@@ -1,0 +1,3545 @@
+------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  G:\Dropbox (IESE)\Fracking Disclosure regulation project/2. code/zs/code/LogFiles/an_predicting_model.txt
+  log type:  text
+ opened on:   7 Feb 2022, 11:03:48
+
+. 
+. /**************
+>         Data Cleaning for the Dependent Variables 
+>         ***************/
+.         
+.         * clean and use voting data
+.                 import delimited "$rawdir/voting data/house/2010_4_0_2.csv", varnames(1) clear
+(25 vars, 3,114 obs)
+
+.                 drop if fips == "fips"
+(1 observation deleted)
+
+.                 destring fips, replace
+fips: all characters numeric; replaced as long
+
+.                 gen str5 fipscode = string(fips,"%05.0f")
+
+.                 merge 1:1 fipscode using "$basedir/education by county.dta", keepusing(state)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                           165
+        from master                         3  (_merge==1)
+        from using                        162  (_merge==2)
+
+    matched                             3,110  (_merge==3)
+    -----------------------------------------
+
+.                         drop if _merge != 3
+(165 observations deleted)
+
+.                         drop _merge
+
+.                 destring democratic republican, replace
+democratic: all characters numeric; replaced as long
+republican: all characters numeric; replaced as long
+
+.                 collapse (sum) democratic republican, by(state)
+
+.                 gen democratic_house = 1 if democratic > republican
+(34 missing values generated)
+
+.                 replace democratic_house = 0 if democratic_house >=.
+(34 real changes made)
+
+.                 save "$interdir/house.dta", replace
+file G:\Dropbox (IESE)\Fracking Disclosure regulation project/2. code/zs/data/intermediate/house.dta saved
+
+.         
+.                 import delimited "$rawdir/voting data/presidential/2008_0_0_2.csv", varnames(1) clear
+(29 vars, 3,114 obs)
+
+.                 drop if fips == "fips"
+(1 observation deleted)
+
+.                 destring fips, replace
+fips: all characters numeric; replaced as long
+
+.                 gen str5 fipscode = string(fips,"%05.0f")
+
+.                 merge 1:1 fipscode using "$basedir/education by county.dta", keepusing(state)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                           163
+        from master                         2  (_merge==1)
+        from using                        161  (_merge==2)
+
+    matched                             3,111  (_merge==3)
+    -----------------------------------------
+
+.                         drop if _merge != 3
+(163 observations deleted)
+
+.                         drop _merge
+
+.                 destring barackhobama johnsmccainiii, replace
+barackhobama: all characters numeric; replaced as long
+johnsmccainiii: all characters numeric; replaced as long
+
+.                 collapse (sum) barackhobama johnsmccainiii, by(state)
+
+.                 gen democratic_president = 1 if barackhobama > johnsmccainiii
+(21 missing values generated)
+
+.                 replace democratic_president = 0 if democratic_president >=.
+(21 real changes made)
+
+.                 save "$interdir/president.dta", replace
+file G:\Dropbox (IESE)\Fracking Disclosure regulation project/2. code/zs/data/intermediate/president.dta saved
+
+.         
+.                 import delimited "$rawdir/voting data/senate/2010_3_0_2.csv", varnames(1) clear
+(25 vars, 2,179 obs)
+
+.                 drop if fips == "fips"
+(1 observation deleted)
+
+.                 destring fips, replace
+fips: all characters numeric; replaced as long
+
+.                 gen str5 fipscode = string(fips,"%05.0f")
+
+.                 * drop duplicates due to different classes
+.                 duplicates drop fipscode, force
+
+Duplicates in terms of fipscode
+
+(62 observations deleted)
+
+.                 merge 1:1 fipscode using "$basedir/education by county.dta", keepusing(state)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                         1,160
+        from master                         2  (_merge==1)
+        from using                      1,158  (_merge==2)
+
+    matched                             2,114  (_merge==3)
+    -----------------------------------------
+
+.                         drop if _merge != 3
+(1,160 observations deleted)
+
+.                         drop _merge
+
+.                 destring democratic republican, replace
+democratic: all characters numeric; replaced as long
+republican: all characters numeric; replaced as long
+
+.                 collapse (sum) democratic republican, by(state)
+
+.                 gen democratic_senate = 1 if democratic > republican
+(23 missing values generated)
+
+.                 replace democratic_senate = 0 if democratic_senate >=.
+(23 real changes made)
+
+.                 save "$interdir/senate.dta", replace
+file G:\Dropbox (IESE)\Fracking Disclosure regulation project/2. code/zs/data/intermediate/senate.dta saved
+
+.                 * senate data only cover 35 states
+. 
+.                 use "$interdir/senate.dta", clear
+
+.                 
+.                 merge 1:1 state using "$interdir/house.dta"
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                            14
+        from master                         0  (_merge==1)
+        from using                         14  (_merge==2)
+
+    matched                                35  (_merge==3)
+    -----------------------------------------
+
+.                 drop _merge
+
+.                 merge 1:1 state using "$interdir/president.dta"
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             1
+        from master                         0  (_merge==1)
+        from using                          1  (_merge==2)
+
+    matched                                49  (_merge==3)
+    -----------------------------------------
+
+.                 drop _merge
+
+.                 keep if (state == "AR") | (state == "CO") | (state == "KS") | (state == "MI") | ///
+>                                 (state == "MT") | (state == "NM") | (state == "ND") | (state == "OH") | ///
+>                                 (state == "OK") | (state == "PA") | (state == "TX") | (state == "UT") | ///
+>                                 (state == "WV") | (state == "WY") | (state == "MS")     | (state == "KY") | (state == "LA")
+(33 observations deleted)
+
+.                 keep state democratic_*
+
+.                 save "$interdir/votingPB.dta", replace
+file G:\Dropbox (IESE)\Fracking Disclosure regulation project/2. code/zs/data/intermediate/votingPB.dta saved
+
+.         
+.         * obtain income and employment rate data
+.                 use "$basedir/BEA_inc_emp_pop.dta", clear
+
+.                 * get the states
+.                 replace geoname = subinstr(geoname, "*", "", 1)
+(1,440 real changes made)
+
+.                 gen state = substr(geoname, -2, .)
+
+.                 keep if (state == "AR") | (state == "CO") | (state == "KS") | (state == "MI") | ///
+>                                 (state == "MT") | (state == "NM") | (state == "ND") | (state == "OH") | ///
+>                                 (state == "OK") | (state == "PA") | (state == "TX") | (state == "UT") | ///
+>                                 (state == "WV") | (state == "WY") | (state == "MS")     | (state == "KY") | (state == "LA")
+(32,598 observations deleted)
+
+.                 * get the income per capita and employment rate in states
+.                 collapse (sum) personalincome_thousandUSD population employment, by(state)
+
+.                 gen income_per_capita = personalincome_thousandUSD / population
+
+.                 gen employment_rate = employment / population
+
+.                 save "$interdir/income_employment_bystatePB.dta", replace
+file G:\Dropbox (IESE)\Fracking Disclosure regulation project/2. code/zs/data/intermediate/income_employment_bystatePB.dta saved
+
+.                 
+.         * education data
+.                 use "$basedir/education by county.dta", clear
+
+.                 keep if (state == "AR") | (state == "CO") | (state == "KS") | (state == "MI") | ///
+>                                 (state == "MT") | (state == "NM") | (state == "ND") | (state == "OH") | ///
+>                                 (state == "OK") | (state == "PA") | (state == "TX") | (state == "UT") | ///
+>                                 (state == "WV") | (state == "WY") | (state == "MS")     | (state == "KY") | (state == "LA")
+(1,928 observations deleted)
+
+.                 * keep the state aggregates only
+.                 keep if substr(fipscode, -3, .) == "000"
+(1,327 observations deleted)
+
+.                 * keep only 2000 benchmarks 
+.                 keep state *2000
+
+.                 save "$interdir/education_bystatePB.dta", replace
+file G:\Dropbox (IESE)\Fracking Disclosure regulation project/2. code/zs/data/intermediate/education_bystatePB.dta saved
+
+.         
+.         * huc10 data
+.                                                                                                                                                                 
+> use "G:\Dropbox (IESE)\Fracking Disclosure regulation project/1. data/huc10_tempDISC_2020 OCT 2021_ALL_STATES.dta", clear
+
+.                 * get the total areas of huc10s in acres
+.                 collapse (sum) areaacres, by(states)
+
+.                 
+.                 * if huc10s cross states, then count all the areas in all states affiliated
+.                 gen state1 = substr(states, 1, 2)
+(1 missing value generated)
+
+.                 gen state2 = substr(states, 4, 2)
+(17 missing values generated)
+
+.                 gen state3 = substr(states, 7, 2)
+(47 missing values generated)
+
+.                 replace state2 = state1 if state2 == ""
+(16 real changes made)
+
+.                 replace state3 = state1 if (state 2 == state 1)
+(16 real changes made)
+
+.                 
+.                 * generate areas and get the maximum one for the final  
+.                 forv x = 1(1)3 {
+  2.                         bysort state`x': egen area`x' = total(areaacres)
+  3.                 }
+
+.                 egen area = rowmax(area1-area3)
+
+.                 drop if strlen(states) > 2
+(36 observations deleted)
+
+.                 drop if strlen(states) == 0
+(1 observation deleted)
+
+.                 rename states state
+
+.                 keep state area
+
+.                 save "$interdir/huc10area_bystate.dta", replace
+file G:\Dropbox (IESE)\Fracking Disclosure regulation project/2. code/zs/data/intermediate/huc10area_bystate.dta saved
+
+.         
+.         * use google_fracking trend
+.                 use "$basedir/f_google", clear
+
+.                 
+.                 merge m:1 state time using "$basedir/disclosurerule_datePB.dta"
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                         4,218
+        from master                     4,218  (_merge==1)
+        from using                          0  (_merge==2)
+
+    matched                                17  (_merge==3)
+    -----------------------------------------
+
+.                 * generate disclosure date var
+.                         gen disc = 1 if _merge == 3
+(4,218 missing values generated)
+
+.                         replace disc = 0 if _merge != 3
+(4,218 real changes made)
+
+.                         drop _merge
+
+.                 *keep only states in the sample
+.                 replace state = "AR" if state == "arkansas"
+(121 real changes made)
+
+.                 replace state = "CO" if state == "colorado"
+(121 real changes made)
+
+.                 replace state = "KS" if state == "kansas"
+(121 real changes made)
+
+.                 replace state = "MI" if state == "michigan"
+(121 real changes made)
+
+.                 replace state = "MS" if state == "mississippi"
+(121 real changes made)
+
+.                 replace state = "MT" if state == "montana"
+(121 real changes made)
+
+.                 replace state = "NM" if state == "newmexico"
+(121 real changes made)
+
+.                 replace state = "ND" if state == "northdakota"
+(121 real changes made)
+
+.                 replace state = "OH" if state == "ohio"
+(121 real changes made)
+
+.                 replace state = "OK" if state == "oklahoma"
+(121 real changes made)
+
+.                 replace state = "PA" if state == "pennsylvania"
+(121 real changes made)
+
+.                 replace state = "TX" if state == "texas"
+(121 real changes made)
+
+.                 replace state = "UT" if state == "utah"
+(121 real changes made)
+
+.                 replace state = "WV" if state == "westvirginia"
+(121 real changes made)
+
+.                 replace state = "WY" if state == "wyoming"
+(121 real changes made)
+
+.                 replace state = "KY" if state == "kentucky"
+(121 real changes made)
+
+.                 replace state = "LA" if state == "louisiana"
+(121 real changes made)
+
+.                 
+.                 keep if strlen(state) == 2
+(2,178 observations deleted)
+
+.                 drop if state == "michigan"
+(0 observations deleted)
+
+.                 
+.                 * generate disc_time for each state
+.                         gsort st -disc
+
+.                         by st: gen disc_time = time[1]
+
+.                         format disc_time %tm
+
+.                         
+.                 /* generate fracking search trend benchmarked as the average of search intensity 
+>                 for 12 months prior to the disclosure rule adoption in each state*/
+.                         bysort st: gen disc_time_minus1 = 1 if (disc_time-time <= 12 & disc_time-time > 0)
+(1,858 missing values generated)
+
+.                         replace disc_time_minus1 = 0 if disc_time_minus1 >=.
+(1,858 real changes made)
+
+.                         bysort st: egen ggsearch_disc_time_minus1 = mean(fracking) if disc_time_minus1 == 1
+(1858 missing values generated)
+
+. 
+.                         bysort st: gen disc_time_minus2 = 1 if (disc_time-time <= 24 & disc_time-time > 12)
+(1,901 missing values generated)
+
+.                         replace disc_time_minus2 = 0 if disc_time_minus2 >=.
+(1,901 real changes made)
+
+.                         bysort st: egen ggsearch_disc_time_minus2 = mean(fracking) if disc_time_minus2 == 1
+(1901 missing values generated)
+
+.                         
+.                         save "$interdir/ggsearch_year_month_by_statePB.dta", replace
+file G:\Dropbox (IESE)\Fracking Disclosure regulation project/2. code/zs/data/intermediate/ggsearch_year_month_by_statePB.dta saved
+
+. 
+. local S ""california" "massachusetts" "newyork""
+
+. foreach s of local S {
+  2.         * use google_fracking trend
+.                 use "$basedir/f_google", clear
+  3.                 
+.                 * generate disclosure date var
+.                         gen disc = 1 if time ==tm(2012m1)
+  4.                         replace disc = 0 if disc ==.            
+  5.                 
+.                         keep if state == "`s'"
+  6.                 
+.                 * generate disc_time for each state
+.                         gsort st -disc
+  7.                         by st: gen disc_time = time[1]
+  8.                         format disc_time %tm
+  9.                         
+.                 /* generate fracking search trend benchmarked as the average of search intensity 
+>                 for 12 months prior to the disclosure rule adoption in each state*/
+.                         bysort st: gen disc_time_minus1 = 1 if (disc_time-time <= 12 & disc_time-time > 0)
+ 10.                         replace disc_time_minus1 = 0 if disc_time_minus1 >=.
+ 11.                         bysort st: egen ggsearch_minus1`s' = mean(fracking) if disc_time_minus1 == 1
+ 12. 
+.                         bysort st: gen disc_time_minus2 = 1 if (disc_time-time <= 24 & disc_time-time > 12)
+ 13.                         replace disc_time_minus2 = 0 if disc_time_minus2 >=.
+ 14.                         bysort st: egen ggsearch_minus2`s' = mean(fracking) if disc_time_minus2 == 1
+ 15. 
+.                         
+.                         collapse (max) ggsearch_minus1`s' ggsearch_minus2`s' disc_time, by(state)
+ 16.                         
+.                         g ID = 1
+ 17.                         
+.                         save "$interdir/ggsearch_disc_time_minus1`s'PB.dta", replace
+ 18.                         
+.                         use "$basedir/f_google", clear
+ 19. }
+(4,200 missing values generated)
+(4,200 real changes made)
+(4,114 observations deleted)
+(109 missing values generated)
+(109 real changes made)
+(109 missing values generated)
+(109 missing values generated)
+(109 real changes made)
+(109 missing values generated)
+file G:\Dropbox (IESE)\Fracking Disclosure regulation project/2. code/zs/data/intermediate/ggsearch_disc_time_minus1californiaPB.dta saved
+(4,200 missing values generated)
+(4,200 real changes made)
+(4,114 observations deleted)
+(109 missing values generated)
+(109 real changes made)
+(109 missing values generated)
+(109 missing values generated)
+(109 real changes made)
+(109 missing values generated)
+file G:\Dropbox (IESE)\Fracking Disclosure regulation project/2. code/zs/data/intermediate/ggsearch_disc_time_minus1massachusettsPB.dta saved
+(4,200 missing values generated)
+(4,200 real changes made)
+(4,114 observations deleted)
+(109 missing values generated)
+(109 real changes made)
+(109 missing values generated)
+(109 missing values generated)
+(109 real changes made)
+(109 missing values generated)
+file G:\Dropbox (IESE)\Fracking Disclosure regulation project/2. code/zs/data/intermediate/ggsearch_disc_time_minus1newyorkPB.dta saved
+
+. 
+. 
+.                 
+. /**************
+>         Merge Everything Tother 
+>         ***************/
+.         use "$interdir/ggsearch_year_month_by_statePB.dta", clear
+
+.         merge m:1 state using "$interdir/income_employment_bystatePB.dta"
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                             2,057  (_merge==3)
+    -----------------------------------------
+
+.         drop _merge
+
+.         merge m:1 state using "$interdir/education_bystatePB.dta"
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                             2,057  (_merge==3)
+    -----------------------------------------
+
+.         drop _merge
+
+.         merge m:1 state using "$interdir/huc10area_bystate.dta"
+(note: variable state was str13, now str14 to accommodate using data's values)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                           121
+        from master                       121  (_merge==1)
+        from using                          0  (_merge==2)
+
+    matched                             1,936  (_merge==3)
+    -----------------------------------------
+
+.         drop _merge
+
+.         merge m:1 state using "$interdir/votingPB.dta"
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                             2,057  (_merge==3)
+    -----------------------------------------
+
+.         * drop states of michigan as not in sample
+.         drop if _merge == 1
+(0 observations deleted)
+
+.         drop _merge
+
+. 
+.         g ID = 1
+
+.         local s california
+
+.         merge m:1 ID using "$interdir/ggsearch_disc_time_minus1`s'PB.dta"
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                             2,057  (_merge==3)
+    -----------------------------------------
+
+.         drop _merge
+
+.         local s massachusetts
+
+.         merge m:1 ID using "$interdir/ggsearch_disc_time_minus1`s'PB.dta"
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                             2,057  (_merge==3)
+    -----------------------------------------
+
+.         drop _merge
+
+.         local s newyork
+
+.         merge m:1 ID using "$interdir/ggsearch_disc_time_minus1`s'PB.dta"
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                             2,057  (_merge==3)
+    -----------------------------------------
+
+.         drop _merge
+
+. 
+.         
+.         
+. /**************
+>         Three Outcome Variables (with OLS results)
+>         ***************/
+.         
+.         lab var ggsearch_disc_time_minus1 "Average Google Search Intensity 1 year before Disclosure Rule"
+
+.         lab var income_per_capita "Income Per Capita"
+
+.         lab var employment_rate "Employment Rate"
+
+.         lab var area "Total Area (Well) in Square Acres"
+
+.         lab var democratic_house "Democratic House"
+
+.         lab var democratic_president "Democratic President"
+
+.         
+.         drop disc_time_minus1
+
+.         drop disc_time_minus2
+
+.         drop ggsearch_disc_time_minus1
+
+.         drop ggsearch_disc_time_minus2
+
+. 
+.         sort state time
+
+.         
+.         // google searches at the state-month level, with time invariant info on pop, educ, income, emp, voting, and google searches lagged relative to 2012m1 f
+> or NY, CA, and MA.
+. 
+.         compress
+  variable time was float now int
+  variable disc was float now byte
+  variable disc_time was float now int
+  variable democratic_senate was float now byte
+  variable democratic_house was float now byte
+  variable democratic_president was float now byte
+  variable ID was float now byte
+  variable population was double now long
+  variable employment was double now long
+  variable state was str14 now str2
+  (80,223 bytes saved)
+
+.         
+.         save "$interdir/ggsearch_for_Altonji_test_PB.dta", replace
+file G:\Dropbox (IESE)\Fracking Disclosure regulation project/2. code/zs/data/intermediate/ggsearch_for_Altonji_test_PB.dta saved
+
+. 
+.         
+.         * 2. benchmarked on the GasLand movie of Jan. 2010
+.                 gen gasland_time =  monthly("Jan2010","MY")
+
+.                 format gasland_time %tm
+
+.                 gen disc_time_diff1 = disc_time - gasland_time
+
+.                 
+.         * 3. benchmarked on the time fracking starts
+.                 gen fracking_time = monthly("Dec2006","MY")
+
+.                 format fracking_time %tm
+
+.                 gen disc_time_diff2 = disc_time - fracking_time
+
+.                 
+. rename disc_time_diff1 disc_time_diff1
+  (all newnames==oldnames)
+
+. 
+. replace state ="05" if state =="AR"
+(121 real changes made)
+
+. replace state ="08" if state =="CO"
+(121 real changes made)
+
+. replace state ="20" if state =="KS"
+(121 real changes made)
+
+. replace state ="21" if state =="KY"
+(121 real changes made)
+
+. replace state ="22" if state =="LA"
+(121 real changes made)
+
+. replace state ="28" if state =="MS"
+(121 real changes made)
+
+. replace state ="30" if state =="MT"
+(121 real changes made)
+
+. replace state ="35" if state =="NM"
+(121 real changes made)
+
+. replace state ="38" if state =="ND"
+(121 real changes made)
+
+. replace state ="39" if state =="OH"
+(121 real changes made)
+
+. replace state ="40" if state =="OK"
+(121 real changes made)
+
+. replace state ="42" if state =="PA"
+(121 real changes made)
+
+. replace state ="48" if state =="TX"
+(121 real changes made)
+
+. replace state ="49" if state =="UT"
+(121 real changes made)
+
+. replace state ="54" if state =="WV"
+(121 real changes made)
+
+. replace state ="56" if state =="WY"
+(121 real changes made)
+
+. 
+. tostring time, g(time_new) force usedisplayformat
+time_new generated as str7
+time_new was forced to string; some loss of information
+
+. 
+. g year = substr(time_new,1,4)
+
+. destring year, replace
+year: all characters numeric; replaced as int
+
+. 
+. g month_temp = substr(time_new,5,2)
+
+. g month_tempB = substr(time_new,5,3)
+
+. 
+. g month ="jan" if month_temp =="m1"
+(1,360 missing values generated)
+
+. replace month ="feb" if month_temp =="m2"
+(170 real changes made)
+
+. replace month ="mar" if month_temp =="m3"
+(170 real changes made)
+
+. replace month ="apr" if month_temp =="m4"
+(170 real changes made)
+
+. replace month ="may" if month_temp =="m5"
+(170 real changes made)
+
+. replace month ="jun" if month_temp =="m6"
+(170 real changes made)
+
+. replace month ="jul" if month_temp =="m7"
+(170 real changes made)
+
+. replace month ="aug" if month_temp =="m8"
+(170 real changes made)
+
+. replace month ="sep" if month_temp =="m9"
+(170 real changes made)
+
+. replace month ="oct" if month_tempB =="m10"
+(170 real changes made)
+
+. replace month ="nov" if month_tempB =="m11"
+(170 real changes made)
+
+. replace month ="dec" if month_tempB =="m12"
+(170 real changes made)
+
+. drop month_temp
+
+. 
+. g frack_start = fracking if year == 2010 & month =="jan"
+(2,040 missing values generated)
+
+. 
+. bysort state: egen frack_start_def = max(frack_start)
+
+. drop frack_start
+
+. codebook frack_start_def
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------
+frack_start_def                                                                                                                                        (unlabeled)
+------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+                  type:  numeric (float)
+
+                 range:  [0,13]                       units:  1
+         unique values:  3                        missing .:  0/2,057
+
+            tabulation:  Freq.  Value
+                         1,815  0
+                           121  6
+                           121  13
+
+. 
+. compress
+  variable gasland_time was float now int
+  variable disc_time_diff1 was float now byte
+  variable fracking_time was float now int
+  variable disc_time_diff2 was float now byte
+  variable frack_start_def was float now byte
+  (26,741 bytes saved)
+
+. rename state StateCode
+
+. save "$interdir/ggsearch_for_Altonji_test_PB_DEF.dta", replace
+file G:\Dropbox (IESE)\Fracking Disclosure regulation project/2. code/zs/data/intermediate/ggsearch_for_Altonji_test_PB_DEF.dta saved
+
+. 
+end of do-file
+
+. do "C:\Users\PBonetti\AppData\Local\Temp\STD385c_000000.tmp"
+
+. ***********
+. * Table 3 *
+. ***********
+. 
+. cd "G:\Dropbox (IESE)\Fracking Disclosure regulation project\1. data"
+G:\Dropbox (IESE)\Fracking Disclosure regulation project\1. data
+
+. * use "DISC_TEMP_2020 OCT 2021 DEF B.dta", clear
+. use "DISC_TEMP_2020 OCT 2021 DEF B_ALL_STATES.dta", clear
+
+. 
+. // set directory
+. cd "G:\Dropbox (IESE)\Fracking Disclosure regulation project\6. results\RESULTS JAN 2022\Tab 3"
+G:\Dropbox (IESE)\Fracking Disclosure regulation project\6. results\RESULTS JAN 2022\Tab 3
+
+. 
+. 
+. merge m:1 StateCode year month using "G:\Dropbox (IESE)\Fracking Disclosure regulation project/2. code/zs/data/intermediate/ggsearch_for_Altonji_test_PB_DEF.dta
+> ", gen(_merge_altonji)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                       767,478
+        from master                   767,265  (_merge_altonji==1)
+        from using                        213  (_merge_altonji==2)
+
+    matched                           388,304  (_merge_altonji==3)
+    -----------------------------------------
+
+. 
+end of do-file
+
+. do "C:\Users\PBonetti\AppData\Local\Temp\STD385c_000000.tmp"
+
+. drop if _merge_altonji==2
+(213 observations deleted)
+
+. 
+end of do-file
+
+. do "C:\Users\PBonetti\AppData\Local\Temp\STD385c_000000.tmp"
+
+. ***********
+. * Table 3 *
+. ***********
+. 
+. cd "G:\Dropbox (IESE)\Fracking Disclosure regulation project\1. data"
+G:\Dropbox (IESE)\Fracking Disclosure regulation project\1. data
+
+. * use "DISC_TEMP_2020 OCT 2021 DEF B.dta", clear
+. use "DISC_TEMP_2020 OCT 2021 DEF B_ALL_STATES.dta", clear
+
+. 
+. // set directory
+. cd "G:\Dropbox (IESE)\Fracking Disclosure regulation project\6. results\RESULTS JAN 2022\Tab 3"
+G:\Dropbox (IESE)\Fracking Disclosure regulation project\6. results\RESULTS JAN 2022\Tab 3
+
+. 
+. 
+. merge m:1 StateCode year month using "G:\Dropbox (IESE)\Fracking Disclosure regulation project/2. code/zs/data/intermediate/ggsearch_for_Altonji_test_PB_DEF.dta
+> ", gen(_merge_altonji)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                       767,478
+        from master                   767,265  (_merge_altonji==1)
+        from using                        213  (_merge_altonji==2)
+
+    matched                           388,304  (_merge_altonji==3)
+    -----------------------------------------
+
+. drop if _merge_altonji==2
+(213 observations deleted)
+
+. 
+. bysort State: g m_frack_start_def = max(frack_start_def)
+invalid syntax
+r(198);
+
+end of do-file
+
+r(198);
+
+. do "C:\Users\PBonetti\AppData\Local\Temp\STD385c_000000.tmp"
+
+. bysort State: egen m_frack_start_def = max(frack_start_def)
+(636159 missing values generated)
+
+. replace fracking  = m_frack_start_def if date<=d(31dec2009)
+(131,106 real changes made)
+
+. drop if _merge_altonji == 2
+(0 observations deleted)
+
+. 
+end of do-file
+
+. help predict
+
+. do "C:\Users\PBonetti\AppData\Local\Temp\STD385c_000000.tmp"
+
+. ***********
+. * Table 3 *
+. ***********
+. 
+. cd "G:\Dropbox (IESE)\Fracking Disclosure regulation project\1. data"
+G:\Dropbox (IESE)\Fracking Disclosure regulation project\1. data
+
+. * use "DISC_TEMP_2020 OCT 2021 DEF B.dta", clear
+. use "DISC_TEMP_2020 OCT 2021 DEF B_ALL_STATES.dta", clear
+
+. 
+. // set directory
+. cd "G:\Dropbox (IESE)\Fracking Disclosure regulation project\6. results\RESULTS JAN 2022\Tab 3"
+G:\Dropbox (IESE)\Fracking Disclosure regulation project\6. results\RESULTS JAN 2022\Tab 3
+
+. 
+. 
+. merge m:1 StateCode year month using "G:\Dropbox (IESE)\Fracking Disclosure regulation project/2. code/zs/data/intermediate/ggsearch_for_Altonji_test_PB_DEF.dta
+> ", gen(_merge_altonji)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                       767,478
+        from master                   767,265  (_merge_altonji==1)
+        from using                        213  (_merge_altonji==2)
+
+    matched                           388,304  (_merge_altonji==3)
+    -----------------------------------------
+
+. drop if _merge_altonji==2
+(213 observations deleted)
+
+. 
+. bysort State: egen m_frack_start_def = max(frack_start_def)
+(636159 missing values generated)
+
+. replace fracking  = m_frack_start_def if date<=d(31dec2009)
+(131,106 real changes made)
+
+. drop if _merge_altonji == 2
+(0 observations deleted)
+
+. 
+. /*
+> We provide a falsification test in the spirit of Altonji,
+> Elder, and Taber (2005). 
+> 
+> We first estimate Model 3 in Table 2, but exclude the variables of interest (MAD and
+> TPD) and instead add several variables potentially capturing local factors to which lawmakers might respond
+> when implementing the two directives. Specifically, we include gross domestic savings, the net capital account,
+> portfolio equity inflows, annual growth in GDP per capita, yearly inflation, and five binary indicator variables
+> for the closeness to national elections in a country (for quarters t–4 to t =0 relative to the election quarter). 
+> 
+> We scale the raw variables by GDP and lag them by four quarters. Macroeconomic data are from the World Bank
+> and the IMF, election dates are from the national archives.
+> 
+> We then use the predicted values from this first-stage
+> regression as the dependent variable in our base specification and report the MAD and TPD coefficients from
+> this falsification test in the table. Insignificant coefficients indicate that local factors cannot explain the estimated
+> effects obtained in Table 2.
+> */
+. 
+. 
+. // Stacked regression
+. // SUR
+. local errors ""cluster(huc10_state)""
+
+. local Ys ""log_t_t_Value_clean2""
+
+. local fe ""ID_geo_feNCha""
+
+. local k ALL
+
+. local p 1
+
+. foreach y of local Ys {
+  2. foreach f of local fe {
+  3. foreach e of local errors {
+  4. 
+.         reghdfe `y' c.fracking#c.T_HUC10_balanced`p'_`k' c.log_cum_prec_3days#i.group_items i.T_mean_D_5_groups#i.group_items if  T_HUC10_only_post ==0 & Treate
+> d_state == 1 & m_cum_well_huc4_H_D == 1,  `e' absorb(`f' state_month_year_feCha huc8_month_feCha)
+  5.         predict y_hat1
+  6.                 reghdfe `y' c.post_disc#c.T_HUC10_balanced`p'_`k' y_hat1 c.log_cum_prec_3days#i.group_items i.T_mean_D_5_groups#i.group_items if  T_HUC10_onl
+> y_post ==0 & Treated_state == 1,  `e' absorb(`f' state_month_year_feCha huc8_month_feCha)
+  7.                 outreg2 using Tab3_altonji_`y'_`k'_`p'_`e'`f'_pre.xls, /// * location of the file
+>                 keep(c.post_disc#c.T_HUC10_balanced`p'_`k' y_hat1) /// * Variables you want to display 
+>                 title ("ATE - `k' - `y'") ctitle("HF at least in Pre Disclosure period") ///
+>                 bracket bdec (4) sdec(4) append ///
+>                 addtext(Treated Sample, HUC10s with HF at least in pre, Control Sample, HUC10s with no HF in pre, Note, No HUC10 with HF only in post, Weather C
+> ontrols, Yes, Monitoring FE, Yes, State*Month*Year FE, Yes, HUC8*Month FE, Yes)
+  8. 
+.         reghdfe `y' c.fracking#c.T_HUC10_balanced`p'_`k' c.log_cum_prec_3days#i.group_items i.T_mean_D_5_groups#i.group_items if  T_HUC10_only_post ==0 & Treate
+> d_state == 1 & m_cum_well_huc4_H_D == 1, `e' absorb(`f' huc8_year_month_feCha)
+  9.         predict y_hat2
+ 10.         reghdfe `y' c.post_disc#c.T_HUC10_balanced`p'_`k' y_hat2 c.log_cum_prec_3days#i.group_items i.T_mean_D_5_groups#i.group_items if  T_HUC10_only_post =
+> =0 & Treated_state == 1, `e' absorb(`f' huc8_year_month_feCha)
+ 11.                 outreg2 using Tab3_altonji_`y'_`k'_`p'_`e'`f'_pre.xls, /// * location of the file
+>                 keep(c.post_disc#c.T_HUC10_balanced`p'_`k' y_hat2) /// * Variables you want to display
+>                 title ("ATE - `k' - `y'") ctitle("HF at least in Pre Disclosure period") ///
+>                 bracket bdec (4) sdec(4) append ///
+>                 addtext(Treated Sample, HUC10s with HF at least in pre, Control Sample, HUC10s with no HF in pre, Note, No HUC10 with HF only in post, Weather C
+> ontrols, Yes, Monitoring FE, Yes, HUC8*Month*Year FE, Yes)
+ 12. 
+. }
+ 13. }
+ 14. }
+(dropped 14345 singleton observations)
+(MWFE estimator converged in 260 iterations)
+note: 4.T_mean_D_5_groups#2.group_items omitted because of collinearity
+note: 4.T_mean_D_5_groups#3.group_items omitted because of collinearity
+note: 4.T_mean_D_5_groups#4.group_items omitted because of collinearity
+
+HDFE Linear regression                            Number of obs   =    325,351
+Absorbing 3 HDFE groups                           F(  21,   2228) =      26.04
+Statistics robust to heteroskedasticity           Prob > F        =     0.0000
+                                                  R-squared       =     0.9606
+                                                  Adj R-squared   =     0.9548
+                                                  Within R-sq.    =     0.0064
+Number of clusters (huc10_state) =      2,229     Root MSE        =     0.6586
+
+                                              (Std. Err. adjusted for 2,229 clusters in huc10_state)
+----------------------------------------------------------------------------------------------------
+                                   |               Robust
+              log_t_t_Value_clean2 |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-----------------------------------+----------------------------------------------------------------
+c.fracking#c.T_HUC10_balanced1_ALL |  -.0011086   .0003657    -3.03   0.002    -.0018257   -.0003916
+                                   |
+  group_items#c.log_cum_prec_3days |
+                                1  |   .0242801   .0031139     7.80   0.000     .0181737    .0303865
+                                2  |  -.0786049   .0097425    -8.07   0.000    -.0977102   -.0594997
+                                3  |  -.0559274   .0040144   -13.93   0.000    -.0637998    -.048055
+                                4  |  -.0666606   .0044934   -14.84   0.000    -.0754724   -.0578488
+                                   |
+     T_mean_D_5_groups#group_items |
+                              0 2  |  -.2106437   .2990205    -0.70   0.481    -.7970317    .3757443
+                              0 3  |   .0658103   .0367701     1.79   0.074    -.0062969    .1379174
+                              0 4  |   .0866999   .0266498     3.25   0.001     .0344387     .138961
+                              1 1  |  -.0505159   .0312083    -1.62   0.106    -.1117162    .0106845
+                              1 2  |  -.0437591    .041036    -1.07   0.286    -.1242318    .0367136
+                              1 3  |  -.0055224   .0160522    -0.34   0.731    -.0370013    .0259565
+                              1 4  |  -.0107396   .0166323    -0.65   0.519    -.0433559    .0218768
+                              2 1  |  -.0052358   .0322961    -0.16   0.871    -.0685693    .0580978
+                              2 2  |  -.0501612   .0287742    -1.74   0.081    -.1065883    .0062659
+                              2 3  |  -.0386497   .0134152    -2.88   0.004    -.0649573   -.0123422
+                              2 4  |  -.0305774   .0139625    -2.19   0.029    -.0579584   -.0031965
+                              3 1  |   .0291546   .0332788     0.88   0.381    -.0361061    .0944153
+                              3 2  |  -.0333343   .0202653    -1.64   0.100    -.0730752    .0064066
+                              3 3  |   -.032742   .0096276    -3.40   0.001    -.0516219   -.0138621
+                              3 4  |  -.0049917   .0115518    -0.43   0.666    -.0276451    .0176617
+                              4 1  |    .045738   .0349794     1.31   0.191    -.0228575    .1143336
+                              4 2  |          0  (omitted)
+                              4 3  |          0  (omitted)
+                              4 4  |          0  (omitted)
+                                   |
+                             _cons |   7.307014   .0106752   684.48   0.000      7.28608    7.327949
+----------------------------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+----------------------------------------------------------------+
+            Absorbed FE | Categories  - Redundant  = Num. Coefs |
+------------------------+---------------------------------------|
+          ID_geo_feNCha |     25854       25854           0    *|
+ state_month_year_feCha |      5945           0        5945     |
+       huc8_month_feCha |     10740         382       10358     |
+----------------------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+(option xb assumed; fitted values)
+(636,728 missing values generated)
+(dropped 19785 singleton observations)
+--Break--
+r(1);
+
+end of do-file
+
+--Break--
+r(1);
+
+. do "C:\Users\PBonetti\AppData\Local\Temp\STD385c_000000.tmp"
+
+. // Stacked regression
+. // SUR
+. local errors ""cluster(huc10_state)""
+
+. local Ys ""log_t_t_Value_clean2""
+
+. local fe ""ID_geo_feNCha""
+
+. local k ALL
+
+. local p 1
+
+. foreach y of local Ys {
+  2. foreach f of local fe {
+  3. foreach e of local errors {
+  4. 
+.         reghdfe `y' c.fracking#c.T_HUC10_balanced`p'_`k' c.log_cum_prec_3days#i.group_items i.T_mean_D_5_groups#i.group_items if  T_HUC10_only_post ==0 & Treate
+> d_state == 1 & m_cum_well_huc4_H_D == 1,  `e' absorb(`f' state_month_year_feCha huc8_month_feCha)
+  5.         predict y_hat1
+  6.                 reghdfe y_hat1 c.post_disc#c.T_HUC10_balanced`p'_`k' y_hat1 c.log_cum_prec_3days#i.group_items i.T_mean_D_5_groups#i.group_items if  T_HUC10_
+> only_post ==0 & Treated_state == 1,  `e' absorb(`f' state_month_year_feCha huc8_month_feCha)
+  7.                 outreg2 using Tab3_altonji_`y'_`k'_`p'_`e'`f'_pre.xls, /// * location of the file
+>                 keep(c.post_disc#c.T_HUC10_balanced`p'_`k' ) /// * Variables you want to display 
+>                 title ("ATE - `k' - `y'") ctitle("HF at least in Pre Disclosure period") ///
+>                 bracket bdec (4) sdec(4) append ///
+>                 addtext(Treated Sample, HUC10s with HF at least in pre, Control Sample, HUC10s with no HF in pre, Note, No HUC10 with HF only in post, Weather C
+> ontrols, Yes, Monitoring FE, Yes, State*Month*Year FE, Yes, HUC8*Month FE, Yes)
+  8. 
+.         reghdfe `y' c.fracking#c.T_HUC10_balanced`p'_`k' c.log_cum_prec_3days#i.group_items i.T_mean_D_5_groups#i.group_items if  T_HUC10_only_post ==0 & Treate
+> d_state == 1 & m_cum_well_huc4_H_D == 1, `e' absorb(`f' huc8_year_month_feCha)
+  9.         predict y_hat2
+ 10.         reghdfe y_hat2 c.post_disc#c.T_HUC10_balanced`p'_`k' y_hat2 c.log_cum_prec_3days#i.group_items i.T_mean_D_5_groups#i.group_items if  T_HUC10_only_pos
+> t ==0 & Treated_state == 1, `e' absorb(`f' huc8_year_month_feCha)
+ 11.                 outreg2 using Tab3_altonji_`y'_`k'_`p'_`e'`f'_pre.xls, /// * location of the file
+>                 keep(c.post_disc#c.T_HUC10_balanced`p'_`k' ) /// * Variables you want to display
+>                 title ("ATE - `k' - `y'") ctitle("HF at least in Pre Disclosure period") ///
+>                 bracket bdec (4) sdec(4) append ///
+>                 addtext(Treated Sample, HUC10s with HF at least in pre, Control Sample, HUC10s with no HF in pre, Note, No HUC10 with HF only in post, Weather C
+> ontrols, Yes, Monitoring FE, Yes, HUC8*Month*Year FE, Yes)
+ 12. 
+. }
+ 13. }
+ 14. }
+(dropped 14345 singleton observations)
+(MWFE estimator converged in 260 iterations)
+note: 4.T_mean_D_5_groups#2.group_items omitted because of collinearity
+note: 4.T_mean_D_5_groups#3.group_items omitted because of collinearity
+note: 4.T_mean_D_5_groups#4.group_items omitted because of collinearity
+
+HDFE Linear regression                            Number of obs   =    325,351
+Absorbing 3 HDFE groups                           F(  21,   2228) =      26.04
+Statistics robust to heteroskedasticity           Prob > F        =     0.0000
+                                                  R-squared       =     0.9606
+                                                  Adj R-squared   =     0.9548
+                                                  Within R-sq.    =     0.0064
+Number of clusters (huc10_state) =      2,229     Root MSE        =     0.6586
+
+                                              (Std. Err. adjusted for 2,229 clusters in huc10_state)
+----------------------------------------------------------------------------------------------------
+                                   |               Robust
+              log_t_t_Value_clean2 |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-----------------------------------+----------------------------------------------------------------
+c.fracking#c.T_HUC10_balanced1_ALL |  -.0011086   .0003657    -3.03   0.002    -.0018257   -.0003916
+                                   |
+  group_items#c.log_cum_prec_3days |
+                                1  |   .0242801   .0031139     7.80   0.000     .0181737    .0303865
+                                2  |  -.0786049   .0097425    -8.07   0.000    -.0977102   -.0594997
+                                3  |  -.0559274   .0040144   -13.93   0.000    -.0637998    -.048055
+                                4  |  -.0666606   .0044934   -14.84   0.000    -.0754724   -.0578488
+                                   |
+     T_mean_D_5_groups#group_items |
+                              0 2  |  -.2106437   .2990205    -0.70   0.481    -.7970317    .3757443
+                              0 3  |   .0658103   .0367701     1.79   0.074    -.0062969    .1379174
+                              0 4  |   .0866999   .0266498     3.25   0.001     .0344387     .138961
+                              1 1  |  -.0505159   .0312083    -1.62   0.106    -.1117162    .0106845
+                              1 2  |  -.0437591    .041036    -1.07   0.286    -.1242318    .0367136
+                              1 3  |  -.0055224   .0160522    -0.34   0.731    -.0370013    .0259565
+                              1 4  |  -.0107396   .0166323    -0.65   0.519    -.0433559    .0218768
+                              2 1  |  -.0052358   .0322961    -0.16   0.871    -.0685693    .0580978
+                              2 2  |  -.0501612   .0287742    -1.74   0.081    -.1065883    .0062659
+                              2 3  |  -.0386497   .0134152    -2.88   0.004    -.0649573   -.0123422
+                              2 4  |  -.0305774   .0139625    -2.19   0.029    -.0579584   -.0031965
+                              3 1  |   .0291546   .0332788     0.88   0.381    -.0361061    .0944153
+                              3 2  |  -.0333343   .0202653    -1.64   0.100    -.0730752    .0064066
+                              3 3  |   -.032742   .0096276    -3.40   0.001    -.0516219   -.0138621
+                              3 4  |  -.0049917   .0115518    -0.43   0.666    -.0276451    .0176617
+                              4 1  |    .045738   .0349794     1.31   0.191    -.0228575    .1143336
+                              4 2  |          0  (omitted)
+                              4 3  |          0  (omitted)
+                              4 4  |          0  (omitted)
+                                   |
+                             _cons |   7.307014   .0106752   684.48   0.000      7.28608    7.327949
+----------------------------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+----------------------------------------------------------------+
+            Absorbed FE | Categories  - Redundant  = Num. Coefs |
+------------------------+---------------------------------------|
+          ID_geo_feNCha |     25854       25854           0    *|
+ state_month_year_feCha |      5945           0        5945     |
+       huc8_month_feCha |     10740         382       10358     |
+----------------------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+variable y_hat1 already defined
+r(110);
+
+end of do-file
+
+r(110);
+
+. do "C:\Users\PBonetti\AppData\Local\Temp\STD385c_000000.tmp"
+
+. // Stacked regression
+. // SUR
+. local errors ""cluster(huc10_state)""
+
+. local Ys ""log_t_t_Value_clean2""
+
+. local fe ""ID_geo_feNCha""
+
+. local k ALL
+
+. local p 1
+
+. foreach y of local Ys {
+  2. foreach f of local fe {
+  3. foreach e of local errors {
+  4. 
+.         reghdfe `y' c.fracking#c.T_HUC10_balanced`p'_`k' c.log_cum_prec_3days#i.group_items i.T_mean_D_5_groups#i.group_items if  T_HUC10_only_post ==0 & Treate
+> d_state == 1 & m_cum_well_huc4_H_D == 1,  `e' absorb(`f' state_month_year_feCha huc8_month_feCha)
+  5.         predict y_hat1
+  6.                 reghdfe y_hat1 c.post_disc#c.T_HUC10_balanced`p'_`k'  c.log_cum_prec_3days#i.group_items i.T_mean_D_5_groups#i.group_items if  T_HUC10_only_p
+> ost ==0 & Treated_state == 1,  `e' absorb(`f' state_month_year_feCha huc8_month_feCha)
+  7.                 outreg2 using Tab3_altonji_`y'_`k'_`p'_`e'`f'_pre.xls, /// * location of the file
+>                 keep(c.post_disc#c.T_HUC10_balanced`p'_`k' ) /// * Variables you want to display 
+>                 title ("ATE - `k' - `y'") ctitle("HF at least in Pre Disclosure period") ///
+>                 bracket bdec (4) sdec(4) append ///
+>                 addtext(Treated Sample, HUC10s with HF at least in pre, Control Sample, HUC10s with no HF in pre, Note, No HUC10 with HF only in post, Weather C
+> ontrols, Yes, Monitoring FE, Yes, State*Month*Year FE, Yes, HUC8*Month FE, Yes)
+  8. 
+.         reghdfe `y' c.fracking#c.T_HUC10_balanced`p'_`k' c.log_cum_prec_3days#i.group_items i.T_mean_D_5_groups#i.group_items if  T_HUC10_only_post ==0 & Treate
+> d_state == 1 & m_cum_well_huc4_H_D == 1, `e' absorb(`f' huc8_year_month_feCha)
+  9.         predict y_hat2
+ 10.         reghdfe y_hat2 c.post_disc#c.T_HUC10_balanced`p'_`k'  c.log_cum_prec_3days#i.group_items i.T_mean_D_5_groups#i.group_items if  T_HUC10_only_post ==0 
+> & Treated_state == 1, `e' absorb(`f' huc8_year_month_feCha)
+ 11.                 outreg2 using Tab3_altonji_`y'_`k'_`p'_`e'`f'_pre.xls, /// * location of the file
+>                 keep(c.post_disc#c.T_HUC10_balanced`p'_`k' ) /// * Variables you want to display
+>                 title ("ATE - `k' - `y'") ctitle("HF at least in Pre Disclosure period") ///
+>                 bracket bdec (4) sdec(4) append ///
+>                 addtext(Treated Sample, HUC10s with HF at least in pre, Control Sample, HUC10s with no HF in pre, Note, No HUC10 with HF only in post, Weather C
+> ontrols, Yes, Monitoring FE, Yes, HUC8*Month*Year FE, Yes)
+ 12. 
+. }
+ 13. }
+ 14. }
+(dropped 14345 singleton observations)
+(MWFE estimator converged in 260 iterations)
+note: 4.T_mean_D_5_groups#2.group_items omitted because of collinearity
+note: 4.T_mean_D_5_groups#3.group_items omitted because of collinearity
+note: 4.T_mean_D_5_groups#4.group_items omitted because of collinearity
+
+HDFE Linear regression                            Number of obs   =    325,351
+Absorbing 3 HDFE groups                           F(  21,   2228) =      26.04
+Statistics robust to heteroskedasticity           Prob > F        =     0.0000
+                                                  R-squared       =     0.9606
+                                                  Adj R-squared   =     0.9548
+                                                  Within R-sq.    =     0.0064
+Number of clusters (huc10_state) =      2,229     Root MSE        =     0.6586
+
+                                              (Std. Err. adjusted for 2,229 clusters in huc10_state)
+----------------------------------------------------------------------------------------------------
+                                   |               Robust
+              log_t_t_Value_clean2 |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-----------------------------------+----------------------------------------------------------------
+c.fracking#c.T_HUC10_balanced1_ALL |  -.0011086   .0003657    -3.03   0.002    -.0018257   -.0003916
+                                   |
+  group_items#c.log_cum_prec_3days |
+                                1  |   .0242801   .0031139     7.80   0.000     .0181737    .0303865
+                                2  |  -.0786049   .0097425    -8.07   0.000    -.0977102   -.0594997
+                                3  |  -.0559274   .0040144   -13.93   0.000    -.0637998    -.048055
+                                4  |  -.0666606   .0044934   -14.84   0.000    -.0754724   -.0578488
+                                   |
+     T_mean_D_5_groups#group_items |
+                              0 2  |  -.2106437   .2990205    -0.70   0.481    -.7970317    .3757443
+                              0 3  |   .0658103   .0367701     1.79   0.074    -.0062969    .1379174
+                              0 4  |   .0866999   .0266498     3.25   0.001     .0344387     .138961
+                              1 1  |  -.0505159   .0312083    -1.62   0.106    -.1117162    .0106845
+                              1 2  |  -.0437591    .041036    -1.07   0.286    -.1242318    .0367136
+                              1 3  |  -.0055224   .0160522    -0.34   0.731    -.0370013    .0259565
+                              1 4  |  -.0107396   .0166323    -0.65   0.519    -.0433559    .0218768
+                              2 1  |  -.0052358   .0322961    -0.16   0.871    -.0685693    .0580978
+                              2 2  |  -.0501612   .0287742    -1.74   0.081    -.1065883    .0062659
+                              2 3  |  -.0386497   .0134152    -2.88   0.004    -.0649573   -.0123422
+                              2 4  |  -.0305774   .0139625    -2.19   0.029    -.0579584   -.0031965
+                              3 1  |   .0291546   .0332788     0.88   0.381    -.0361061    .0944153
+                              3 2  |  -.0333343   .0202653    -1.64   0.100    -.0730752    .0064066
+                              3 3  |   -.032742   .0096276    -3.40   0.001    -.0516219   -.0138621
+                              3 4  |  -.0049917   .0115518    -0.43   0.666    -.0276451    .0176617
+                              4 1  |    .045738   .0349794     1.31   0.191    -.0228575    .1143336
+                              4 2  |          0  (omitted)
+                              4 3  |          0  (omitted)
+                              4 4  |          0  (omitted)
+                                   |
+                             _cons |   7.307014   .0106752   684.48   0.000      7.28608    7.327949
+----------------------------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+----------------------------------------------------------------+
+            Absorbed FE | Categories  - Redundant  = Num. Coefs |
+------------------------+---------------------------------------|
+          ID_geo_feNCha |     25854       25854           0    *|
+ state_month_year_feCha |      5945           0        5945     |
+       huc8_month_feCha |     10740         382       10358     |
+----------------------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+variable y_hat1 already defined
+r(110);
+
+end of do-file
+
+r(110);
+
+. do "C:\Users\PBonetti\AppData\Local\Temp\STD385c_000000.tmp"
+
+.                 reghdfe y_hat1 c.post_disc#c.T_HUC10_balanced`p'_`k'  c.log_cum_prec_3days#i.group_items i.T_mean_D_5_groups#i.group_items if  T_HUC10_only_post
+>  ==0 & Treated_state == 1,  `e' absorb(`f' state_month_year_feCha huc8_month_feCha)
+T_HUC10_balanced_ ambiguous abbreviation
+r(111);
+
+end of do-file
+
+r(111);
+
+. do "C:\Users\PBonetti\AppData\Local\Temp\STD385c_000000.tmp"
+
+. ***********
+. * Table 3 *
+. ***********
+. 
+. cd "G:\Dropbox (IESE)\Fracking Disclosure regulation project\1. data"
+G:\Dropbox (IESE)\Fracking Disclosure regulation project\1. data
+
+. * use "DISC_TEMP_2020 OCT 2021 DEF B.dta", clear
+. use "DISC_TEMP_2020 OCT 2021 DEF B_ALL_STATES.dta", clear
+
+. 
+. // set directory
+. cd "G:\Dropbox (IESE)\Fracking Disclosure regulation project\6. results\RESULTS JAN 2022\Tab 3"
+G:\Dropbox (IESE)\Fracking Disclosure regulation project\6. results\RESULTS JAN 2022\Tab 3
+
+. 
+. 
+. merge m:1 StateCode year month using "G:\Dropbox (IESE)\Fracking Disclosure regulation project/2. co
+> de/zs/data/intermediate/ggsearch_for_Altonji_test_PB_DEF.dta", gen(_merge_altonji)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                       767,478
+        from master                   767,265  (_merge_altonji==1)
+        from using                        213  (_merge_altonji==2)
+
+    matched                           388,304  (_merge_altonji==3)
+    -----------------------------------------
+
+. drop if _merge_altonji==2
+(213 observations deleted)
+
+. 
+. bysort State: egen m_frack_start_def = max(frack_start_def)
+(636159 missing values generated)
+
+. replace fracking  = m_frack_start_def if date<=d(31dec2009)
+(131,106 real changes made)
+
+. drop if _merge_altonji == 2
+(0 observations deleted)
+
+. 
+. /*
+> We provide a falsification test in the spirit of Altonji,
+> Elder, and Taber (2005). 
+> 
+> We first estimate Model 3 in Table 2, but exclude the variables of interest (MAD and
+> TPD) and instead add several variables potentially capturing local factors to which lawmakers might 
+> respond
+> when implementing the two directives. Specifically, we include gross domestic savings, the net capit
+> al account,
+> portfolio equity inflows, annual growth in GDP per capita, yearly inflation, and five binary indicat
+> or variables
+> for the closeness to national elections in a country (for quarters t–4 to t =0 relative to the elect
+> ion quarter). 
+> 
+> We scale the raw variables by GDP and lag them by four quarters. Macroeconomic data are from the Wor
+> ld Bank
+> and the IMF, election dates are from the national archives.
+> 
+> We then use the predicted values from this first-stage
+> regression as the dependent variable in our base specification and report the MAD and TPD coefficien
+> ts from
+> this falsification test in the table. Insignificant coefficients indicate that local factors cannot 
+> explain the estimated
+> effects obtained in Table 2.
+> */
+. 
+. 
+. // Stacked regression
+. // SUR
+. local errors ""cluster(huc10_state)""
+
+. local Ys ""log_t_t_Value_clean2""
+
+. local fe ""ID_geo_feNCha""
+
+. local k ALL
+
+. local p 1
+
+. foreach y of local Ys {
+  2. foreach f of local fe {
+  3. foreach e of local errors {
+  4. 
+.         reghdfe `y' c.fracking#c.T_HUC10_balanced`p'_`k' c.log_cum_prec_3days#i.group_items i.T_mean
+> _D_5_groups#i.group_items if  T_HUC10_only_post ==0 & Treated_state == 1 & m_cum_well_huc4_H_D == 1,
+>   `e' absorb(`f' state_month_year_feCha huc8_month_feCha)
+  5.         predict y_hat1 
+  6.         rename y_hat1 Y_altonji1
+  7.                 reghdfe Y_altonji1 c.post_disc#c.T_HUC10_balanced`p'_`k'  c.log_cum_prec_3days#i.
+> group_items i.T_mean_D_5_groups#i.group_items if  T_HUC10_only_post ==0 & Treated_state == 1,  `e' a
+> bsorb(`f' state_month_year_feCha huc8_month_feCha)
+  8.                 outreg2 using Tab3_altonji_`y'_`k'_`p'_`e'`f'_pre.xls, /// * location of the file
+>                 keep(c.post_disc#c.T_HUC10_balanced`p'_`k' ) /// * Variables you want to display 
+>                 title ("ATE - `k' - `y'") ctitle("HF at least in Pre Disclosure period") ///
+>                 bracket bdec (4) sdec(4) append ///
+>                 addtext(Treated Sample, HUC10s with HF at least in pre, Control Sample, HUC10s with 
+> no HF in pre, Note, No HUC10 with HF only in post, Weather Controls, Yes, Monitoring FE, Yes, State*
+> Month*Year FE, Yes, HUC8*Month FE, Yes)
+  9. 
+.         reghdfe `y' c.fracking#c.T_HUC10_balanced`p'_`k' c.log_cum_prec_3days#i.group_items i.T_mean
+> _D_5_groups#i.group_items if  T_HUC10_only_post ==0 & Treated_state == 1 & m_cum_well_huc4_H_D == 1,
+>  `e' absorb(`f' huc8_year_month_feCha)
+ 10.         predict y_hat2
+ 11.         rename y_hat2 Y_altonji2
+ 12. 
+.         reghdfe Y_altonji2 c.post_disc#c.T_HUC10_balanced`p'_`k'  c.log_cum_prec_3days#i.group_items
+>  i.T_mean_D_5_groups#i.group_items if  T_HUC10_only_post ==0 & Treated_state == 1, `e' absorb(`f' hu
+> c8_year_month_feCha)
+ 13.                 outreg2 using Tab3_altonji_`y'_`k'_`p'_`e'`f'_pre.xls, /// * location of the file
+>                 keep(c.post_disc#c.T_HUC10_balanced`p'_`k' ) /// * Variables you want to display
+>                 title ("ATE - `k' - `y'") ctitle("HF at least in Pre Disclosure period") ///
+>                 bracket bdec (4) sdec(4) append ///
+>                 addtext(Treated Sample, HUC10s with HF at least in pre, Control Sample, HUC10s with 
+> no HF in pre, Note, No HUC10 with HF only in post, Weather Controls, Yes, Monitoring FE, Yes, HUC8*M
+> onth*Year FE, Yes)
+ 14. 
+. }
+ 15. }
+ 16. }
+(dropped 14345 singleton observations)
+(MWFE estimator converged in 260 iterations)
+note: 4.T_mean_D_5_groups#2.group_items omitted because of collinearity
+note: 4.T_mean_D_5_groups#3.group_items omitted because of collinearity
+note: 4.T_mean_D_5_groups#4.group_items omitted because of collinearity
+
+HDFE Linear regression                            Number of obs   =    325,351
+Absorbing 3 HDFE groups                           F(  21,   2228) =      26.04
+Statistics robust to heteroskedasticity           Prob > F        =     0.0000
+                                                  R-squared       =     0.9606
+                                                  Adj R-squared   =     0.9548
+                                                  Within R-sq.    =     0.0064
+Number of clusters (huc10_state) =      2,229     Root MSE        =     0.6586
+
+                                              (Std. Err. adjusted for 2,229 clusters in huc10_state)
+----------------------------------------------------------------------------------------------------
+                                   |               Robust
+              log_t_t_Value_clean2 |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-----------------------------------+----------------------------------------------------------------
+c.fracking#c.T_HUC10_balanced1_ALL |  -.0011086   .0003657    -3.03   0.002    -.0018257   -.0003916
+                                   |
+  group_items#c.log_cum_prec_3days |
+                                1  |   .0242801   .0031139     7.80   0.000     .0181737    .0303865
+                                2  |  -.0786049   .0097425    -8.07   0.000    -.0977102   -.0594997
+                                3  |  -.0559274   .0040144   -13.93   0.000    -.0637998    -.048055
+                                4  |  -.0666606   .0044934   -14.84   0.000    -.0754724   -.0578488
+                                   |
+     T_mean_D_5_groups#group_items |
+                              0 2  |  -.2106437   .2990205    -0.70   0.481    -.7970317    .3757443
+                              0 3  |   .0658103   .0367701     1.79   0.074    -.0062969    .1379174
+                              0 4  |   .0866999   .0266498     3.25   0.001     .0344387     .138961
+                              1 1  |  -.0505159   .0312083    -1.62   0.106    -.1117162    .0106845
+                              1 2  |  -.0437591    .041036    -1.07   0.286    -.1242318    .0367136
+                              1 3  |  -.0055224   .0160522    -0.34   0.731    -.0370013    .0259565
+                              1 4  |  -.0107396   .0166323    -0.65   0.519    -.0433559    .0218768
+                              2 1  |  -.0052358   .0322961    -0.16   0.871    -.0685693    .0580978
+                              2 2  |  -.0501612   .0287742    -1.74   0.081    -.1065883    .0062659
+                              2 3  |  -.0386497   .0134152    -2.88   0.004    -.0649573   -.0123422
+                              2 4  |  -.0305774   .0139625    -2.19   0.029    -.0579584   -.0031965
+                              3 1  |   .0291546   .0332788     0.88   0.381    -.0361061    .0944153
+                              3 2  |  -.0333343   .0202653    -1.64   0.100    -.0730752    .0064066
+                              3 3  |   -.032742   .0096276    -3.40   0.001    -.0516219   -.0138621
+                              3 4  |  -.0049917   .0115518    -0.43   0.666    -.0276451    .0176617
+                              4 1  |    .045738   .0349794     1.31   0.191    -.0228575    .1143336
+                              4 2  |          0  (omitted)
+                              4 3  |          0  (omitted)
+                              4 4  |          0  (omitted)
+                                   |
+                             _cons |   7.307014   .0106752   684.48   0.000      7.28608    7.327949
+----------------------------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+----------------------------------------------------------------+
+            Absorbed FE | Categories  - Redundant  = Num. Coefs |
+------------------------+---------------------------------------|
+          ID_geo_feNCha |     25854       25854           0    *|
+ state_month_year_feCha |      5945           0        5945     |
+       huc8_month_feCha |     10740         382       10358     |
+----------------------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+(option xb assumed; fitted values)
+(636,728 missing values generated)
+(dropped 19577 singleton observations)
+(MWFE estimator converged in 386 iterations)
+note: 4.T_mean_D_5_groups#2.group_items omitted because of collinearity
+note: 4.T_mean_D_5_groups#3.group_items omitted because of collinearity
+note: 4.T_mean_D_5_groups#4.group_items omitted because of collinearity
+
+HDFE Linear regression                            Number of obs   =    485,716
+Absorbing 3 HDFE groups                           F(  21,   3219) = 1888677.24
+Statistics robust to heteroskedasticity           Prob > F        =     0.0000
+                                                  R-squared       =     0.9971
+                                                  Adj R-squared   =     0.9967
+                                                  Within R-sq.    =     0.9888
+Number of clusters (huc10_state) =      3,220     Root MSE        =     0.0058
+
+                                               (Std. Err. adjusted for 3,220 clusters in huc10_state)
+-----------------------------------------------------------------------------------------------------
+                                    |               Robust
+                         Y_altonji1 |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+------------------------------------+----------------------------------------------------------------
+c.post_disc#c.T_HUC10_balanced1_ALL |    -.02478   .0010472   -23.66   0.000    -.0268332   -.0227268
+                                    |
+   group_items#c.log_cum_prec_3days |
+                                 1  |   .0242625   .0000282   861.69   0.000     .0242073    .0243177
+                                 2  |  -.0786117   .0000322 -2442.12   0.000    -.0786748   -.0785486
+                                 3  |  -.0558951   .0000194 -2884.36   0.000    -.0559331   -.0558571
+                                 4  |  -.0667443   .0000422 -1580.83   0.000    -.0668271   -.0666615
+                                    |
+      T_mean_D_5_groups#group_items |
+                               0 2  |  -.2107501   .0005154  -408.88   0.000    -.2117607   -.2097395
+                               0 3  |   .0662618   .0002386   277.76   0.000      .065794    .0667295
+                               0 4  |   .0861726   .0005057   170.42   0.000     .0851812    .0871641
+                               1 1  |  -.0510026   .0002431  -209.82   0.000    -.0514792    -.050526
+                               1 2  |  -.0433702   .0002922  -148.42   0.000    -.0439431   -.0427972
+                               1 3  |  -.0055389   .0001403   -39.48   0.000    -.0058139   -.0052638
+                               1 4  |  -.0111303   .0003015   -36.92   0.000    -.0117215   -.0105392
+                               2 1  |  -.0054268   .0002718   -19.96   0.000    -.0059598   -.0048938
+                               2 2  |  -.0498503   .0002048  -243.44   0.000    -.0502518   -.0494488
+                               2 3  |  -.0387306   .0001063  -364.38   0.000     -.038939   -.0385221
+                               2 4  |  -.0307406   .0001925  -159.67   0.000    -.0311181   -.0303631
+                               3 1  |   .0288237   .0002908    99.12   0.000     .0282535    .0293938
+                               3 2  |  -.0332167   .0001712  -194.04   0.000    -.0335523   -.0328811
+                               3 3  |   -.032925   .0000717  -459.09   0.000    -.0330656   -.0327843
+                               3 4  |  -.0053499   .0001403   -38.12   0.000    -.0056251   -.0050748
+                               4 1  |    .045619   .0003114   146.48   0.000     .0450084    .0462297
+                               4 2  |          0  (omitted)
+                               4 3  |          0  (omitted)
+                               4 4  |          0  (omitted)
+                                    |
+                              _cons |   7.304457   .0001731  4.2e+04   0.000     7.304118    7.304796
+-----------------------------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+----------------------------------------------------------------+
+            Absorbed FE | Categories  - Redundant  = Num. Coefs |
+------------------------+---------------------------------------|
+          ID_geo_feNCha |     37994       37994           0    *|
+ state_month_year_feCha |      7397           0        7397     |
+       huc8_month_feCha |     17658         434       17224     |
+----------------------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+Tab3_altonji_log_t_t_Value_clean2_ALL_1_cluster(huc10_state)ID_geo_feNCha_pre.xls
+dir : seeout
+(dropped 36309 singleton observations)
+(MWFE estimator converged in 124 iterations)
+note: 4.T_mean_D_5_groups#2.group_items omitted because of collinearity
+note: 4.T_mean_D_5_groups#3.group_items omitted because of collinearity
+note: 4.T_mean_D_5_groups#4.group_items omitted because of collinearity
+
+HDFE Linear regression                            Number of obs   =    303,387
+Absorbing 2 HDFE groups                           F(  21,   2121) =      15.96
+Statistics robust to heteroskedasticity           Prob > F        =     0.0000
+                                                  R-squared       =     0.9712
+                                                  Adj R-squared   =     0.9626
+                                                  Within R-sq.    =     0.0061
+Number of clusters (huc10_state) =      2,122     Root MSE        =     0.5967
+
+                                              (Std. Err. adjusted for 2,122 clusters in huc10_state)
+----------------------------------------------------------------------------------------------------
+                                   |               Robust
+              log_t_t_Value_clean2 |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-----------------------------------+----------------------------------------------------------------
+c.fracking#c.T_HUC10_balanced1_ALL |  -.0002987   .0004653    -0.64   0.521    -.0012111    .0006137
+                                   |
+  group_items#c.log_cum_prec_3days |
+                                1  |   .0227162   .0043918     5.17   0.000     .0141036    .0313289
+                                2  |  -.0879994   .0129851    -6.78   0.000    -.1134642   -.0625346
+                                3  |  -.0580993   .0047083   -12.34   0.000    -.0673326    -.048866
+                                4  |  -.0697176   .0060244   -11.57   0.000    -.0815319   -.0579032
+                                   |
+     T_mean_D_5_groups#group_items |
+                              0 2  |   .0282395   .0969867     0.29   0.771    -.1619595    .2184384
+                              0 3  |   .0471586   .0436998     1.08   0.281    -.0385403    .1328576
+                              0 4  |   .0248888   .0367695     0.68   0.499    -.0472193    .0969969
+                              1 1  |  -.0637378   .0566146    -1.13   0.260    -.1747638    .0472881
+                              1 2  |  -.0419819   .0482388    -0.87   0.384    -.1365822    .0526183
+                              1 3  |  -.0157774   .0203916    -0.77   0.439    -.0557671    .0242122
+                              1 4  |  -.0239318   .0196923    -1.22   0.224    -.0625499    .0146864
+                              2 1  |   -.014849   .0578512    -0.26   0.797       -.1283    .0986021
+                              2 2  |   -.040005   .0270689    -1.48   0.140    -.0930893    .0130793
+                              2 3  |   -.049942   .0164554    -3.03   0.002    -.0822123   -.0176716
+                              2 4  |  -.0290585   .0180498    -1.61   0.108    -.0644557    .0063387
+                              3 1  |   .0171319   .0606546     0.28   0.778    -.1018169    .1360807
+                              3 2  |  -.0168253   .0228665    -0.74   0.462    -.0616683    .0280178
+                              3 3  |  -.0380579   .0126558    -3.01   0.003     -.062877   -.0132387
+                              3 4  |  -.0100693     .01423    -0.71   0.479    -.0379756    .0178369
+                              4 1  |   .0437389    .061734     0.71   0.479    -.0773267    .1648045
+                              4 2  |          0  (omitted)
+                              4 3  |          0  (omitted)
+                              4 4  |          0  (omitted)
+                                   |
+                             _cons |   7.320322   .0161893   452.17   0.000     7.288573     7.35207
+----------------------------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+---------------------------------------------------------------+
+           Absorbed FE | Categories  - Redundant  = Num. Coefs |
+-----------------------+---------------------------------------|
+         ID_geo_feNCha |     25053       25053           0    *|
+ huc8_year_month_feCha |     45084           0       45084     |
+---------------------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+(option xb assumed; fitted values)
+(636,728 missing values generated)
+(dropped 55537 singleton observations)
+(MWFE estimator converged in 126 iterations)
+note: 4.T_mean_D_5_groups#2.group_items omitted because of collinearity
+note: 4.T_mean_D_5_groups#3.group_items omitted because of collinearity
+note: 4.T_mean_D_5_groups#4.group_items omitted because of collinearity
+
+HDFE Linear regression                            Number of obs   =    449,756
+Absorbing 2 HDFE groups                           F(  21,   3055) =   6.64e+07
+Statistics robust to heteroskedasticity           Prob > F        =     0.0000
+                                                  R-squared       =     0.9999
+                                                  Adj R-squared   =     0.9999
+                                                  Within R-sq.    =     0.9996
+Number of clusters (huc10_state) =      3,056     Root MSE        =     0.0009
+
+                                               (Std. Err. adjusted for 3,056 clusters in huc10_state)
+-----------------------------------------------------------------------------------------------------
+                                    |               Robust
+                         Y_altonji2 |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+------------------------------------+----------------------------------------------------------------
+c.post_disc#c.T_HUC10_balanced1_ALL |   -.006551   .0006584    -9.95   0.000    -.0078419   -.0052602
+                                    |
+   group_items#c.log_cum_prec_3days |
+                                 1  |   .0227217   4.98e-06  4559.39   0.000      .022712    .0227315
+                                 2  |   -.087992   7.60e-06 -1.2e+04   0.000    -.0880069   -.0879771
+                                 3  |  -.0580927   3.30e-06 -1.8e+04   0.000    -.0580992   -.0580863
+                                 4  |  -.0697094   9.97e-06 -6990.42   0.000     -.069729   -.0696899
+                                    |
+      T_mean_D_5_groups#group_items |
+                               0 2  |   .0282395   .0001638   172.35   0.000     .0279183    .0285608
+                               0 3  |    .047281   .0000503   940.29   0.000     .0471824    .0473796
+                               0 4  |   .0249707   .0001002   249.10   0.000     .0247742    .0251673
+                               1 1  |  -.0639878   .0000765  -836.97   0.000    -.0641377   -.0638379
+                               1 2  |   -.041954   .0000575  -729.51   0.000    -.0420667   -.0418412
+                               1 3  |  -.0157982   .0000245  -644.27   0.000    -.0158463   -.0157501
+                               1 4  |  -.0239305   .0000527  -454.50   0.000    -.0240337   -.0238272
+                               2 1  |  -.0151205   .0000821  -184.20   0.000    -.0152815   -.0149596
+                               2 2  |  -.0399785   .0000521  -767.12   0.000    -.0400807   -.0398763
+                               2 3  |  -.0499748   .0000303 -1650.00   0.000    -.0500342   -.0499154
+                               2 4  |  -.0290725   .0000366  -793.51   0.000    -.0291443   -.0290007
+                               3 1  |   .0168624    .000086   196.06   0.000     .0166937     .017031
+                               3 2  |  -.0168114   .0000378  -445.29   0.000    -.0168854   -.0167374
+                               3 3  |  -.0380827   .0000127 -2998.14   0.000    -.0381076   -.0380578
+                               3 4  |  -.0100655   .0000245  -411.63   0.000    -.0101134   -.0100175
+                               4 1  |   .0435002   .0000897   485.15   0.000     .0433244     .043676
+                               4 2  |          0  (omitted)
+                               4 3  |          0  (omitted)
+                               4 4  |          0  (omitted)
+                                    |
+                              _cons |   7.319601   .0001042  7.0e+04   0.000     7.319396    7.319805
+-----------------------------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+---------------------------------------------------------------+
+           Absorbed FE | Categories  - Redundant  = Num. Coefs |
+-----------------------+---------------------------------------|
+         ID_geo_feNCha |     36590       36590           0    *|
+ huc8_year_month_feCha |     70894           0       70894     |
+---------------------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+Tab3_altonji_log_t_t_Value_clean2_ALL_1_cluster(huc10_state)ID_geo_feNCha_pre.xls
+dir : seeout
+
+. 
+. 
+. 
+. 
+. 
+. /*
+> /// import shales
+> capture drop _merge*
+> drop shale_play shale m_shale m_shale_huc4 basin
+> merge m:1 huc10_s using "G:\Dropbox (IESE)\Fracking Disclosure regulation project\1. data\shales_EPA
+> _huc10_link.dta", gen(_merge_shale)
+> *keep if _merge_shale==3
+> g shale = 1 if _merge_shale==3
+> replace shale = 0 if shale ==.
+> bysort huc8_s: egen m_shale = max(shale)
+> *keep if m_shale == 1
+> 
+> egen shale_play_group_shale = group(shale_play) // 29
+> bysort huc8_s: egen m_shale_play_group_shale = max(shale_play_group_shale) // 35,721 missing
+> replace shale_play_group_shale = m_shale_play_group_shale if shale_play_group_shale==. // 35,721 mis
+> sing
+>         egen shale_play_fe_sh = group(shale_play_group_shale)
+>         *egen shale_play_year_fe_sh = group(shale_play_group_shale date_string_year)
+>         *egen shale_play_month_fe_sh = group(shale_play_group_shale date_string_monthM)
+>         egen shale_play_month_year_fe_sh = group(shale_play_group_shale month date_string_year Ch)
+>         *egen shale_play_huc8_month_year_fe_sh = group(shale_play_group_shale huc8_s date_string_mon
+> thM date_string_year)
+>         *egen shale_play_huc4_month_year_fe_sh = group(shale_play_group_shale huc4_s date_string_mon
+> thM date_string_year)
+> 
+> egen shale_play_group = group(basin) // 26
+> bysort huc8_s: egen m_shale_play_group = max(shale_play_group) // 37,422 missing
+> replace shale_play_group = m_shale_play_group if shale_play_group==. //  35,721 missing
+>         egen shale_play_fe = group(shale_play_group)
+>         *egen shale_play_year_fe = group(shale_play_group date_string_year)
+>         *egen shale_play_month_fe = group(shale_play_group date_string_monthM)
+>         egen shale_play_month_year_feCha = group(shale_play_group month date_string_year Ch)
+>         *egen shale_play_huc8_month_year_fe = group(shale_play_group huc8_s date_string_monthM date_
+> string_year)
+>         *egen shale_play_huc4_month_year_fe = group(shale_play_group huc4_s date_string_monthM date_
+> string_year)
+> 
+>         
+> drop if shale_play_month_year_feCha     ==.
+> 
+> // SUR
+> local errors ""cluster(huc10_state)""
+> local Ys ""log_t_t_Value_clean2""
+> local fe ""ID_geo_feNCha""
+> local k ALL
+> local p 1
+> foreach y of local Ys {
+> foreach f of local fe {
+> foreach e of local errors {
+> 
+>         reghdfe `y' c.post_disc#c.T_HUC10_balanced`p'_`k' c.log_cum_prec_3days#i.group_items i.T_mea
+> n_D_5_groups#i.group_items if  T_HUC10_only_post ==0 & Treated_state == 1,  `e' absorb(`f' state_mon
+> th_year_feCha huc8_month_feCha)
+>                 outreg2 using Tab3_`y'_`k'_`p'_`e'`f'_pre.xls, /// * location of the file
+>                 keep(c.post_disc#c.T_HUC10_balanced`p'_`k') /// * Variables you want to display 
+>                 title ("ATE - `k' - `y'") ctitle("HF at least in Pre Disclosure period") ///
+>                 bracket bdec (4) sdec(4) append ///
+>                 addtext(Treated Sample, HUC10s with HF at least in pre, Control Sample, HUC10s with 
+> no HF in pre, Note, No HUC10 with HF only in post, Weather Controls, Yes, Monitoring FE, Yes, State*
+> Month*Year FE, Yes, HUC8*Month FE, Yes)
+>         reghdfe `y' c.post_disc#c.T_HUC10_balanced`p'_`k' c.log_cum_prec_3days#i.group_items i.T_mea
+> n_D_5_groups#i.group_items if  T_HUC10_only_post ==0 & Treated_state == 1, `e' absorb(`f' huc8_year_
+> month_feCha)
+>                 outreg2 using Tab3_`y'_`k'_`p'_`e'`f'_pre.xls, /// * location of the file
+>                 keep(c.post_disc#c.T_HUC10_balanced`p'_`k') /// * Variables you want to display
+>                 title ("ATE - `k' - `y'") ctitle("HF at least in Pre Disclosure period") ///
+>                 bracket bdec (4) sdec(4) append ///
+>                 addtext(Treated Sample, HUC10s with HF at least in pre, Control Sample, HUC10s with 
+> no HF in pre, Note, No HUC10 with HF only in post, Weather Controls, Yes, Monitoring FE, Yes, HUC8*M
+> onth*Year FE, Yes)
+> 
+> }
+> }
+> }
+
+end of do-file
+
+. do "C:\Users\PBonetti\AppData\Local\Temp\STD385c_000000.tmp"
+
+.         rename y_hat1 Y_altonji1
+variable y_hat1 not found
+r(111);
+
+end of do-file
+
+r(111);
+
+. do "C:\Users\PBonetti\AppData\Local\Temp\STD385c_000000.tmp"
+
+. ***********
+. * Table 3 *
+. ***********
+. 
+. cd "G:\Dropbox (IESE)\Fracking Disclosure regulation project\1. data"
+G:\Dropbox (IESE)\Fracking Disclosure regulation project\1. data
+
+. * use "DISC_TEMP_2020 OCT 2021 DEF B.dta", clear
+. use "DISC_TEMP_2020 OCT 2021 DEF B_ALL_STATES.dta", clear
+
+. 
+. // set directory
+. cd "G:\Dropbox (IESE)\Fracking Disclosure regulation project\6. results\RESULTS JAN 2022\Tab 3"
+G:\Dropbox (IESE)\Fracking Disclosure regulation project\6. results\RESULTS JAN 2022\Tab 3
+
+. 
+. 
+. merge m:1 StateCode year month using "G:\Dropbox (IESE)\Fracking Disclosure regulation project/2. co
+> de/zs/data/intermediate/ggsearch_for_Altonji_test_PB_DEF.dta", gen(_merge_altonji)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                       767,478
+        from master                   767,265  (_merge_altonji==1)
+        from using                        213  (_merge_altonji==2)
+
+    matched                           388,304  (_merge_altonji==3)
+    -----------------------------------------
+
+. drop if _merge_altonji==2
+(213 observations deleted)
+
+. 
+. bysort State: egen m_frack_start_def = max(frack_start_def)
+(636159 missing values generated)
+
+. replace fracking  = m_frack_start_def if date<=d(31dec2009)
+(131,106 real changes made)
+
+. drop if _merge_altonji == 2
+(0 observations deleted)
+
+. 
+. /*
+> We provide a falsification test in the spirit of Altonji,
+> Elder, and Taber (2005). 
+> 
+> We first estimate Model 3 in Table 2, but exclude the variables of interest (MAD and
+> TPD) and instead add several variables potentially capturing local factors to which lawmakers might 
+> respond
+> when implementing the two directives. Specifically, we include gross domestic savings, the net capit
+> al account,
+> portfolio equity inflows, annual growth in GDP per capita, yearly inflation, and five binary indicat
+> or variables
+> for the closeness to national elections in a country (for quarters t–4 to t =0 relative to the elect
+> ion quarter). 
+> 
+> We scale the raw variables by GDP and lag them by four quarters. Macroeconomic data are from the Wor
+> ld Bank
+> and the IMF, election dates are from the national archives.
+> 
+> We then use the predicted values from this first-stage
+> regression as the dependent variable in our base specification and report the MAD and TPD coefficien
+> ts from
+> this falsification test in the table. Insignificant coefficients indicate that local factors cannot 
+> explain the estimated
+> effects obtained in Table 2.
+> */
+. 
+. 
+. // Stacked regression
+. // SUR
+. local errors ""cluster(huc10_state)""
+
+. local Ys ""log_t_t_Value_clean2""
+
+. local fe ""ID_geo_feNCha""
+
+. local k ALL
+
+. local p 1
+
+. foreach y of local Ys {
+  2. foreach f of local fe {
+  3. foreach e of local errors {
+  4. 
+.         reghdfe `y' c.fracking#c.T_HUC10_balanced`p'_`k' c.log_cum_prec_3days#i.group_items i.T_mean
+> _D_5_groups#i.group_items if  T_HUC10_only_post ==0 & Treated_state == 1 & m_cum_well_huc4_H_D == 1,
+>   `e' absorb(`f' state_month_year_feCha huc8_month_feCha)
+  5.         g sample_1 = e(sample)
+  6.         predict y_hat1 
+  7.         rename y_hat1 Y_altonji1
+  8.                 reghdfe Y_altonji1 c.post_disc#c.T_HUC10_balanced`p'_`k'  c.log_cum_prec_3days#i.
+> group_items i.T_mean_D_5_groups#i.group_items if  T_HUC10_only_post ==0 & Treated_state == 1 & sampl
+> e_1 == 1,  `e' absorb(`f' state_month_year_feCha huc8_month_feCha)
+  9.                 outreg2 using Tab3_altonji_`y'_`k'_`p'_`e'`f'_pre.xls, /// * location of the file
+>                 keep(c.post_disc#c.T_HUC10_balanced`p'_`k' ) /// * Variables you want to display 
+>                 title ("ATE - `k' - `y'") ctitle("HF at least in Pre Disclosure period") ///
+>                 bracket bdec (4) sdec(4) append ///
+>                 addtext(Treated Sample, HUC10s with HF at least in pre, Control Sample, HUC10s with 
+> no HF in pre, Note, No HUC10 with HF only in post, Weather Controls, Yes, Monitoring FE, Yes, State*
+> Month*Year FE, Yes, HUC8*Month FE, Yes)
+ 10. 
+.         reghdfe `y' c.fracking#c.T_HUC10_balanced`p'_`k' c.log_cum_prec_3days#i.group_items i.T_mean
+> _D_5_groups#i.group_items if  T_HUC10_only_post ==0 & Treated_state == 1 & m_cum_well_huc4_H_D == 1,
+>  `e' absorb(`f' huc8_year_month_feCha)
+ 11.         g sample_2 = e(sample)
+ 12.         predict y_hat2
+ 13.         rename y_hat2 Y_altonji2
+ 14. 
+.         reghdfe Y_altonji2 c.post_disc#c.T_HUC10_balanced`p'_`k'  c.log_cum_prec_3days#i.group_items
+>  i.T_mean_D_5_groups#i.group_items if  T_HUC10_only_post ==0 & Treated_state == 1 & sample_2 == 1, `
+> e' absorb(`f' huc8_year_month_feCha)
+ 15.                 outreg2 using Tab3_altonji_`y'_`k'_`p'_`e'`f'_pre.xls, /// * location of the file
+>                 keep(c.post_disc#c.T_HUC10_balanced`p'_`k' ) /// * Variables you want to display
+>                 title ("ATE - `k' - `y'") ctitle("HF at least in Pre Disclosure period") ///
+>                 bracket bdec (4) sdec(4) append ///
+>                 addtext(Treated Sample, HUC10s with HF at least in pre, Control Sample, HUC10s with 
+> no HF in pre, Note, No HUC10 with HF only in post, Weather Controls, Yes, Monitoring FE, Yes, HUC8*M
+> onth*Year FE, Yes)
+ 16. 
+. }
+ 17. }
+ 18. }
+(dropped 14345 singleton observations)
+(MWFE estimator converged in 260 iterations)
+note: 4.T_mean_D_5_groups#2.group_items omitted because of collinearity
+note: 4.T_mean_D_5_groups#3.group_items omitted because of collinearity
+note: 4.T_mean_D_5_groups#4.group_items omitted because of collinearity
+
+HDFE Linear regression                            Number of obs   =    325,351
+Absorbing 3 HDFE groups                           F(  21,   2228) =      26.04
+Statistics robust to heteroskedasticity           Prob > F        =     0.0000
+                                                  R-squared       =     0.9606
+                                                  Adj R-squared   =     0.9548
+                                                  Within R-sq.    =     0.0064
+Number of clusters (huc10_state) =      2,229     Root MSE        =     0.6586
+
+                                              (Std. Err. adjusted for 2,229 clusters in huc10_state)
+----------------------------------------------------------------------------------------------------
+                                   |               Robust
+              log_t_t_Value_clean2 |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-----------------------------------+----------------------------------------------------------------
+c.fracking#c.T_HUC10_balanced1_ALL |  -.0011086   .0003657    -3.03   0.002    -.0018257   -.0003916
+                                   |
+  group_items#c.log_cum_prec_3days |
+                                1  |   .0242801   .0031139     7.80   0.000     .0181737    .0303865
+                                2  |  -.0786049   .0097425    -8.07   0.000    -.0977102   -.0594997
+                                3  |  -.0559274   .0040144   -13.93   0.000    -.0637998    -.048055
+                                4  |  -.0666606   .0044934   -14.84   0.000    -.0754724   -.0578488
+                                   |
+     T_mean_D_5_groups#group_items |
+                              0 2  |  -.2106437   .2990205    -0.70   0.481    -.7970317    .3757443
+                              0 3  |   .0658103   .0367701     1.79   0.074    -.0062969    .1379174
+                              0 4  |   .0866999   .0266498     3.25   0.001     .0344387     .138961
+                              1 1  |  -.0505159   .0312083    -1.62   0.106    -.1117162    .0106845
+                              1 2  |  -.0437591    .041036    -1.07   0.286    -.1242318    .0367136
+                              1 3  |  -.0055224   .0160522    -0.34   0.731    -.0370013    .0259565
+                              1 4  |  -.0107396   .0166323    -0.65   0.519    -.0433559    .0218768
+                              2 1  |  -.0052358   .0322961    -0.16   0.871    -.0685693    .0580978
+                              2 2  |  -.0501612   .0287742    -1.74   0.081    -.1065883    .0062659
+                              2 3  |  -.0386497   .0134152    -2.88   0.004    -.0649573   -.0123422
+                              2 4  |  -.0305774   .0139625    -2.19   0.029    -.0579584   -.0031965
+                              3 1  |   .0291546   .0332788     0.88   0.381    -.0361061    .0944153
+                              3 2  |  -.0333343   .0202653    -1.64   0.100    -.0730752    .0064066
+                              3 3  |   -.032742   .0096276    -3.40   0.001    -.0516219   -.0138621
+                              3 4  |  -.0049917   .0115518    -0.43   0.666    -.0276451    .0176617
+                              4 1  |    .045738   .0349794     1.31   0.191    -.0228575    .1143336
+                              4 2  |          0  (omitted)
+                              4 3  |          0  (omitted)
+                              4 4  |          0  (omitted)
+                                   |
+                             _cons |   7.307014   .0106752   684.48   0.000      7.28608    7.327949
+----------------------------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+----------------------------------------------------------------+
+            Absorbed FE | Categories  - Redundant  = Num. Coefs |
+------------------------+---------------------------------------|
+          ID_geo_feNCha |     25854       25854           0    *|
+ state_month_year_feCha |      5945           0        5945     |
+       huc8_month_feCha |     10740         382       10358     |
+----------------------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+(option xb assumed; fitted values)
+(636,728 missing values generated)
+(MWFE estimator converged in 254 iterations)
+note: 4.T_mean_D_5_groups#2.group_items omitted because of collinearity
+note: 4.T_mean_D_5_groups#3.group_items omitted because of collinearity
+note: 4.T_mean_D_5_groups#4.group_items omitted because of collinearity
+
+HDFE Linear regression                            Number of obs   =    325,351
+Absorbing 3 HDFE groups                           F(  21,   2228) =  984610.38
+Statistics robust to heteroskedasticity           Prob > F        =     0.0000
+                                                  R-squared       =     0.9963
+                                                  Adj R-squared   =     0.9957
+                                                  Within R-sq.    =     0.9849
+Number of clusters (huc10_state) =      2,229     Root MSE        =     0.0065
+
+                                               (Std. Err. adjusted for 2,229 clusters in huc10_state)
+-----------------------------------------------------------------------------------------------------
+                                    |               Robust
+                         Y_altonji1 |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+------------------------------------+----------------------------------------------------------------
+c.post_disc#c.T_HUC10_balanced1_ALL |  -.0244766   .0010188   -24.03   0.000    -.0264745   -.0224788
+                                    |
+   group_items#c.log_cum_prec_3days |
+                                 1  |   .0242339   .0000407   595.49   0.000     .0241541    .0243137
+                                 2  |  -.0786886   .0000725 -1085.24   0.000    -.0788308   -.0785464
+                                 3  |  -.0559028   .0000245 -2283.09   0.000    -.0559508   -.0558547
+                                 4  |  -.0667826   .0000532 -1255.17   0.000     -.066887   -.0666783
+                                    |
+      T_mean_D_5_groups#group_items |
+                               0 2  |  -.2096197   .0008445  -248.22   0.000    -.2112758   -.2079636
+                               0 3  |   .0664219   .0003371   197.01   0.000     .0657608    .0670831
+                               0 4  |   .0860654   .0006731   127.87   0.000     .0847455    .0873853
+                               1 1  |  -.0512308    .000394  -130.02   0.000    -.0520035   -.0504581
+                               1 2  |   -.042088   .0005677   -74.14   0.000    -.0432013   -.0409747
+                               1 3  |  -.0054796    .000184   -29.79   0.000    -.0058403   -.0051188
+                               1 4  |  -.0111817   .0003811   -29.34   0.000     -.011929   -.0104344
+                               2 1  |  -.0056465   .0004299   -13.13   0.000    -.0064895   -.0048035
+                               2 2  |  -.0491968   .0004129  -119.15   0.000    -.0500065   -.0483871
+                               2 3  |  -.0387479   .0001408  -275.15   0.000     -.039024   -.0384717
+                               2 4  |   -.030784   .0002544  -121.02   0.000    -.0312828   -.0302852
+                               3 1  |   .0285054   .0004598    61.99   0.000     .0276037    .0294071
+                               3 2  |  -.0333615   .0002328  -143.33   0.000    -.0338179    -.032905
+                               3 3  |  -.0329531   .0000923  -357.15   0.000     -.033134   -.0327721
+                               3 4  |  -.0054368   .0001885   -28.85   0.000    -.0058064   -.0050672
+                               4 1  |   .0453727   .0004826    94.03   0.000     .0444264     .046319
+                               4 2  |          0  (omitted)
+                               4 3  |          0  (omitted)
+                               4 4  |          0  (omitted)
+                                    |
+                              _cons |   7.303515   .0002423  3.0e+04   0.000      7.30304    7.303991
+-----------------------------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+----------------------------------------------------------------+
+            Absorbed FE | Categories  - Redundant  = Num. Coefs |
+------------------------+---------------------------------------|
+          ID_geo_feNCha |     25854       25854           0    *|
+ state_month_year_feCha |      5945           0        5945     |
+       huc8_month_feCha |     10740         382       10358     |
+----------------------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+Tab3_altonji_log_t_t_Value_clean2_ALL_1_cluster(huc10_state)ID_geo_feNCha_pre.xls
+dir : seeout
+(dropped 36309 singleton observations)
+(MWFE estimator converged in 124 iterations)
+note: 4.T_mean_D_5_groups#2.group_items omitted because of collinearity
+note: 4.T_mean_D_5_groups#3.group_items omitted because of collinearity
+note: 4.T_mean_D_5_groups#4.group_items omitted because of collinearity
+
+HDFE Linear regression                            Number of obs   =    303,387
+Absorbing 2 HDFE groups                           F(  21,   2121) =      15.96
+Statistics robust to heteroskedasticity           Prob > F        =     0.0000
+                                                  R-squared       =     0.9712
+                                                  Adj R-squared   =     0.9626
+                                                  Within R-sq.    =     0.0061
+Number of clusters (huc10_state) =      2,122     Root MSE        =     0.5967
+
+                                              (Std. Err. adjusted for 2,122 clusters in huc10_state)
+----------------------------------------------------------------------------------------------------
+                                   |               Robust
+              log_t_t_Value_clean2 |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-----------------------------------+----------------------------------------------------------------
+c.fracking#c.T_HUC10_balanced1_ALL |  -.0002987   .0004653    -0.64   0.521    -.0012111    .0006137
+                                   |
+  group_items#c.log_cum_prec_3days |
+                                1  |   .0227162   .0043918     5.17   0.000     .0141036    .0313289
+                                2  |  -.0879994   .0129851    -6.78   0.000    -.1134642   -.0625346
+                                3  |  -.0580993   .0047083   -12.34   0.000    -.0673326    -.048866
+                                4  |  -.0697176   .0060244   -11.57   0.000    -.0815319   -.0579032
+                                   |
+     T_mean_D_5_groups#group_items |
+                              0 2  |   .0282395   .0969867     0.29   0.771    -.1619595    .2184384
+                              0 3  |   .0471586   .0436998     1.08   0.281    -.0385403    .1328576
+                              0 4  |   .0248888   .0367695     0.68   0.499    -.0472193    .0969969
+                              1 1  |  -.0637378   .0566146    -1.13   0.260    -.1747638    .0472881
+                              1 2  |  -.0419819   .0482388    -0.87   0.384    -.1365822    .0526183
+                              1 3  |  -.0157774   .0203916    -0.77   0.439    -.0557671    .0242122
+                              1 4  |  -.0239318   .0196923    -1.22   0.224    -.0625499    .0146864
+                              2 1  |   -.014849   .0578512    -0.26   0.797       -.1283    .0986021
+                              2 2  |   -.040005   .0270689    -1.48   0.140    -.0930893    .0130793
+                              2 3  |   -.049942   .0164554    -3.03   0.002    -.0822123   -.0176716
+                              2 4  |  -.0290585   .0180498    -1.61   0.108    -.0644557    .0063387
+                              3 1  |   .0171319   .0606546     0.28   0.778    -.1018169    .1360807
+                              3 2  |  -.0168253   .0228665    -0.74   0.462    -.0616683    .0280178
+                              3 3  |  -.0380579   .0126558    -3.01   0.003     -.062877   -.0132387
+                              3 4  |  -.0100693     .01423    -0.71   0.479    -.0379756    .0178369
+                              4 1  |   .0437389    .061734     0.71   0.479    -.0773267    .1648045
+                              4 2  |          0  (omitted)
+                              4 3  |          0  (omitted)
+                              4 4  |          0  (omitted)
+                                   |
+                             _cons |   7.320322   .0161893   452.17   0.000     7.288573     7.35207
+----------------------------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+---------------------------------------------------------------+
+           Absorbed FE | Categories  - Redundant  = Num. Coefs |
+-----------------------+---------------------------------------|
+         ID_geo_feNCha |     25053       25053           0    *|
+ huc8_year_month_feCha |     45084           0       45084     |
+---------------------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+(option xb assumed; fitted values)
+(636,728 missing values generated)
+(MWFE estimator converged in 128 iterations)
+note: 4.T_mean_D_5_groups#2.group_items omitted because of collinearity
+note: 4.T_mean_D_5_groups#3.group_items omitted because of collinearity
+note: 4.T_mean_D_5_groups#4.group_items omitted because of collinearity
+
+HDFE Linear regression                            Number of obs   =    303,387
+Absorbing 2 HDFE groups                           F(  21,   2121) =   6.01e+07
+Statistics robust to heteroskedasticity           Prob > F        =     0.0000
+                                                  R-squared       =     0.9999
+                                                  Adj R-squared   =     0.9999
+                                                  Within R-sq.    =     0.9995
+Number of clusters (huc10_state) =      2,122     Root MSE        =     0.0010
+
+                                               (Std. Err. adjusted for 2,122 clusters in huc10_state)
+-----------------------------------------------------------------------------------------------------
+                                    |               Robust
+                         Y_altonji2 |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+------------------------------------+----------------------------------------------------------------
+c.post_disc#c.T_HUC10_balanced1_ALL |  -.0064987   .0006537    -9.94   0.000    -.0077807   -.0052168
+                                    |
+   group_items#c.log_cum_prec_3days |
+                                 1  |    .022724   6.86e-06  3311.36   0.000     .0227105    .0227374
+                                 2  |  -.0879952   4.80e-06 -1.8e+04   0.000    -.0880046   -.0879857
+                                 3  |  -.0580912   4.03e-06 -1.4e+04   0.000    -.0580991   -.0580833
+                                 4  |   -.069708   .0000115 -6048.24   0.000    -.0697306   -.0696854
+                                    |
+      T_mean_D_5_groups#group_items |
+                               0 2  |   .0281503    .000069   408.24   0.000     .0280151    .0282855
+                               0 3  |   .0473212   .0000689   686.91   0.000     .0471861    .0474563
+                               0 4  |   .0249898   .0001216   205.45   0.000     .0247513    .0252284
+                               1 1  |  -.0641549   .0001207  -531.71   0.000    -.0643915   -.0639183
+                               1 2  |   -.042027   .0000374 -1124.39   0.000    -.0421003   -.0419537
+                               1 3  |  -.0158035   .0000312  -505.76   0.000    -.0158648   -.0157422
+                               1 4  |  -.0239301   .0000621  -385.64   0.000    -.0240518   -.0238084
+                               2 1  |  -.0152961   .0001286  -118.99   0.000    -.0155482    -.015044
+                               2 2  |   -.040044   .0000374 -1070.69   0.000    -.0401174   -.0399707
+                               2 3  |  -.0499838   .0000388 -1287.10   0.000    -.0500599   -.0499076
+                               2 4  |  -.0290746   .0000437  -665.28   0.000    -.0291603   -.0289889
+                               3 1  |   .0166878   .0001335   125.00   0.000      .016426    .0169496
+                               3 2  |  -.0168544   .0000277  -609.02   0.000    -.0169086   -.0168001
+                               3 3  |  -.0380896   .0000162 -2352.08   0.000    -.0381214   -.0380578
+                               3 4  |  -.0100641   .0000291  -345.30   0.000    -.0101213    -.010007
+                               4 1  |   .0433368   .0001381   313.74   0.000      .043066    .0436077
+                               4 2  |          0  (omitted)
+                               4 3  |          0  (omitted)
+                               4 4  |          0  (omitted)
+                                    |
+                              _cons |   7.319348   .0001448  5.1e+04   0.000     7.319064    7.319632
+-----------------------------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+---------------------------------------------------------------+
+           Absorbed FE | Categories  - Redundant  = Num. Coefs |
+-----------------------+---------------------------------------|
+         ID_geo_feNCha |     25053       25053           0    *|
+ huc8_year_month_feCha |     45084           0       45084     |
+---------------------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+Tab3_altonji_log_t_t_Value_clean2_ALL_1_cluster(huc10_state)ID_geo_feNCha_pre.xls
+dir : seeout
+
+. 
+. 
+. 
+. 
+. 
+. /*
+> /// import shales
+> capture drop _merge*
+> drop shale_play shale m_shale m_shale_huc4 basin
+> merge m:1 huc10_s using "G:\Dropbox (IESE)\Fracking Disclosure regulation project\1. data\shales_EPA
+> _huc10_link.dta", gen(_merge_shale)
+> *keep if _merge_shale==3
+> g shale = 1 if _merge_shale==3
+> replace shale = 0 if shale ==.
+> bysort huc8_s: egen m_shale = max(shale)
+> *keep if m_shale == 1
+> 
+> egen shale_play_group_shale = group(shale_play) // 29
+> bysort huc8_s: egen m_shale_play_group_shale = max(shale_play_group_shale) // 35,721 missing
+> replace shale_play_group_shale = m_shale_play_group_shale if shale_play_group_shale==. // 35,721 mis
+> sing
+>         egen shale_play_fe_sh = group(shale_play_group_shale)
+>         *egen shale_play_year_fe_sh = group(shale_play_group_shale date_string_year)
+>         *egen shale_play_month_fe_sh = group(shale_play_group_shale date_string_monthM)
+>         egen shale_play_month_year_fe_sh = group(shale_play_group_shale month date_string_year Ch)
+>         *egen shale_play_huc8_month_year_fe_sh = group(shale_play_group_shale huc8_s date_string_mon
+> thM date_string_year)
+>         *egen shale_play_huc4_month_year_fe_sh = group(shale_play_group_shale huc4_s date_string_mon
+> thM date_string_year)
+> 
+> egen shale_play_group = group(basin) // 26
+> bysort huc8_s: egen m_shale_play_group = max(shale_play_group) // 37,422 missing
+> replace shale_play_group = m_shale_play_group if shale_play_group==. //  35,721 missing
+>         egen shale_play_fe = group(shale_play_group)
+>         *egen shale_play_year_fe = group(shale_play_group date_string_year)
+>         *egen shale_play_month_fe = group(shale_play_group date_string_monthM)
+>         egen shale_play_month_year_feCha = group(shale_play_group month date_string_year Ch)
+>         *egen shale_play_huc8_month_year_fe = group(shale_play_group huc8_s date_string_monthM date_
+> string_year)
+>         *egen shale_play_huc4_month_year_fe = group(shale_play_group huc4_s date_string_monthM date_
+> string_year)
+> 
+>         
+> drop if shale_play_month_year_feCha     ==.
+> 
+> // SUR
+> local errors ""cluster(huc10_state)""
+> local Ys ""log_t_t_Value_clean2""
+> local fe ""ID_geo_feNCha""
+> local k ALL
+> local p 1
+> foreach y of local Ys {
+> foreach f of local fe {
+> foreach e of local errors {
+> 
+>         reghdfe `y' c.post_disc#c.T_HUC10_balanced`p'_`k' c.log_cum_prec_3days#i.group_items i.T_mea
+> n_D_5_groups#i.group_items if  T_HUC10_only_post ==0 & Treated_state == 1,  `e' absorb(`f' state_mon
+> th_year_feCha huc8_month_feCha)
+>                 outreg2 using Tab3_`y'_`k'_`p'_`e'`f'_pre.xls, /// * location of the file
+>                 keep(c.post_disc#c.T_HUC10_balanced`p'_`k') /// * Variables you want to display 
+>                 title ("ATE - `k' - `y'") ctitle("HF at least in Pre Disclosure period") ///
+>                 bracket bdec (4) sdec(4) append ///
+>                 addtext(Treated Sample, HUC10s with HF at least in pre, Control Sample, HUC10s with 
+> no HF in pre, Note, No HUC10 with HF only in post, Weather Controls, Yes, Monitoring FE, Yes, State*
+> Month*Year FE, Yes, HUC8*Month FE, Yes)
+>         reghdfe `y' c.post_disc#c.T_HUC10_balanced`p'_`k' c.log_cum_prec_3days#i.group_items i.T_mea
+> n_D_5_groups#i.group_items if  T_HUC10_only_post ==0 & Treated_state == 1, `e' absorb(`f' huc8_year_
+> month_feCha)
+>                 outreg2 using Tab3_`y'_`k'_`p'_`e'`f'_pre.xls, /// * location of the file
+>                 keep(c.post_disc#c.T_HUC10_balanced`p'_`k') /// * Variables you want to display
+>                 title ("ATE - `k' - `y'") ctitle("HF at least in Pre Disclosure period") ///
+>                 bracket bdec (4) sdec(4) append ///
+>                 addtext(Treated Sample, HUC10s with HF at least in pre, Control Sample, HUC10s with 
+> no HF in pre, Note, No HUC10 with HF only in post, Weather Controls, Yes, Monitoring FE, Yes, HUC8*M
+> onth*Year FE, Yes)
+> 
+> }
+> }
+> }
+
+end of do-file
+
+. do "G:\WP\Fracking Disclosure\ANALYSIS_DO_VERSION 2021\Analysis\Altonji.do"
+
+. ***********
+. * Table 3 *
+. ***********
+. 
+. cd "G:\Dropbox (IESE)\Fracking Disclosure regulation project\1. data"
+G:\Dropbox (IESE)\Fracking Disclosure regulation project\1. data
+
+. * use "DISC_TEMP_2020 OCT 2021 DEF B.dta", clear
+. use "DISC_TEMP_2020 OCT 2021 DEF B_ALL_STATES.dta", clear
+
+. 
+. // set directory
+. cd "G:\Dropbox (IESE)\Fracking Disclosure regulation project\6. results\RESULTS JAN 2022\Tab 3"
+G:\Dropbox (IESE)\Fracking Disclosure regulation project\6. results\RESULTS JAN 2022\Tab 3
+
+. 
+. 
+. merge m:1 StateCode year month using "G:\Dropbox (IESE)\Fracking Disclosure regulation project/2. co
+> de/zs/data/intermediate/ggsearch_for_Altonji_test_PB_DEF.dta", gen(_merge_altonji)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                       767,478
+        from master                   767,265  (_merge_altonji==1)
+        from using                        213  (_merge_altonji==2)
+
+    matched                           388,304  (_merge_altonji==3)
+    -----------------------------------------
+
+. drop if _merge_altonji==2
+(213 observations deleted)
+
+. 
+. bysort State: egen m_frack_start_def = max(frack_start_def)
+(636159 missing values generated)
+
+. replace fracking  = m_frack_start_def if date<=d(31dec2009) & fracking ==.
+(131,106 real changes made)
+
+. drop if _merge_altonji == 2
+(0 observations deleted)
+
+. 
+. /*
+> We provide a falsification test in the spirit of Altonji,
+> Elder, and Taber (2005). 
+> 
+> We first estimate Model 3 in Table 2, but exclude the variables of interest (MAD and
+> TPD) and instead add several variables potentially capturing local factors to which lawmakers might 
+> respond
+> when implementing the two directives. Specifically, we include gross domestic savings, the net capit
+> al account,
+> portfolio equity inflows, annual growth in GDP per capita, yearly inflation, and five binary indicat
+> or variables
+> for the closeness to national elections in a country (for quarters t–4 to t =0 relative to the elect
+> ion quarter). 
+> 
+> We scale the raw variables by GDP and lag them by four quarters. Macroeconomic data are from the Wor
+> ld Bank
+> and the IMF, election dates are from the national archives.
+> 
+> We then use the predicted values from this first-stage
+> regression as the dependent variable in our base specification and report the MAD and TPD coefficien
+> ts from
+> this falsification test in the table. Insignificant coefficients indicate that local factors cannot 
+> explain the estimated
+> effects obtained in Table 2.
+> */
+. 
+. 
+. // Stacked regression
+. // SUR
+. local errors ""cluster(huc10_state)""
+
+. local Ys ""log_t_t_Value_clean2""
+
+. local fe ""ID_geo_feNCha""
+
+. local k ALL
+
+. local p 1
+
+. foreach y of local Ys {
+  2. foreach f of local fe {
+  3. foreach e of local errors {
+  4. 
+.         reghdfe `y' c.fracking#c.T_HUC10_balanced`p'_`k' c.log_cum_prec_3days#i.group_items i.T_mean
+> _D_5_groups#i.group_items if  T_HUC10_only_post ==0 & Treated_state == 1 & m_cum_well_huc4_H_D == 1,
+>   `e' absorb(`f' state_month_year_feCha huc8_month_feCha)
+  5.         g sample_1 = e(sample)
+  6.         predict y_hat1 
+  7.         rename y_hat1 Y_altonji1
+  8.                 reghdfe Y_altonji1 c.post_disc#c.T_HUC10_balanced`p'_`k'  c.log_cum_prec_3days#i.
+> group_items i.T_mean_D_5_groups#i.group_items if  T_HUC10_only_post ==0 & Treated_state == 1 & sampl
+> e_1 == 1,  `e' absorb(`f' state_month_year_feCha huc8_month_feCha)
+  9.                 outreg2 using Tab3_altonji_`y'_`k'_`p'_`e'`f'_pre.xls, /// * location of the file
+>                 keep(c.post_disc#c.T_HUC10_balanced`p'_`k' ) /// * Variables you want to display 
+>                 title ("ATE - `k' - `y'") ctitle("HF at least in Pre Disclosure period") ///
+>                 bracket bdec (4) sdec(4) replace ///
+>                 addtext(Treated Sample, HUC10s with HF at least in pre, Control Sample, HUC10s with 
+> no HF in pre, Note, No HUC10 with HF only in post, Weather Controls, Yes, Monitoring FE, Yes, State*
+> Month*Year FE, Yes, HUC8*Month FE, Yes)
+ 10. 
+.         reghdfe `y' c.fracking#c.T_HUC10_balanced`p'_`k' c.log_cum_prec_3days#i.group_items i.T_mean
+> _D_5_groups#i.group_items if  T_HUC10_only_post ==0 & Treated_state == 1 & m_cum_well_huc4_H_D == 1,
+>  `e' absorb(`f' huc8_year_month_feCha)
+ 11.         g sample_2 = e(sample)
+ 12.         predict y_hat2
+ 13.         rename y_hat2 Y_altonji2
+ 14. 
+.         reghdfe Y_altonji2 c.post_disc#c.T_HUC10_balanced`p'_`k'  c.log_cum_prec_3days#i.group_items
+>  i.T_mean_D_5_groups#i.group_items if  T_HUC10_only_post ==0 & Treated_state == 1 & sample_2 == 1, `
+> e' absorb(`f' huc8_year_month_feCha)
+ 15.                 outreg2 using Tab3_altonji_`y'_`k'_`p'_`e'`f'_pre.xls, /// * location of the file
+>                 keep(c.post_disc#c.T_HUC10_balanced`p'_`k' ) /// * Variables you want to display
+>                 title ("ATE - `k' - `y'") ctitle("HF at least in Pre Disclosure period") ///
+>                 bracket bdec (4) sdec(4) append ///
+>                 addtext(Treated Sample, HUC10s with HF at least in pre, Control Sample, HUC10s with 
+> no HF in pre, Note, No HUC10 with HF only in post, Weather Controls, Yes, Monitoring FE, Yes, HUC8*M
+> onth*Year FE, Yes)
+ 16. 
+. }
+ 17. }
+ 18. }
+(dropped 14345 singleton observations)
+(MWFE estimator converged in 260 iterations)
+note: 4.T_mean_D_5_groups#2.group_items omitted because of collinearity
+note: 4.T_mean_D_5_groups#3.group_items omitted because of collinearity
+note: 4.T_mean_D_5_groups#4.group_items omitted because of collinearity
+
+HDFE Linear regression                            Number of obs   =    325,351
+Absorbing 3 HDFE groups                           F(  21,   2228) =      26.04
+Statistics robust to heteroskedasticity           Prob > F        =     0.0000
+                                                  R-squared       =     0.9606
+                                                  Adj R-squared   =     0.9548
+                                                  Within R-sq.    =     0.0064
+Number of clusters (huc10_state) =      2,229     Root MSE        =     0.6586
+
+                                              (Std. Err. adjusted for 2,229 clusters in huc10_state)
+----------------------------------------------------------------------------------------------------
+                                   |               Robust
+              log_t_t_Value_clean2 |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-----------------------------------+----------------------------------------------------------------
+c.fracking#c.T_HUC10_balanced1_ALL |  -.0011086   .0003657    -3.03   0.002    -.0018257   -.0003916
+                                   |
+  group_items#c.log_cum_prec_3days |
+                                1  |   .0242801   .0031139     7.80   0.000     .0181737    .0303865
+                                2  |  -.0786049   .0097425    -8.07   0.000    -.0977102   -.0594997
+                                3  |  -.0559274   .0040144   -13.93   0.000    -.0637998    -.048055
+                                4  |  -.0666606   .0044934   -14.84   0.000    -.0754724   -.0578488
+                                   |
+     T_mean_D_5_groups#group_items |
+                              0 2  |  -.2106437   .2990205    -0.70   0.481    -.7970317    .3757443
+                              0 3  |   .0658103   .0367701     1.79   0.074    -.0062969    .1379174
+                              0 4  |   .0866999   .0266498     3.25   0.001     .0344387     .138961
+                              1 1  |  -.0505159   .0312083    -1.62   0.106    -.1117162    .0106845
+                              1 2  |  -.0437591    .041036    -1.07   0.286    -.1242318    .0367136
+                              1 3  |  -.0055224   .0160522    -0.34   0.731    -.0370013    .0259565
+                              1 4  |  -.0107396   .0166323    -0.65   0.519    -.0433559    .0218768
+                              2 1  |  -.0052358   .0322961    -0.16   0.871    -.0685693    .0580978
+                              2 2  |  -.0501612   .0287742    -1.74   0.081    -.1065883    .0062659
+                              2 3  |  -.0386497   .0134152    -2.88   0.004    -.0649573   -.0123422
+                              2 4  |  -.0305774   .0139625    -2.19   0.029    -.0579584   -.0031965
+                              3 1  |   .0291546   .0332788     0.88   0.381    -.0361061    .0944153
+                              3 2  |  -.0333343   .0202653    -1.64   0.100    -.0730752    .0064066
+                              3 3  |   -.032742   .0096276    -3.40   0.001    -.0516219   -.0138621
+                              3 4  |  -.0049917   .0115518    -0.43   0.666    -.0276451    .0176617
+                              4 1  |    .045738   .0349794     1.31   0.191    -.0228575    .1143336
+                              4 2  |          0  (omitted)
+                              4 3  |          0  (omitted)
+                              4 4  |          0  (omitted)
+                                   |
+                             _cons |   7.307014   .0106752   684.48   0.000      7.28608    7.327949
+----------------------------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+----------------------------------------------------------------+
+            Absorbed FE | Categories  - Redundant  = Num. Coefs |
+------------------------+---------------------------------------|
+          ID_geo_feNCha |     25854       25854           0    *|
+ state_month_year_feCha |      5945           0        5945     |
+       huc8_month_feCha |     10740         382       10358     |
+----------------------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+(option xb assumed; fitted values)
+(636,728 missing values generated)
+(MWFE estimator converged in 254 iterations)
+note: 4.T_mean_D_5_groups#2.group_items omitted because of collinearity
+note: 4.T_mean_D_5_groups#3.group_items omitted because of collinearity
+note: 4.T_mean_D_5_groups#4.group_items omitted because of collinearity
+
+HDFE Linear regression                            Number of obs   =    325,351
+Absorbing 3 HDFE groups                           F(  21,   2228) =  984610.38
+Statistics robust to heteroskedasticity           Prob > F        =     0.0000
+                                                  R-squared       =     0.9963
+                                                  Adj R-squared   =     0.9957
+                                                  Within R-sq.    =     0.9849
+Number of clusters (huc10_state) =      2,229     Root MSE        =     0.0065
+
+                                               (Std. Err. adjusted for 2,229 clusters in huc10_state)
+-----------------------------------------------------------------------------------------------------
+                                    |               Robust
+                         Y_altonji1 |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+------------------------------------+----------------------------------------------------------------
+c.post_disc#c.T_HUC10_balanced1_ALL |  -.0244766   .0010188   -24.03   0.000    -.0264745   -.0224788
+                                    |
+   group_items#c.log_cum_prec_3days |
+                                 1  |   .0242339   .0000407   595.49   0.000     .0241541    .0243137
+                                 2  |  -.0786886   .0000725 -1085.24   0.000    -.0788308   -.0785464
+                                 3  |  -.0559028   .0000245 -2283.09   0.000    -.0559508   -.0558547
+                                 4  |  -.0667826   .0000532 -1255.17   0.000     -.066887   -.0666783
+                                    |
+      T_mean_D_5_groups#group_items |
+                               0 2  |  -.2096197   .0008445  -248.22   0.000    -.2112758   -.2079636
+                               0 3  |   .0664219   .0003371   197.01   0.000     .0657608    .0670831
+                               0 4  |   .0860654   .0006731   127.87   0.000     .0847455    .0873853
+                               1 1  |  -.0512308    .000394  -130.02   0.000    -.0520035   -.0504581
+                               1 2  |   -.042088   .0005677   -74.14   0.000    -.0432013   -.0409747
+                               1 3  |  -.0054796    .000184   -29.79   0.000    -.0058403   -.0051188
+                               1 4  |  -.0111817   .0003811   -29.34   0.000     -.011929   -.0104344
+                               2 1  |  -.0056465   .0004299   -13.13   0.000    -.0064895   -.0048035
+                               2 2  |  -.0491968   .0004129  -119.15   0.000    -.0500065   -.0483871
+                               2 3  |  -.0387479   .0001408  -275.15   0.000     -.039024   -.0384717
+                               2 4  |   -.030784   .0002544  -121.02   0.000    -.0312828   -.0302852
+                               3 1  |   .0285054   .0004598    61.99   0.000     .0276037    .0294071
+                               3 2  |  -.0333615   .0002328  -143.33   0.000    -.0338179    -.032905
+                               3 3  |  -.0329531   .0000923  -357.15   0.000     -.033134   -.0327721
+                               3 4  |  -.0054368   .0001885   -28.85   0.000    -.0058064   -.0050672
+                               4 1  |   .0453727   .0004826    94.03   0.000     .0444264     .046319
+                               4 2  |          0  (omitted)
+                               4 3  |          0  (omitted)
+                               4 4  |          0  (omitted)
+                                    |
+                              _cons |   7.303515   .0002423  3.0e+04   0.000      7.30304    7.303991
+-----------------------------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+----------------------------------------------------------------+
+            Absorbed FE | Categories  - Redundant  = Num. Coefs |
+------------------------+---------------------------------------|
+          ID_geo_feNCha |     25854       25854           0    *|
+ state_month_year_feCha |      5945           0        5945     |
+       huc8_month_feCha |     10740         382       10358     |
+----------------------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+Tab3_altonji_log_t_t_Value_clean2_ALL_1_cluster(huc10_state)ID_geo_feNCha_pre.xls
+dir : seeout
+(dropped 36309 singleton observations)
+(MWFE estimator converged in 124 iterations)
+note: 4.T_mean_D_5_groups#2.group_items omitted because of collinearity
+note: 4.T_mean_D_5_groups#3.group_items omitted because of collinearity
+note: 4.T_mean_D_5_groups#4.group_items omitted because of collinearity
+
+HDFE Linear regression                            Number of obs   =    303,387
+Absorbing 2 HDFE groups                           F(  21,   2121) =      15.96
+Statistics robust to heteroskedasticity           Prob > F        =     0.0000
+                                                  R-squared       =     0.9712
+                                                  Adj R-squared   =     0.9626
+                                                  Within R-sq.    =     0.0061
+Number of clusters (huc10_state) =      2,122     Root MSE        =     0.5967
+
+                                              (Std. Err. adjusted for 2,122 clusters in huc10_state)
+----------------------------------------------------------------------------------------------------
+                                   |               Robust
+              log_t_t_Value_clean2 |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-----------------------------------+----------------------------------------------------------------
+c.fracking#c.T_HUC10_balanced1_ALL |  -.0002987   .0004653    -0.64   0.521    -.0012111    .0006137
+                                   |
+  group_items#c.log_cum_prec_3days |
+                                1  |   .0227162   .0043918     5.17   0.000     .0141036    .0313289
+                                2  |  -.0879994   .0129851    -6.78   0.000    -.1134642   -.0625346
+                                3  |  -.0580993   .0047083   -12.34   0.000    -.0673326    -.048866
+                                4  |  -.0697176   .0060244   -11.57   0.000    -.0815319   -.0579032
+                                   |
+     T_mean_D_5_groups#group_items |
+                              0 2  |   .0282395   .0969867     0.29   0.771    -.1619595    .2184384
+                              0 3  |   .0471586   .0436998     1.08   0.281    -.0385403    .1328576
+                              0 4  |   .0248888   .0367695     0.68   0.499    -.0472193    .0969969
+                              1 1  |  -.0637378   .0566146    -1.13   0.260    -.1747638    .0472881
+                              1 2  |  -.0419819   .0482388    -0.87   0.384    -.1365822    .0526183
+                              1 3  |  -.0157774   .0203916    -0.77   0.439    -.0557671    .0242122
+                              1 4  |  -.0239318   .0196923    -1.22   0.224    -.0625499    .0146864
+                              2 1  |   -.014849   .0578512    -0.26   0.797       -.1283    .0986021
+                              2 2  |   -.040005   .0270689    -1.48   0.140    -.0930893    .0130793
+                              2 3  |   -.049942   .0164554    -3.03   0.002    -.0822123   -.0176716
+                              2 4  |  -.0290585   .0180498    -1.61   0.108    -.0644557    .0063387
+                              3 1  |   .0171319   .0606546     0.28   0.778    -.1018169    .1360807
+                              3 2  |  -.0168253   .0228665    -0.74   0.462    -.0616683    .0280178
+                              3 3  |  -.0380579   .0126558    -3.01   0.003     -.062877   -.0132387
+                              3 4  |  -.0100693     .01423    -0.71   0.479    -.0379756    .0178369
+                              4 1  |   .0437389    .061734     0.71   0.479    -.0773267    .1648045
+                              4 2  |          0  (omitted)
+                              4 3  |          0  (omitted)
+                              4 4  |          0  (omitted)
+                                   |
+                             _cons |   7.320322   .0161893   452.17   0.000     7.288573     7.35207
+----------------------------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+---------------------------------------------------------------+
+           Absorbed FE | Categories  - Redundant  = Num. Coefs |
+-----------------------+---------------------------------------|
+         ID_geo_feNCha |     25053       25053           0    *|
+ huc8_year_month_feCha |     45084           0       45084     |
+---------------------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+(option xb assumed; fitted values)
+(636,728 missing values generated)
+(MWFE estimator converged in 128 iterations)
+note: 4.T_mean_D_5_groups#2.group_items omitted because of collinearity
+note: 4.T_mean_D_5_groups#3.group_items omitted because of collinearity
+note: 4.T_mean_D_5_groups#4.group_items omitted because of collinearity
+
+HDFE Linear regression                            Number of obs   =    303,387
+Absorbing 2 HDFE groups                           F(  21,   2121) =   6.01e+07
+Statistics robust to heteroskedasticity           Prob > F        =     0.0000
+                                                  R-squared       =     0.9999
+                                                  Adj R-squared   =     0.9999
+                                                  Within R-sq.    =     0.9995
+Number of clusters (huc10_state) =      2,122     Root MSE        =     0.0010
+
+                                               (Std. Err. adjusted for 2,122 clusters in huc10_state)
+-----------------------------------------------------------------------------------------------------
+                                    |               Robust
+                         Y_altonji2 |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+------------------------------------+----------------------------------------------------------------
+c.post_disc#c.T_HUC10_balanced1_ALL |  -.0064987   .0006537    -9.94   0.000    -.0077807   -.0052168
+                                    |
+   group_items#c.log_cum_prec_3days |
+                                 1  |    .022724   6.86e-06  3311.36   0.000     .0227105    .0227374
+                                 2  |  -.0879952   4.80e-06 -1.8e+04   0.000    -.0880046   -.0879857
+                                 3  |  -.0580912   4.03e-06 -1.4e+04   0.000    -.0580991   -.0580833
+                                 4  |   -.069708   .0000115 -6048.24   0.000    -.0697306   -.0696854
+                                    |
+      T_mean_D_5_groups#group_items |
+                               0 2  |   .0281503    .000069   408.24   0.000     .0280151    .0282855
+                               0 3  |   .0473212   .0000689   686.91   0.000     .0471861    .0474563
+                               0 4  |   .0249898   .0001216   205.45   0.000     .0247513    .0252284
+                               1 1  |  -.0641549   .0001207  -531.71   0.000    -.0643915   -.0639183
+                               1 2  |   -.042027   .0000374 -1124.39   0.000    -.0421003   -.0419537
+                               1 3  |  -.0158035   .0000312  -505.76   0.000    -.0158648   -.0157422
+                               1 4  |  -.0239301   .0000621  -385.64   0.000    -.0240518   -.0238084
+                               2 1  |  -.0152961   .0001286  -118.99   0.000    -.0155482    -.015044
+                               2 2  |   -.040044   .0000374 -1070.69   0.000    -.0401174   -.0399707
+                               2 3  |  -.0499838   .0000388 -1287.10   0.000    -.0500599   -.0499076
+                               2 4  |  -.0290746   .0000437  -665.28   0.000    -.0291603   -.0289889
+                               3 1  |   .0166878   .0001335   125.00   0.000      .016426    .0169496
+                               3 2  |  -.0168544   .0000277  -609.02   0.000    -.0169086   -.0168001
+                               3 3  |  -.0380896   .0000162 -2352.08   0.000    -.0381214   -.0380578
+                               3 4  |  -.0100641   .0000291  -345.30   0.000    -.0101213    -.010007
+                               4 1  |   .0433368   .0001381   313.74   0.000      .043066    .0436077
+                               4 2  |          0  (omitted)
+                               4 3  |          0  (omitted)
+                               4 4  |          0  (omitted)
+                                    |
+                              _cons |   7.319348   .0001448  5.1e+04   0.000     7.319064    7.319632
+-----------------------------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+---------------------------------------------------------------+
+           Absorbed FE | Categories  - Redundant  = Num. Coefs |
+-----------------------+---------------------------------------|
+         ID_geo_feNCha |     25053       25053           0    *|
+ huc8_year_month_feCha |     45084           0       45084     |
+---------------------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+Tab3_altonji_log_t_t_Value_clean2_ALL_1_cluster(huc10_state)ID_geo_feNCha_pre.xls
+dir : seeout
+
+. 
+. 
+. 
+. 
+. 
+. /*
+> /// import shales
+> capture drop _merge*
+> drop shale_play shale m_shale m_shale_huc4 basin
+> merge m:1 huc10_s using "G:\Dropbox (IESE)\Fracking Disclosure regulation project\1. data\shales_EPA
+> _huc10_link.dta", gen(_merge_shale)
+> *keep if _merge_shale==3
+> g shale = 1 if _merge_shale==3
+> replace shale = 0 if shale ==.
+> bysort huc8_s: egen m_shale = max(shale)
+> *keep if m_shale == 1
+> 
+> egen shale_play_group_shale = group(shale_play) // 29
+> bysort huc8_s: egen m_shale_play_group_shale = max(shale_play_group_shale) // 35,721 missing
+> replace shale_play_group_shale = m_shale_play_group_shale if shale_play_group_shale==. // 35,721 mis
+> sing
+>         egen shale_play_fe_sh = group(shale_play_group_shale)
+>         *egen shale_play_year_fe_sh = group(shale_play_group_shale date_string_year)
+>         *egen shale_play_month_fe_sh = group(shale_play_group_shale date_string_monthM)
+>         egen shale_play_month_year_fe_sh = group(shale_play_group_shale month date_string_year Ch)
+>         *egen shale_play_huc8_month_year_fe_sh = group(shale_play_group_shale huc8_s date_string_mon
+> thM date_string_year)
+>         *egen shale_play_huc4_month_year_fe_sh = group(shale_play_group_shale huc4_s date_string_mon
+> thM date_string_year)
+> 
+> egen shale_play_group = group(basin) // 26
+> bysort huc8_s: egen m_shale_play_group = max(shale_play_group) // 37,422 missing
+> replace shale_play_group = m_shale_play_group if shale_play_group==. //  35,721 missing
+>         egen shale_play_fe = group(shale_play_group)
+>         *egen shale_play_year_fe = group(shale_play_group date_string_year)
+>         *egen shale_play_month_fe = group(shale_play_group date_string_monthM)
+>         egen shale_play_month_year_feCha = group(shale_play_group month date_string_year Ch)
+>         *egen shale_play_huc8_month_year_fe = group(shale_play_group huc8_s date_string_monthM date_
+> string_year)
+>         *egen shale_play_huc4_month_year_fe = group(shale_play_group huc4_s date_string_monthM date_
+> string_year)
+> 
+>         
+> drop if shale_play_month_year_feCha     ==.
+> 
+> // SUR
+> local errors ""cluster(huc10_state)""
+> local Ys ""log_t_t_Value_clean2""
+> local fe ""ID_geo_feNCha""
+> local k ALL
+> local p 1
+> foreach y of local Ys {
+> foreach f of local fe {
+> foreach e of local errors {
+> 
+>         reghdfe `y' c.post_disc#c.T_HUC10_balanced`p'_`k' c.log_cum_prec_3days#i.group_items i.T_mea
+> n_D_5_groups#i.group_items if  T_HUC10_only_post ==0 & Treated_state == 1,  `e' absorb(`f' state_mon
+> th_year_feCha huc8_month_feCha)
+>                 outreg2 using Tab3_`y'_`k'_`p'_`e'`f'_pre.xls, /// * location of the file
+>                 keep(c.post_disc#c.T_HUC10_balanced`p'_`k') /// * Variables you want to display 
+>                 title ("ATE - `k' - `y'") ctitle("HF at least in Pre Disclosure period") ///
+>                 bracket bdec (4) sdec(4) append ///
+>                 addtext(Treated Sample, HUC10s with HF at least in pre, Control Sample, HUC10s with 
+> no HF in pre, Note, No HUC10 with HF only in post, Weather Controls, Yes, Monitoring FE, Yes, State*
+> Month*Year FE, Yes, HUC8*Month FE, Yes)
+>         reghdfe `y' c.post_disc#c.T_HUC10_balanced`p'_`k' c.log_cum_prec_3days#i.group_items i.T_mea
+> n_D_5_groups#i.group_items if  T_HUC10_only_post ==0 & Treated_state == 1, `e' absorb(`f' huc8_year_
+> month_feCha)
+>                 outreg2 using Tab3_`y'_`k'_`p'_`e'`f'_pre.xls, /// * location of the file
+>                 keep(c.post_disc#c.T_HUC10_balanced`p'_`k') /// * Variables you want to display
+>                 title ("ATE - `k' - `y'") ctitle("HF at least in Pre Disclosure period") ///
+>                 bracket bdec (4) sdec(4) append ///
+>                 addtext(Treated Sample, HUC10s with HF at least in pre, Control Sample, HUC10s with 
+> no HF in pre, Note, No HUC10 with HF only in post, Weather Controls, Yes, Monitoring FE, Yes, HUC8*M
+> onth*Year FE, Yes)
+> 
+> }
+> }
+> }
+
+end of do-file
+
+. do "G:\WP\Fracking Disclosure\ANALYSIS_DO_VERSION 2021\Analysis\Altonji.do"
+
+. ***********
+. * Table 3 *
+. ***********
+. 
+. cd "G:\Dropbox (IESE)\Fracking Disclosure regulation project\1. data"
+G:\Dropbox (IESE)\Fracking Disclosure regulation project\1. data
+
+. * use "DISC_TEMP_2020 OCT 2021 DEF B.dta", clear
+. use "DISC_TEMP_2020 OCT 2021 DEF B_ALL_STATES.dta", clear
+
+. 
+. // set directory
+. cd "G:\Dropbox (IESE)\Fracking Disclosure regulation project\6. results\RESULTS JAN 2022\Tab 3"
+G:\Dropbox (IESE)\Fracking Disclosure regulation project\6. results\RESULTS JAN 2022\Tab 3
+
+. 
+. 
+. merge m:1 StateCode year month using "G:\Dropbox (IESE)\Fracking Disclosure regulation project/2. co
+> de/zs/data/intermediate/ggsearch_for_Altonji_test_PB_DEF.dta", gen(_merge_altonji)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                       767,478
+        from master                   767,265  (_merge_altonji==1)
+        from using                        213  (_merge_altonji==2)
+
+    matched                           388,304  (_merge_altonji==3)
+    -----------------------------------------
+
+. drop if _merge_altonji==2
+(213 observations deleted)
+
+. 
+. bysort State: egen m_frack_start_def = max(frack_start_def)
+(636159 missing values generated)
+
+. replace fracking  = m_frack_start_def if date<=d(31dec2009) & fracking ==.
+(131,106 real changes made)
+
+. drop if _merge_altonji == 2
+(0 observations deleted)
+
+. 
+. /*
+> We provide a falsification test in the spirit of Altonji, Elder, and Taber (2005). 
+> 
+> We first estimate Model 3 in Table 2, but exclude the variables of interest (MAD and
+> TPD) and instead add several variables potentially capturing local factors to which lawmakers might 
+> respond
+> when implementing the two directives. Specifically, we include gross domestic savings, the net capit
+> al account,
+> portfolio equity inflows, annual growth in GDP per capita, yearly inflation, and five binary indicat
+> or variables
+> for the closeness to national elections in a country (for quarters t–4 to t =0 relative to the elect
+> ion quarter). 
+> 
+> We scale the raw variables by GDP and lag them by four quarters. Macroeconomic data are from the Wor
+> ld Bank
+> and the IMF, election dates are from the national archives.
+> 
+> We then use the predicted values from this first-stage regression as the dependent variable in our b
+> ase specification 
+> and report the MAD and TPD coefficients from this falsification test in the table. Insignificant coe
+> fficients indicate that local factors cannot 
+> explain the estimated effects obtained in Table 2.
+> */
+. 
+. 
+. // Stacked regression
+. // SUR
+. local errors ""cluster(huc10_state)""
+
+. local Ys ""log_t_t_Value_clean2""
+
+. local fe ""ID_geo_feNCha""
+
+. local k ALL
+
+. local p 1
+
+. foreach y of local Ys {
+  2. foreach f of local fe {
+  3. foreach e of local errors {
+  4. 
+.         reghdfe `y' c.fracking#c.T_HUC10_balanced`p'_`k' c.log_cum_prec_3days#i.group_items i.T_mean
+> _D_5_groups#i.group_items if  T_HUC10_only_post ==0 & Treated_state == 1 & m_cum_well_huc4_H_D == 1,
+>   `e' absorb(`f' state_month_year_feCha huc8_month_feCha)
+  5.         g sample_1 = e(sample)
+  6.         predict y_hat1 
+  7.         rename y_hat1 Y_altonji1
+  8.                 reghdfe Y_altonji1 c.post_disc#c.T_HUC10_balanced`p'_`k'  c.log_cum_prec_3days#i.
+> group_items i.T_mean_D_5_groups#i.group_items if  T_HUC10_only_post ==0 & Treated_state == 1 & sampl
+> e_1 == 1,  `e' absorb(`f' state_month_year_feCha huc8_month_feCha)
+  9.                 outreg2 using Tab3_altonji_.xls, /// * location of the file
+>                 keep(c.post_disc#c.T_HUC10_balanced`p'_`k' ) /// * Variables you want to display 
+>                 title ("ATE - `k' - `y'") ctitle("HF at least in Pre Disclosure period") ///
+>                 bracket bdec (4) sdec(4) replace ///
+>                 addtext(Treated Sample, HUC10s with HF at least in pre, Control Sample, HUC10s with 
+> no HF in pre, Note, No HUC10 with HF only in post, Weather Controls, Yes, Monitoring FE, Yes, State*
+> Month*Year FE, Yes, HUC8*Month FE, Yes)
+ 10. 
+.         reghdfe `y' c.fracking#c.T_HUC10_balanced`p'_`k' c.log_cum_prec_3days#i.group_items i.T_mean
+> _D_5_groups#i.group_items if  T_HUC10_only_post ==0 & Treated_state == 1 & m_cum_well_huc4_H_D == 1,
+>  `e' absorb(`f' huc8_year_month_feCha)
+ 11.         g sample_2 = e(sample)
+ 12.         predict y_hat2
+ 13.         rename y_hat2 Y_altonji2
+ 14. 
+.         reghdfe Y_altonji2 c.post_disc#c.T_HUC10_balanced`p'_`k'  c.log_cum_prec_3days#i.group_items
+>  i.T_mean_D_5_groups#i.group_items if  T_HUC10_only_post ==0 & Treated_state == 1 & sample_2 == 1, `
+> e' absorb(`f' huc8_year_month_feCha)
+ 15.                 outreg2 using Tab3_altonji_.xls, /// * location of the file
+>                 keep(c.post_disc#c.T_HUC10_balanced`p'_`k' ) /// * Variables you want to display
+>                 title ("ATE - `k' - `y'") ctitle("HF at least in Pre Disclosure period") ///
+>                 bracket bdec (4) sdec(4) append ///
+>                 addtext(Treated Sample, HUC10s with HF at least in pre, Control Sample, HUC10s with 
+> no HF in pre, Note, No HUC10 with HF only in post, Weather Controls, Yes, Monitoring FE, Yes, HUC8*M
+> onth*Year FE, Yes)
+ 16. 
+. }
+ 17. }
+ 18. }
+(dropped 14345 singleton observations)
+(MWFE estimator converged in 260 iterations)
+note: 4.T_mean_D_5_groups#2.group_items omitted because of collinearity
+note: 4.T_mean_D_5_groups#3.group_items omitted because of collinearity
+note: 4.T_mean_D_5_groups#4.group_items omitted because of collinearity
+
+HDFE Linear regression                            Number of obs   =    325,351
+Absorbing 3 HDFE groups                           F(  21,   2228) =      26.04
+Statistics robust to heteroskedasticity           Prob > F        =     0.0000
+                                                  R-squared       =     0.9606
+                                                  Adj R-squared   =     0.9548
+                                                  Within R-sq.    =     0.0064
+Number of clusters (huc10_state) =      2,229     Root MSE        =     0.6586
+
+                                              (Std. Err. adjusted for 2,229 clusters in huc10_state)
+----------------------------------------------------------------------------------------------------
+                                   |               Robust
+              log_t_t_Value_clean2 |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-----------------------------------+----------------------------------------------------------------
+c.fracking#c.T_HUC10_balanced1_ALL |  -.0011086   .0003657    -3.03   0.002    -.0018257   -.0003916
+                                   |
+  group_items#c.log_cum_prec_3days |
+                                1  |   .0242801   .0031139     7.80   0.000     .0181737    .0303865
+                                2  |  -.0786049   .0097425    -8.07   0.000    -.0977102   -.0594997
+                                3  |  -.0559274   .0040144   -13.93   0.000    -.0637998    -.048055
+                                4  |  -.0666606   .0044934   -14.84   0.000    -.0754724   -.0578488
+                                   |
+     T_mean_D_5_groups#group_items |
+                              0 2  |  -.2106437   .2990205    -0.70   0.481    -.7970317    .3757443
+                              0 3  |   .0658103   .0367701     1.79   0.074    -.0062969    .1379174
+                              0 4  |   .0866999   .0266498     3.25   0.001     .0344387     .138961
+                              1 1  |  -.0505159   .0312083    -1.62   0.106    -.1117162    .0106845
+                              1 2  |  -.0437591    .041036    -1.07   0.286    -.1242318    .0367136
+                              1 3  |  -.0055224   .0160522    -0.34   0.731    -.0370013    .0259565
+                              1 4  |  -.0107396   .0166323    -0.65   0.519    -.0433559    .0218768
+                              2 1  |  -.0052358   .0322961    -0.16   0.871    -.0685693    .0580978
+                              2 2  |  -.0501612   .0287742    -1.74   0.081    -.1065883    .0062659
+                              2 3  |  -.0386497   .0134152    -2.88   0.004    -.0649573   -.0123422
+                              2 4  |  -.0305774   .0139625    -2.19   0.029    -.0579584   -.0031965
+                              3 1  |   .0291546   .0332788     0.88   0.381    -.0361061    .0944153
+                              3 2  |  -.0333343   .0202653    -1.64   0.100    -.0730752    .0064066
+                              3 3  |   -.032742   .0096276    -3.40   0.001    -.0516219   -.0138621
+                              3 4  |  -.0049917   .0115518    -0.43   0.666    -.0276451    .0176617
+                              4 1  |    .045738   .0349794     1.31   0.191    -.0228575    .1143336
+                              4 2  |          0  (omitted)
+                              4 3  |          0  (omitted)
+                              4 4  |          0  (omitted)
+                                   |
+                             _cons |   7.307014   .0106752   684.48   0.000      7.28608    7.327949
+----------------------------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+----------------------------------------------------------------+
+            Absorbed FE | Categories  - Redundant  = Num. Coefs |
+------------------------+---------------------------------------|
+          ID_geo_feNCha |     25854       25854           0    *|
+ state_month_year_feCha |      5945           0        5945     |
+       huc8_month_feCha |     10740         382       10358     |
+----------------------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+(option xb assumed; fitted values)
+(636,728 missing values generated)
+(MWFE estimator converged in 254 iterations)
+note: 4.T_mean_D_5_groups#2.group_items omitted because of collinearity
+note: 4.T_mean_D_5_groups#3.group_items omitted because of collinearity
+note: 4.T_mean_D_5_groups#4.group_items omitted because of collinearity
+
+HDFE Linear regression                            Number of obs   =    325,351
+Absorbing 3 HDFE groups                           F(  21,   2228) =  984610.38
+Statistics robust to heteroskedasticity           Prob > F        =     0.0000
+                                                  R-squared       =     0.9963
+                                                  Adj R-squared   =     0.9957
+                                                  Within R-sq.    =     0.9849
+Number of clusters (huc10_state) =      2,229     Root MSE        =     0.0065
+
+                                               (Std. Err. adjusted for 2,229 clusters in huc10_state)
+-----------------------------------------------------------------------------------------------------
+                                    |               Robust
+                         Y_altonji1 |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+------------------------------------+----------------------------------------------------------------
+c.post_disc#c.T_HUC10_balanced1_ALL |  -.0244766   .0010188   -24.03   0.000    -.0264745   -.0224788
+                                    |
+   group_items#c.log_cum_prec_3days |
+                                 1  |   .0242339   .0000407   595.49   0.000     .0241541    .0243137
+                                 2  |  -.0786886   .0000725 -1085.24   0.000    -.0788308   -.0785464
+                                 3  |  -.0559028   .0000245 -2283.09   0.000    -.0559508   -.0558547
+                                 4  |  -.0667826   .0000532 -1255.17   0.000     -.066887   -.0666783
+                                    |
+      T_mean_D_5_groups#group_items |
+                               0 2  |  -.2096197   .0008445  -248.22   0.000    -.2112758   -.2079636
+                               0 3  |   .0664219   .0003371   197.01   0.000     .0657608    .0670831
+                               0 4  |   .0860654   .0006731   127.87   0.000     .0847455    .0873853
+                               1 1  |  -.0512308    .000394  -130.02   0.000    -.0520035   -.0504581
+                               1 2  |   -.042088   .0005677   -74.14   0.000    -.0432013   -.0409747
+                               1 3  |  -.0054796    .000184   -29.79   0.000    -.0058403   -.0051188
+                               1 4  |  -.0111817   .0003811   -29.34   0.000     -.011929   -.0104344
+                               2 1  |  -.0056465   .0004299   -13.13   0.000    -.0064895   -.0048035
+                               2 2  |  -.0491968   .0004129  -119.15   0.000    -.0500065   -.0483871
+                               2 3  |  -.0387479   .0001408  -275.15   0.000     -.039024   -.0384717
+                               2 4  |   -.030784   .0002544  -121.02   0.000    -.0312828   -.0302852
+                               3 1  |   .0285054   .0004598    61.99   0.000     .0276037    .0294071
+                               3 2  |  -.0333615   .0002328  -143.33   0.000    -.0338179    -.032905
+                               3 3  |  -.0329531   .0000923  -357.15   0.000     -.033134   -.0327721
+                               3 4  |  -.0054368   .0001885   -28.85   0.000    -.0058064   -.0050672
+                               4 1  |   .0453727   .0004826    94.03   0.000     .0444264     .046319
+                               4 2  |          0  (omitted)
+                               4 3  |          0  (omitted)
+                               4 4  |          0  (omitted)
+                                    |
+                              _cons |   7.303515   .0002423  3.0e+04   0.000      7.30304    7.303991
+-----------------------------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+----------------------------------------------------------------+
+            Absorbed FE | Categories  - Redundant  = Num. Coefs |
+------------------------+---------------------------------------|
+          ID_geo_feNCha |     25854       25854           0    *|
+ state_month_year_feCha |      5945           0        5945     |
+       huc8_month_feCha |     10740         382       10358     |
+----------------------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+Tab3_altonji_.xls
+dir : seeout
+(dropped 36309 singleton observations)
+(MWFE estimator converged in 124 iterations)
+note: 4.T_mean_D_5_groups#2.group_items omitted because of collinearity
+note: 4.T_mean_D_5_groups#3.group_items omitted because of collinearity
+note: 4.T_mean_D_5_groups#4.group_items omitted because of collinearity
+
+HDFE Linear regression                            Number of obs   =    303,387
+Absorbing 2 HDFE groups                           F(  21,   2121) =      15.96
+Statistics robust to heteroskedasticity           Prob > F        =     0.0000
+                                                  R-squared       =     0.9712
+                                                  Adj R-squared   =     0.9626
+                                                  Within R-sq.    =     0.0061
+Number of clusters (huc10_state) =      2,122     Root MSE        =     0.5967
+
+                                              (Std. Err. adjusted for 2,122 clusters in huc10_state)
+----------------------------------------------------------------------------------------------------
+                                   |               Robust
+              log_t_t_Value_clean2 |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-----------------------------------+----------------------------------------------------------------
+c.fracking#c.T_HUC10_balanced1_ALL |  -.0002987   .0004653    -0.64   0.521    -.0012111    .0006137
+                                   |
+  group_items#c.log_cum_prec_3days |
+                                1  |   .0227162   .0043918     5.17   0.000     .0141036    .0313289
+                                2  |  -.0879994   .0129851    -6.78   0.000    -.1134642   -.0625346
+                                3  |  -.0580993   .0047083   -12.34   0.000    -.0673326    -.048866
+                                4  |  -.0697176   .0060244   -11.57   0.000    -.0815319   -.0579032
+                                   |
+     T_mean_D_5_groups#group_items |
+                              0 2  |   .0282395   .0969867     0.29   0.771    -.1619595    .2184384
+                              0 3  |   .0471586   .0436998     1.08   0.281    -.0385403    .1328576
+                              0 4  |   .0248888   .0367695     0.68   0.499    -.0472193    .0969969
+                              1 1  |  -.0637378   .0566146    -1.13   0.260    -.1747638    .0472881
+                              1 2  |  -.0419819   .0482388    -0.87   0.384    -.1365822    .0526183
+                              1 3  |  -.0157774   .0203916    -0.77   0.439    -.0557671    .0242122
+                              1 4  |  -.0239318   .0196923    -1.22   0.224    -.0625499    .0146864
+                              2 1  |   -.014849   .0578512    -0.26   0.797       -.1283    .0986021
+                              2 2  |   -.040005   .0270689    -1.48   0.140    -.0930893    .0130793
+                              2 3  |   -.049942   .0164554    -3.03   0.002    -.0822123   -.0176716
+                              2 4  |  -.0290585   .0180498    -1.61   0.108    -.0644557    .0063387
+                              3 1  |   .0171319   .0606546     0.28   0.778    -.1018169    .1360807
+                              3 2  |  -.0168253   .0228665    -0.74   0.462    -.0616683    .0280178
+                              3 3  |  -.0380579   .0126558    -3.01   0.003     -.062877   -.0132387
+                              3 4  |  -.0100693     .01423    -0.71   0.479    -.0379756    .0178369
+                              4 1  |   .0437389    .061734     0.71   0.479    -.0773267    .1648045
+                              4 2  |          0  (omitted)
+                              4 3  |          0  (omitted)
+                              4 4  |          0  (omitted)
+                                   |
+                             _cons |   7.320322   .0161893   452.17   0.000     7.288573     7.35207
+----------------------------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+---------------------------------------------------------------+
+           Absorbed FE | Categories  - Redundant  = Num. Coefs |
+-----------------------+---------------------------------------|
+         ID_geo_feNCha |     25053       25053           0    *|
+ huc8_year_month_feCha |     45084           0       45084     |
+---------------------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+(option xb assumed; fitted values)
+(636,728 missing values generated)
+(MWFE estimator converged in 128 iterations)
+note: 4.T_mean_D_5_groups#2.group_items omitted because of collinearity
+note: 4.T_mean_D_5_groups#3.group_items omitted because of collinearity
+note: 4.T_mean_D_5_groups#4.group_items omitted because of collinearity
+
+HDFE Linear regression                            Number of obs   =    303,387
+Absorbing 2 HDFE groups                           F(  21,   2121) =   6.01e+07
+Statistics robust to heteroskedasticity           Prob > F        =     0.0000
+                                                  R-squared       =     0.9999
+                                                  Adj R-squared   =     0.9999
+                                                  Within R-sq.    =     0.9995
+Number of clusters (huc10_state) =      2,122     Root MSE        =     0.0010
+
+                                               (Std. Err. adjusted for 2,122 clusters in huc10_state)
+-----------------------------------------------------------------------------------------------------
+                                    |               Robust
+                         Y_altonji2 |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+------------------------------------+----------------------------------------------------------------
+c.post_disc#c.T_HUC10_balanced1_ALL |  -.0064987   .0006537    -9.94   0.000    -.0077807   -.0052168
+                                    |
+   group_items#c.log_cum_prec_3days |
+                                 1  |    .022724   6.86e-06  3311.36   0.000     .0227105    .0227374
+                                 2  |  -.0879952   4.80e-06 -1.8e+04   0.000    -.0880046   -.0879857
+                                 3  |  -.0580912   4.03e-06 -1.4e+04   0.000    -.0580991   -.0580833
+                                 4  |   -.069708   .0000115 -6048.24   0.000    -.0697306   -.0696854
+                                    |
+      T_mean_D_5_groups#group_items |
+                               0 2  |   .0281503    .000069   408.24   0.000     .0280151    .0282855
+                               0 3  |   .0473212   .0000689   686.91   0.000     .0471861    .0474563
+                               0 4  |   .0249898   .0001216   205.45   0.000     .0247513    .0252284
+                               1 1  |  -.0641549   .0001207  -531.71   0.000    -.0643915   -.0639183
+                               1 2  |   -.042027   .0000374 -1124.39   0.000    -.0421003   -.0419537
+                               1 3  |  -.0158035   .0000312  -505.76   0.000    -.0158648   -.0157422
+                               1 4  |  -.0239301   .0000621  -385.64   0.000    -.0240518   -.0238084
+                               2 1  |  -.0152961   .0001286  -118.99   0.000    -.0155482    -.015044
+                               2 2  |   -.040044   .0000374 -1070.69   0.000    -.0401174   -.0399707
+                               2 3  |  -.0499838   .0000388 -1287.10   0.000    -.0500599   -.0499076
+                               2 4  |  -.0290746   .0000437  -665.28   0.000    -.0291603   -.0289889
+                               3 1  |   .0166878   .0001335   125.00   0.000      .016426    .0169496
+                               3 2  |  -.0168544   .0000277  -609.02   0.000    -.0169086   -.0168001
+                               3 3  |  -.0380896   .0000162 -2352.08   0.000    -.0381214   -.0380578
+                               3 4  |  -.0100641   .0000291  -345.30   0.000    -.0101213    -.010007
+                               4 1  |   .0433368   .0001381   313.74   0.000      .043066    .0436077
+                               4 2  |          0  (omitted)
+                               4 3  |          0  (omitted)
+                               4 4  |          0  (omitted)
+                                    |
+                              _cons |   7.319348   .0001448  5.1e+04   0.000     7.319064    7.319632
+-----------------------------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+---------------------------------------------------------------+
+           Absorbed FE | Categories  - Redundant  = Num. Coefs |
+-----------------------+---------------------------------------|
+         ID_geo_feNCha |     25053       25053           0    *|
+ huc8_year_month_feCha |     45084           0       45084     |
+---------------------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+Tab3_altonji_.xls
+dir : seeout
+
+. 
+. /// import shales
+> capture drop _merge*
+
+. drop shale_play shale m_shale m_shale_huc4 basin
+
+. merge m:1 huc10_s using "G:\Dropbox (IESE)\Fracking Disclosure regulation project\1. data\shales_EPA
+> _huc10_link.dta", gen(_merge_shale)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                       917,239
+        from master                   916,464  (_merge_shale==1)
+        from using                        775  (_merge_shale==2)
+
+    matched                           239,105  (_merge_shale==3)
+    -----------------------------------------
+
+. *keep if _merge_shale==3
+. g shale = 1 if _merge_shale==3
+(917,239 missing values generated)
+
+. replace shale = 0 if shale ==.
+(917,239 real changes made)
+
+. bysort huc8_s: egen m_shale = max(shale)
+
+. *keep if m_shale == 1
+. 
+. egen shale_play_group_shale = group(shale_play) // 29
+(916464 missing values generated)
+
+. bysort huc8_s: egen m_shale_play_group_shale = max(shale_play_group_shale) // 35,721 missing
+(843818 missing values generated)
+
+. replace shale_play_group_shale = m_shale_play_group_shale if shale_play_group_shale==. // 35,721 mis
+> sing
+(72,646 real changes made)
+
+.         egen shale_play_fe_sh = group(shale_play_group_shale)
+(843818 missing values generated)
+
+.         *egen shale_play_year_fe_sh = group(shale_play_group_shale date_string_year)
+.         *egen shale_play_month_fe_sh = group(shale_play_group_shale date_string_monthM)
+.         egen shale_play_month_year_fe_sh = group(shale_play_group_shale month date_string_year Ch)
+(844593 missing values generated)
+
+.         *egen shale_play_huc8_month_year_fe_sh = group(shale_play_group_shale huc8_s date_string_mon
+> thM date_string_year)
+.         *egen shale_play_huc4_month_year_fe_sh = group(shale_play_group_shale huc4_s date_string_mon
+> thM date_string_year)
+. 
+. egen shale_play_group = group(basin) // 26
+(916464 missing values generated)
+
+. bysort huc8_s: egen m_shale_play_group = max(shale_play_group) // 37,422 missing
+(843818 missing values generated)
+
+. replace shale_play_group = m_shale_play_group if shale_play_group==. //  35,721 missing
+(72,646 real changes made)
+
+.         egen shale_play_fe = group(shale_play_group)
+(843818 missing values generated)
+
+.         *egen shale_play_year_fe = group(shale_play_group date_string_year)
+.         *egen shale_play_month_fe = group(shale_play_group date_string_monthM)
+.         egen shale_play_month_year_feCha = group(shale_play_group month date_string_year Ch)
+(844593 missing values generated)
+
+.         *egen shale_play_huc8_month_year_fe = group(shale_play_group huc8_s date_string_monthM date_
+> string_year)
+.         *egen shale_play_huc4_month_year_fe = group(shale_play_group huc4_s date_string_monthM date_
+> string_year)
+. 
+.         
+. drop if shale_play_month_year_feCha     ==.
+(844,593 observations deleted)
+
+. 
+. // SUR
+. local errors ""cluster(huc10_state)""
+
+. local Ys ""log_t_t_Value_clean2""
+
+. local fe ""ID_geo_feNCha""
+
+. local k ALL
+
+. local p 1
+
+. foreach y of local Ys {
+  2. foreach f of local fe {
+  3. foreach e of local errors {
+  4. 
+. 
+.         reghdfe `y' c.fracking#c.T_HUC10_balanced`p'_`k' c.log_cum_prec_3days#i.group_items i.T_mean
+> _D_5_groups#i.group_items if  T_HUC10_only_post ==0 & Treated_state == 1 & m_cum_well_huc4_H_D == 1,
+>   `e' absorb(`f' state_month_year_feCha huc8_month_feCha)
+  5.         g sample_1 = e(sample)
+  6.         predict y_hat1 
+  7.         rename y_hat1 Y_altonji1
+  8.                 reghdfe Y_altonji1 c.post_disc#c.T_HUC10_balanced`p'_`k'  c.log_cum_prec_3days#i.
+> group_items i.T_mean_D_5_groups#i.group_items if  T_HUC10_only_post ==0 & Treated_state == 1 & sampl
+> e_1 == 1,  `e' absorb(`f' state_month_year_feCha huc8_month_feCha)
+  9.                 outreg2 using Tab3_altonji_.xls, /// * location of the file
+>                 keep(c.post_disc#c.T_HUC10_balanced`p'_`k' ) /// * Variables you want to display 
+>                 title ("ATE - `k' - `y'") ctitle("HF at least in Pre Disclosure period") ///
+>                 bracket bdec (4) sdec(4) append ///
+>                 addtext(Treated Sample, HUC10s with HF at least in pre, Control Sample, HUC10s with 
+> no HF in pre, Note, No HUC10 with HF only in post, Weather Controls, Yes, Monitoring FE, Yes, State*
+> Month*Year FE, Yes, HUC8*Month FE, Yes)
+ 10. 
+.         reghdfe `y' c.fracking#c.T_HUC10_balanced`p'_`k' c.log_cum_prec_3days#i.group_items i.T_mean
+> _D_5_groups#i.group_items if  T_HUC10_only_post ==0 & Treated_state == 1 & m_cum_well_huc4_H_D == 1,
+>  `e' absorb(`f' huc8_year_month_feCha)
+ 11.         g sample_2 = e(sample)
+ 12.         predict y_hat2
+ 13.         rename y_hat2 Y_altonji2
+ 14. 
+.         reghdfe Y_altonji2 c.post_disc#c.T_HUC10_balanced`p'_`k'  c.log_cum_prec_3days#i.group_items
+>  i.T_mean_D_5_groups#i.group_items if  T_HUC10_only_post ==0 & Treated_state == 1 & sample_2 == 1, `
+> e' absorb(`f' huc8_year_month_feCha)
+ 15.                 outreg2 using Tab3_altonji_.xls, /// * location of the file
+>                 keep(c.post_disc#c.T_HUC10_balanced`p'_`k' ) /// * Variables you want to display
+>                 title ("ATE - `k' - `y'") ctitle("HF at least in Pre Disclosure period") ///
+>                 bracket bdec (4) sdec(4) append ///
+>                 addtext(Treated Sample, HUC10s with HF at least in pre, Control Sample, HUC10s with 
+> no HF in pre, Note, No HUC10 with HF only in post, Weather Controls, Yes, Monitoring FE, Yes, HUC8*M
+> onth*Year FE, Yes)
+ 16. 
+. }
+ 17. }
+ 18. }
+(dropped 11032 singleton observations)
+(MWFE estimator converged in 245 iterations)
+note: 4.T_mean_D_5_groups#2.group_items omitted because of collinearity
+note: 4.T_mean_D_5_groups#3.group_items omitted because of collinearity
+note: 4.T_mean_D_5_groups#4.group_items omitted because of collinearity
+
+HDFE Linear regression                            Number of obs   =    211,273
+Absorbing 3 HDFE groups                           F(  21,   1439) =      17.91
+Statistics robust to heteroskedasticity           Prob > F        =     0.0000
+                                                  R-squared       =     0.9617
+                                                  Adj R-squared   =     0.9552
+                                                  Within R-sq.    =     0.0042
+Number of clusters (huc10_state) =      1,440     Root MSE        =     0.6605
+
+                                              (Std. Err. adjusted for 1,440 clusters in huc10_state)
+----------------------------------------------------------------------------------------------------
+                                   |               Robust
+              log_t_t_Value_clean2 |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-----------------------------------+----------------------------------------------------------------
+c.fracking#c.T_HUC10_balanced1_ALL |  -.0009208   .0004512    -2.04   0.041     -.001806   -.0000357
+                                   |
+  group_items#c.log_cum_prec_3days |
+                                1  |    .023901   .0036534     6.54   0.000     .0167344    .0310676
+                                2  |   -.077943    .010841    -7.19   0.000    -.0992088   -.0566771
+                                3  |  -.0441414   .0044855    -9.84   0.000    -.0529402   -.0353426
+                                4  |  -.0608835   .0043044   -14.14   0.000    -.0693272   -.0524399
+                                   |
+     T_mean_D_5_groups#group_items |
+                              0 2  |   -.277532   .3335207    -0.83   0.405    -.9317709    .3767069
+                              0 3  |   .0455261   .0429891     1.06   0.290     -.038802    .1298541
+                              0 4  |   .0715324   .0279563     2.56   0.011     .0166929     .126372
+                              1 1  |  -.0562501   .0353255    -1.59   0.112    -.1255452    .0130449
+                              1 2  |  -.0478147   .0685073    -0.70   0.485    -.1821996    .0865702
+                              1 3  |   .0060804   .0226585     0.27   0.788    -.0383669    .0505277
+                              1 4  |  -.0101092      .0179    -0.56   0.572    -.0452221    .0250038
+                              2 1  |  -.0073535   .0362605    -0.20   0.839    -.0784827    .0637756
+                              2 2  |  -.0223794    .051159    -0.44   0.662    -.1227335    .0779747
+                              2 3  |  -.0177109   .0192906    -0.92   0.359    -.0555515    .0201298
+                              2 4  |  -.0278564   .0148878    -1.87   0.062    -.0570604    .0013477
+                              3 1  |   .0275692   .0382947     0.72   0.472    -.0475502    .1026886
+                              3 2  |  -.0235931   .0378091    -0.62   0.533      -.09776    .0505737
+                              3 3  |  -.0220865   .0121359    -1.82   0.069    -.0458926    .0017195
+                              3 4  |  -.0053112   .0125287    -0.42   0.672    -.0298877    .0192653
+                              4 1  |   .0441991   .0411578     1.07   0.283    -.0365366    .1249348
+                              4 2  |          0  (omitted)
+                              4 3  |          0  (omitted)
+                              4 4  |          0  (omitted)
+                                   |
+                             _cons |   6.974741   .0133548   522.26   0.000     6.948544    7.000938
+----------------------------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+----------------------------------------------------------------+
+            Absorbed FE | Categories  - Redundant  = Num. Coefs |
+------------------------+---------------------------------------|
+          ID_geo_feNCha |     18469       18469           0    *|
+ state_month_year_feCha |      5480           0        5480     |
+       huc8_month_feCha |      7001         381        6620     |
+----------------------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+variable sample_1 already defined
+r(110);
+
+end of do-file
+
+r(110);
+
+. do "C:\Users\PBonetti\AppData\Local\Temp\STD385c_000000.tmp"
+
+. drop sample_1 sample_2 Y_altonji1 Y_altonji2
+
+. 
+. // SUR
+. local errors ""cluster(huc10_state)""
+
+. local Ys ""log_t_t_Value_clean2""
+
+. local fe ""ID_geo_feNCha""
+
+. local k ALL
+
+. local p 1
+
+. foreach y of local Ys {
+  2. foreach f of local fe {
+  3. foreach e of local errors {
+  4. 
+. 
+.         reghdfe `y' c.fracking#c.T_HUC10_balanced`p'_`k' c.log_cum_prec_3days#i.group_items i.T_mean
+> _D_5_groups#i.group_items if  T_HUC10_only_post ==0 & Treated_state == 1 & m_cum_well_huc4_H_D == 1,
+>   `e' absorb(`f' state_month_year_feCha huc8_month_feCha)
+  5.         g sample_1 = e(sample)
+  6.         predict y_hat1 
+  7.         rename y_hat1 Y_altonji1
+  8.                 reghdfe Y_altonji1 c.post_disc#c.T_HUC10_balanced`p'_`k'  c.log_cum_prec_3days#i.
+> group_items i.T_mean_D_5_groups#i.group_items if  T_HUC10_only_post ==0 & Treated_state == 1 & sampl
+> e_1 == 1,  `e' absorb(`f' state_month_year_feCha huc8_month_feCha)
+  9.                 outreg2 using Tab3_altonji_.xls, /// * location of the file
+>                 keep(c.post_disc#c.T_HUC10_balanced`p'_`k' ) /// * Variables you want to display 
+>                 title ("ATE - `k' - `y'") ctitle("HF at least in Pre Disclosure period") ///
+>                 bracket bdec (4) sdec(4) append ///
+>                 addtext(Treated Sample, HUC10s with HF at least in pre, Control Sample, HUC10s with 
+> no HF in pre, Note, No HUC10 with HF only in post, Weather Controls, Yes, Monitoring FE, Yes, State*
+> Month*Year FE, Yes, HUC8*Month FE, Yes)
+ 10. 
+.         reghdfe `y' c.fracking#c.T_HUC10_balanced`p'_`k' c.log_cum_prec_3days#i.group_items i.T_mean
+> _D_5_groups#i.group_items if  T_HUC10_only_post ==0 & Treated_state == 1 & m_cum_well_huc4_H_D == 1,
+>  `e' absorb(`f' huc8_year_month_feCha)
+ 11.         g sample_2 = e(sample)
+ 12.         predict y_hat2
+ 13.         rename y_hat2 Y_altonji2
+ 14. 
+.         reghdfe Y_altonji2 c.post_disc#c.T_HUC10_balanced`p'_`k'  c.log_cum_prec_3days#i.group_items
+>  i.T_mean_D_5_groups#i.group_items if  T_HUC10_only_post ==0 & Treated_state == 1 & sample_2 == 1, `
+> e' absorb(`f' huc8_year_month_feCha)
+ 15.                 outreg2 using Tab3_altonji_.xls, /// * location of the file
+>                 keep(c.post_disc#c.T_HUC10_balanced`p'_`k' ) /// * Variables you want to display
+>                 title ("ATE - `k' - `y'") ctitle("HF at least in Pre Disclosure period") ///
+>                 bracket bdec (4) sdec(4) append ///
+>                 addtext(Treated Sample, HUC10s with HF at least in pre, Control Sample, HUC10s with 
+> no HF in pre, Note, No HUC10 with HF only in post, Weather Controls, Yes, Monitoring FE, Yes, HUC8*M
+> onth*Year FE, Yes)
+ 16. 
+. }
+ 17. }
+ 18. }
+(dropped 11032 singleton observations)
+(MWFE estimator converged in 245 iterations)
+note: 4.T_mean_D_5_groups#2.group_items omitted because of collinearity
+note: 4.T_mean_D_5_groups#3.group_items omitted because of collinearity
+note: 4.T_mean_D_5_groups#4.group_items omitted because of collinearity
+
+HDFE Linear regression                            Number of obs   =    211,273
+Absorbing 3 HDFE groups                           F(  21,   1439) =      17.91
+Statistics robust to heteroskedasticity           Prob > F        =     0.0000
+                                                  R-squared       =     0.9617
+                                                  Adj R-squared   =     0.9552
+                                                  Within R-sq.    =     0.0042
+Number of clusters (huc10_state) =      1,440     Root MSE        =     0.6605
+
+                                              (Std. Err. adjusted for 1,440 clusters in huc10_state)
+----------------------------------------------------------------------------------------------------
+                                   |               Robust
+              log_t_t_Value_clean2 |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-----------------------------------+----------------------------------------------------------------
+c.fracking#c.T_HUC10_balanced1_ALL |  -.0009208   .0004512    -2.04   0.041     -.001806   -.0000357
+                                   |
+  group_items#c.log_cum_prec_3days |
+                                1  |    .023901   .0036534     6.54   0.000     .0167344    .0310676
+                                2  |   -.077943    .010841    -7.19   0.000    -.0992088   -.0566771
+                                3  |  -.0441414   .0044855    -9.84   0.000    -.0529402   -.0353426
+                                4  |  -.0608835   .0043044   -14.14   0.000    -.0693272   -.0524399
+                                   |
+     T_mean_D_5_groups#group_items |
+                              0 2  |   -.277532   .3335207    -0.83   0.405    -.9317709    .3767069
+                              0 3  |   .0455261   .0429891     1.06   0.290     -.038802    .1298541
+                              0 4  |   .0715324   .0279563     2.56   0.011     .0166929     .126372
+                              1 1  |  -.0562501   .0353255    -1.59   0.112    -.1255452    .0130449
+                              1 2  |  -.0478147   .0685073    -0.70   0.485    -.1821996    .0865702
+                              1 3  |   .0060804   .0226585     0.27   0.788    -.0383669    .0505277
+                              1 4  |  -.0101092      .0179    -0.56   0.572    -.0452221    .0250038
+                              2 1  |  -.0073535   .0362605    -0.20   0.839    -.0784827    .0637756
+                              2 2  |  -.0223794    .051159    -0.44   0.662    -.1227335    .0779747
+                              2 3  |  -.0177109   .0192906    -0.92   0.359    -.0555515    .0201298
+                              2 4  |  -.0278564   .0148878    -1.87   0.062    -.0570604    .0013477
+                              3 1  |   .0275692   .0382947     0.72   0.472    -.0475502    .1026886
+                              3 2  |  -.0235931   .0378091    -0.62   0.533      -.09776    .0505737
+                              3 3  |  -.0220865   .0121359    -1.82   0.069    -.0458926    .0017195
+                              3 4  |  -.0053112   .0125287    -0.42   0.672    -.0298877    .0192653
+                              4 1  |   .0441991   .0411578     1.07   0.283    -.0365366    .1249348
+                              4 2  |          0  (omitted)
+                              4 3  |          0  (omitted)
+                              4 4  |          0  (omitted)
+                                   |
+                             _cons |   6.974741   .0133548   522.26   0.000     6.948544    7.000938
+----------------------------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+----------------------------------------------------------------+
+            Absorbed FE | Categories  - Redundant  = Num. Coefs |
+------------------------+---------------------------------------|
+          ID_geo_feNCha |     18469       18469           0    *|
+ state_month_year_feCha |      5480           0        5480     |
+       huc8_month_feCha |      7001         381        6620     |
+----------------------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+(option xb assumed; fitted values)
+(54,349 missing values generated)
+(MWFE estimator converged in 238 iterations)
+note: 4.T_mean_D_5_groups#2.group_items omitted because of collinearity
+note: 4.T_mean_D_5_groups#3.group_items omitted because of collinearity
+note: 4.T_mean_D_5_groups#4.group_items omitted because of collinearity
+
+HDFE Linear regression                            Number of obs   =    211,273
+Absorbing 3 HDFE groups                           F(  21,   1439) =  771587.53
+Statistics robust to heteroskedasticity           Prob > F        =     0.0000
+                                                  R-squared       =     0.9962
+                                                  Adj R-squared   =     0.9956
+                                                  Within R-sq.    =     0.9819
+Number of clusters (huc10_state) =      1,440     Root MSE        =     0.0058
+
+                                               (Std. Err. adjusted for 1,440 clusters in huc10_state)
+-----------------------------------------------------------------------------------------------------
+                                    |               Robust
+                         Y_altonji1 |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+------------------------------------+----------------------------------------------------------------
+c.post_disc#c.T_HUC10_balanced1_ALL |  -.0193547   .0009272   -20.87   0.000    -.0211736   -.0175358
+                                    |
+   group_items#c.log_cum_prec_3days |
+                                 1  |   .0238655   .0000427   558.36   0.000     .0237817    .0239494
+                                 2  |  -.0780399   .0000746 -1045.68   0.000    -.0781863   -.0778935
+                                 3  |  -.0441156   .0000295 -1494.60   0.000    -.0441735   -.0440577
+                                 4  |  -.0609558    .000047 -1295.85   0.000    -.0610481   -.0608635
+                                    |
+      T_mean_D_5_groups#group_items |
+                               0 2  |  -.2770174   .0007536  -367.59   0.000    -.2784956   -.2755391
+                               0 3  |   .0455956   .0003581   127.33   0.000     .0448932     .046298
+                               0 4  |   .0706685   .0005547   127.39   0.000     .0695803    .0717567
+                               1 1  |  -.0569337   .0003586  -158.76   0.000    -.0576372   -.0562303
+                               1 2  |  -.0468575   .0005096   -91.95   0.000    -.0478572   -.0458578
+                               1 3  |   .0056068   .0002135    26.26   0.000     .0051879    .0060257
+                               1 4  |   -.010792   .0003263   -33.08   0.000     -.011432    -.010152
+                               2 1  |  -.0077936   .0004056   -19.22   0.000    -.0085892    -.006998
+                               2 2  |  -.0215178   .0004554   -47.25   0.000    -.0224111   -.0206245
+                               2 3  |   -.018069   .0001921   -94.08   0.000    -.0184457   -.0176922
+                               2 4  |  -.0281963   .0002269  -124.25   0.000    -.0286415   -.0277512
+                               3 1  |   .0269449   .0004376    61.57   0.000     .0260864    .0278033
+                               3 2  |  -.0234321    .000277   -84.58   0.000    -.0239756   -.0228886
+                               3 3  |  -.0225011   .0001306  -172.23   0.000    -.0227574   -.0222448
+                               3 4  |  -.0057894   .0001853   -31.25   0.000    -.0061529   -.0054259
+                               4 1  |   .0440551   .0004618    95.40   0.000     .0431492    .0449609
+                               4 2  |          0  (omitted)
+                               4 3  |          0  (omitted)
+                               4 4  |          0  (omitted)
+                                    |
+                              _cons |   6.970044   .0003288  2.1e+04   0.000     6.969399    6.970689
+-----------------------------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+----------------------------------------------------------------+
+            Absorbed FE | Categories  - Redundant  = Num. Coefs |
+------------------------+---------------------------------------|
+          ID_geo_feNCha |     18469       18469           0    *|
+ state_month_year_feCha |      5480           0        5480     |
+       huc8_month_feCha |      7001         381        6620     |
+----------------------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+Tab3_altonji_.xls
+dir : seeout
+(dropped 24047 singleton observations)
+(MWFE estimator converged in 112 iterations)
+note: 4.T_mean_D_5_groups#2.group_items omitted because of collinearity
+note: 4.T_mean_D_5_groups#3.group_items omitted because of collinearity
+note: 4.T_mean_D_5_groups#4.group_items omitted because of collinearity
+
+HDFE Linear regression                            Number of obs   =    198,258
+Absorbing 2 HDFE groups                           F(  21,   1385) =       9.17
+Statistics robust to heteroskedasticity           Prob > F        =     0.0000
+                                                  R-squared       =     0.9718
+                                                  Adj R-squared   =     0.9625
+                                                  Within R-sq.    =     0.0034
+Number of clusters (huc10_state) =      1,386     Root MSE        =     0.6028
+
+                                              (Std. Err. adjusted for 1,386 clusters in huc10_state)
+----------------------------------------------------------------------------------------------------
+                                   |               Robust
+              log_t_t_Value_clean2 |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-----------------------------------+----------------------------------------------------------------
+c.fracking#c.T_HUC10_balanced1_ALL |  -.0002861   .0004693    -0.61   0.542    -.0012066    .0006345
+                                   |
+  group_items#c.log_cum_prec_3days |
+                                1  |   .0200399   .0048898     4.10   0.000     .0104476    .0296322
+                                2  |  -.0806687   .0154549    -5.22   0.000    -.1109863   -.0503511
+                                3  |  -.0415955   .0056611    -7.35   0.000    -.0527008   -.0304902
+                                4  |  -.0606926   .0056092   -10.82   0.000    -.0716961   -.0496891
+                                   |
+     T_mean_D_5_groups#group_items |
+                              0 2  |  -.0470684   .1304134    -0.36   0.718    -.3028975    .2087607
+                              0 3  |   .0170318   .0524579     0.32   0.745    -.0858738    .1199374
+                              0 4  |   -.002958   .0376481    -0.08   0.937    -.0768114    .0708953
+                              1 1  |   -.081705   .0591897    -1.38   0.168    -.1978161    .0344062
+                              1 2  |  -.1260805   .0793509    -1.59   0.112    -.2817414    .0295803
+                              1 3  |  -.0136626   .0283772    -0.48   0.630    -.0693296    .0420044
+                              1 4  |  -.0253119   .0211399    -1.20   0.231    -.0667815    .0161577
+                              2 1  |  -.0357952   .0593958    -0.60   0.547    -.1523106    .0807203
+                              2 2  |    -.02607   .0435274    -0.60   0.549    -.1114567    .0593168
+                              2 3  |  -.0372715   .0223235    -1.67   0.095     -.081063    .0065201
+                              2 4  |  -.0363762    .019561    -1.86   0.063    -.0747486    .0019963
+                              3 1  |   .0001273    .062587     0.00   0.998    -.1226483    .1229029
+                              3 2  |   -.000565   .0368486    -0.02   0.988    -.0728501    .0717201
+                              3 3  |  -.0381886   .0145508    -2.62   0.009    -.0667325   -.0096446
+                              3 4  |  -.0174134   .0157106    -1.11   0.268    -.0482325    .0134058
+                              4 1  |   .0331836    .064649     0.51   0.608    -.0936369    .1600041
+                              4 2  |          0  (omitted)
+                              4 3  |          0  (omitted)
+                              4 4  |          0  (omitted)
+                                   |
+                             _cons |   6.983423   .0189526   368.47   0.000     6.946244    7.020602
+----------------------------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+---------------------------------------------------------------+
+           Absorbed FE | Categories  - Redundant  = Num. Coefs |
+-----------------------+---------------------------------------|
+         ID_geo_feNCha |     17988       17988           0    *|
+ huc8_year_month_feCha |     31187           0       31187     |
+---------------------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+(option xb assumed; fitted values)
+(54,349 missing values generated)
+(MWFE estimator converged in 109 iterations)
+note: 4.T_mean_D_5_groups#2.group_items omitted because of collinearity
+note: 4.T_mean_D_5_groups#3.group_items omitted because of collinearity
+note: 4.T_mean_D_5_groups#4.group_items omitted because of collinearity
+
+HDFE Linear regression                            Number of obs   =    198,258
+Absorbing 2 HDFE groups                           F(  21,   1385) =   1.56e+07
+Statistics robust to heteroskedasticity           Prob > F        =     0.0000
+                                                  R-squared       =     0.9998
+                                                  Adj R-squared   =     0.9997
+                                                  Within R-sq.    =     0.9988
+Number of clusters (huc10_state) =      1,386     Root MSE        =     0.0012
+
+                                               (Std. Err. adjusted for 1,386 clusters in huc10_state)
+-----------------------------------------------------------------------------------------------------
+                                    |               Robust
+                         Y_altonji2 |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+------------------------------------+----------------------------------------------------------------
+c.post_disc#c.T_HUC10_balanced1_ALL |  -.0062236   .0006295    -9.89   0.000    -.0074584   -.0049887
+                                    |
+   group_items#c.log_cum_prec_3days |
+                                 1  |   .0200504   9.42e-06  2128.09   0.000     .0200319    .0200689
+                                 2  |  -.0806601   .0000104 -7787.19   0.000    -.0806804   -.0806398
+                                 3  |  -.0415799   7.69e-06 -5405.23   0.000     -.041595   -.0415648
+                                 4  |  -.0606818   .0000132 -4588.63   0.000    -.0607078   -.0606559
+                                    |
+      T_mean_D_5_groups#group_items |
+                               0 2  |  -.0472108   .0001031  -458.06   0.000     -.047413   -.0470086
+                               0 3  |   .0172415   .0001081   159.55   0.000     .0170296    .0174535
+                               0 4  |  -.0028552   .0001258   -22.70   0.000    -.0031019   -.0026085
+                               1 1  |  -.0821294   .0001231  -667.27   0.000    -.0823708   -.0818879
+                               1 2  |  -.1261763   .0000802 -1574.21   0.000    -.1263335   -.1260191
+                               1 3  |  -.0137166   .0000588  -233.36   0.000    -.0138319   -.0136013
+                               1 4  |  -.0253093   .0000683  -370.82   0.000    -.0254432   -.0251754
+                               2 1  |  -.0362571    .000134  -270.68   0.000    -.0365198   -.0359943
+                               2 2  |  -.0261542   .0000812  -322.12   0.000    -.0263135   -.0259949
+                               2 3  |  -.0373516   .0000704  -530.91   0.000    -.0374896   -.0372135
+                               2 4  |  -.0363928   .0000496  -733.32   0.000    -.0364902   -.0362955
+                               3 1  |  -.0003312   .0001413    -2.34   0.019    -.0006084   -.0000539
+                               3 2  |  -.0006296   .0000622   -10.13   0.000    -.0007515   -.0005076
+                               3 3  |  -.0382515   .0000324 -1178.84   0.000    -.0383151   -.0381878
+                               3 4  |  -.0174072   .0000348  -500.67   0.000    -.0174754    -.017339
+                               4 1  |   .0327821   .0001487   220.39   0.000     .0324903    .0330739
+                               4 2  |          0  (omitted)
+                               4 3  |          0  (omitted)
+                               4 4  |          0  (omitted)
+                                    |
+                              _cons |   6.981969   .0002144  3.3e+04   0.000     6.981549     6.98239
+-----------------------------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+---------------------------------------------------------------+
+           Absorbed FE | Categories  - Redundant  = Num. Coefs |
+-----------------------+---------------------------------------|
+         ID_geo_feNCha |     17988       17988           0    *|
+ huc8_year_month_feCha |     31187           0       31187     |
+---------------------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+Tab3_altonji_.xls
+dir : seeout
+
+. 
+. 
+. 
+. 
+end of do-file
+
+. exit, clear

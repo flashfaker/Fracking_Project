@@ -1,0 +1,818 @@
+-----------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs
+> /code/LogFiles/cr_googletrends_state.txt
+  log type:  text
+ opened on:  17 Dec 2021, 15:45:02
+
+. 
+. /**************
+>         Hydraulic Fracturing Trend
+>         ***************/
+.         
+.         import delimited "$rawdir/HydraulicFracturing_Google/multiTimeline (1).cs
+> v", ///
+>         varnames(3) clear
+(2 vars, 121 obs)
+
+.         save "$interdir/hf_us", replace
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/hf_us.dta saved
+
+.         
+.         forval i = 2/19 {
+  2.                 import delimited "$rawdir/HydraulicFracturing_Google/multiTime
+> line (`i').csv", ///
+>                 varnames(3) clear
+  3.                 merge 1:1 month using "$interdir/hf_us.dta"
+  4.                         drop _merge
+  5.                 save "$interdir/hf_us", replace
+  6.         }
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/hf_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/hf_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/hf_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/hf_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/hf_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/hf_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/hf_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/hf_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/hf_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/hf_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/hf_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/hf_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/hf_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/hf_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/hf_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/hf_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/hf_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/hf_us.dta saved
+
+.         
+.         gen time = monthly(month, "YM")
+
+.         format time %tm
+
+.         drop month
+
+.         reshape long hydraulicfracturing, i(time) j(state) string
+(note: j = arkansas california colorado kansas massachusetts michigan mississippi m
+> ontana newmexico newyork northdakota ohio oklahoma pennsylvania texas unitedstate
+> s utah westvirginia wyoming)
+
+Data                               wide   ->   long
+-----------------------------------------------------------------------------
+Number of obs.                      121   ->    2299
+Number of variables                  20   ->       3
+j variable (19 values)                    ->   state
+xij variables:
+hydraulicfracturingarkansas hydraulicfracturingcalifornia ... hydraulicfracturingwy
+> oming->hydraulicfracturing
+-----------------------------------------------------------------------------
+
+.         
+.         sort state time 
+
+.         order state time
+
+.         label var hydraulicfracturing "Hydraulic Fracturing (Topic)"
+
+.         
+.         save "$basedir/hf_google", replace
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/ba
+> se/hf_google.dta saved
+
+.         
+.         * several plots
+.         line hydraulicfracturing time, by(state, graphregion(fcolor(white))) xlab
+> el(, angle(60))
+
+.         graph export "$figdir/hf_google.pdf", replace
+(file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output
+> /figures/hf_google.pdf written in PDF format)
+
+.         
+. /**************
+>         Hydraulic Fracturing Proppants Trend
+>         ***************/        
+.         * Generate data set of Google search trends for "Hydraulic Fracturing Pro
+> ppants" topic
+.         import delimited "$rawdir/HydraulicFracturingProppants_Google/multiTimeli
+> ne (1).csv", ///
+>         varnames(3) clear
+(2 vars, 121 obs)
+
+.         save "$interdir/hfp_us", replace
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/hfp_us.dta saved
+
+.         
+.         forval i = 2/19 {
+  2.                 * get ride of states that have no obs
+.                 if (`i' < 6 | (`i' > 9 & `i' < 14) | `i' > 16) {
+  3.                         import delimited "$rawdir/HydraulicFracturingProppants
+> _Google/multiTimeline (`i').csv", ///
+>                         varnames(3) clear
+  4.                         merge 1:1 month using "$interdir/hfp_us.dta", force
+  5.                                 drop _merge
+  6.                         save "$interdir/hfp_us", replace
+  7.                 }
+  8.         }
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/hfp_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/hfp_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/hfp_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/hfp_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/hfp_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/hfp_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/hfp_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/hfp_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/hfp_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/hfp_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/hfp_us.dta saved
+
+.         
+.         gen time = monthly(month, "YM")
+
+.         format time %tm
+
+.         drop month
+
+.         reshape long hydraulicfracturingproppants, i(time) j(state) string
+(note: j = arka cali colo kans mass mich newy ohio okla penn texa unit)
+
+Data                               wide   ->   long
+-----------------------------------------------------------------------------
+Number of obs.                      121   ->    1452
+Number of variables                  13   ->       3
+j variable (12 values)                    ->   state
+xij variables:
+hydraulicfracturingproppantsarka hydraulicfracturingproppantscali ... hydraulicfrac
+> turingproppantsunit->hydraulicfracturingproppants
+-----------------------------------------------------------------------------
+
+.         sort state time 
+
+.         order state time
+
+.         label var hydraulicfracturingproppants "Hydraulic Fracturing Proppants (T
+> opic)"
+
+.         * get state names to be full
+.         replace state = "arkansas" if state == "arka"
+variable state was str4 now str8
+(121 real changes made)
+
+.         replace state = "colorado" if state == "colo"
+(121 real changes made)
+
+.         replace state = "kansas" if state == "kans"
+(121 real changes made)
+
+.         replace state = "michigan" if state == "mich"
+(121 real changes made)
+
+.         replace state = "oklahoma" if state == "okla"
+(121 real changes made)
+
+.         replace state = "pennsylvania" if state == "penn"
+variable state was str8 now str12
+(121 real changes made)
+
+.         replace state = "texas" if state == "texa"
+(121 real changes made)
+
+.         replace state = "unitedstates" if state == "unit"
+(121 real changes made)
+
+.         replace state = "california" if state == "cali"
+(121 real changes made)
+
+.         replace state = "massachusetts" if state == "mass"
+variable state was str12 now str13
+(121 real changes made)
+
+.         replace state = "newyork" if state == "newy"
+(121 real changes made)
+
+.         
+.         save "$basedir/hfp_google", replace
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/ba
+> se/hfp_google.dta saved
+
+.         
+.         * several plots
+.         line hydraulicfracturingproppants time, by(state, graphregion(fcolor(whit
+> e))) xlabel(, angle(60))
+
+.         graph export "$figdir/hfp_google.pdf", replace
+(file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output
+> /figures/hfp_google.pdf written in PDF format)
+
+.         
+. /**************
+>         Fracking Trend
+>         ***************/        
+.                 
+.         import delimited "$rawdir/Fracking_Google/multiTimeline (1).csv", ///
+>         varnames(3) clear
+(2 vars, 121 obs)
+
+.         save "$interdir/f_us", replace
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/f_us.dta saved
+
+.         
+.         forval i = 2/35 {
+  2.                 import delimited "$rawdir/Fracking_Google/multiTimeline (`i').
+> csv", ///
+>                 varnames(3) clear
+  3.                 merge 1:1 month using "$interdir/f_us.dta"
+  4.                         drop _merge
+  5.                 save "$interdir/f_us", replace
+  6.         }
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/f_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/f_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/f_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/f_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/f_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/f_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/f_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/f_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/f_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/f_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/f_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/f_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/f_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/f_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/f_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/f_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/f_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/f_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/f_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/f_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/f_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/f_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/f_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/f_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/f_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/f_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/f_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/f_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/f_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/f_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/f_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/f_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/f_us.dta saved
+(2 vars, 121 obs)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               121  (_merge==3)
+    -----------------------------------------
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/in
+> termediate/f_us.dta saved
+
+.         
+.         gen time = monthly(month, "YM")
+
+.         format time %tm
+
+.         drop month
+
+.         reshape long fracking, i(time) j(state) string
+(note: j = alabama arizona arkansas california colorado delaware idaho indiana kans
+> as kentucky louisiana maryland massachusetts michigan minnesota mississippi misso
+> uri montana nebraska nevada newjersey newmexico newyork northdakota ohio oklahoma
+>  pennsylvania southdakota tennessee texas unitedstates utah virginia westvirginia
+>  wyoming)
+
+Data                               wide   ->   long
+-----------------------------------------------------------------------------
+Number of obs.                      121   ->    4235
+Number of variables                  36   ->       3
+j variable (35 values)                    ->   state
+xij variables:
+frackingalabama frackingarizona ... frackingwyoming->fracking
+-----------------------------------------------------------------------------
+
+.         
+.         sort state time 
+
+.         order state time
+
+.         label var fracking "Fracking (Term)"
+
+.         
+.         save "$basedir/f_google", replace
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/ba
+> se/f_google.dta saved
+
+.         
+.         * several plots
+.         line fracking time, by(state, graphregion(fcolor(white))) xlabel(, angle(
+> 60))
+
+.         graph export "$figdir/f_google.pdf", replace
+(file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output
+> /figures/f_google.pdf written in PDF format)
+
+.         
+. ********************************* END ******************************************
+. 
+. capture log close
