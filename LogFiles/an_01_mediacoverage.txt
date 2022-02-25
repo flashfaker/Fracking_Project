@@ -1,8 +1,9 @@
-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------
       name:  <unnamed>
-       log:  C:/Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/code/LogFiles/an_01_mediacoverage.txt
+       log:  /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/
+> code/LogFiles/an_01_mediacoverage.txt
   log type:  text
- opened on:  23 Feb 2022, 11:58:59
+ opened on:  24 Feb 2022, 23:32:17
 
 . 
 . /**************
@@ -10,17 +11,17 @@
 >         ***************/
 .         use "$dropbox/1. data/data for Zirui/media/Article Level Dataset", clear
 
-.         * generate counts of newspaper coverage of "fracking" in state-month combination
+.         * generate counts of newspaper coverage of "fracking" in state-month combi
+> nation
 .         collapse (count) v1, by(state monthly_date)
 
 . 
 .         egen st = group(state)
 
 .         xtset st monthly_date
-
-Panel variable: st (unbalanced)
- Time variable: monthly_date, 2006m8 to 2016m12, but with gaps
-         Delta: 1 month
+       panel variable:  st (unbalanced)
+        time variable:  monthly_date, 2006m8 to 2016m12, but with gaps
+                delta:  1 month
 
 .         replace state = lower(state)
 (1,159 real changes made)
@@ -48,10 +49,10 @@ Statistics robust to heteroskedasticity           Prob > F        =          .
                                                   Within R-sq.    =     0.0000
 Number of clusters (st)      =         46         Root MSE        =     2.1230
 
-                                    (Std. err. adjusted for 46 clusters in st)
+                                    (Std. Err. adjusted for 46 clusters in st)
 ------------------------------------------------------------------------------
              |               Robust
- media_count | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+ media_count |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
 -------------+----------------------------------------------------------------
        _cons |   .6770435   .1780031     3.80   0.000     .3185269     1.03556
 ------------------------------------------------------------------------------
@@ -74,13 +75,13 @@ Absorbed degrees of freedom:
 .         * merge to get disclosure states
 .         merge m:1 state using "$basedir/disclosurerule_datePB.dta"
 
-    Result                      Number of obs
+    Result                           # of obs.
     -----------------------------------------
-    Not matched                         3,625
+    not matched                         3,625
         from master                     3,625  (_merge==1)
         from using                          0  (_merge==2)
 
-    Matched                             2,125  (_merge==3)
+    matched                             2,125  (_merge==3)
     -----------------------------------------
 
 .         keep if _merge == 3 // keep only disclosure states
@@ -108,23 +109,27 @@ Absorbed degrees of freedom:
 .         replace peak = . if state == "arkansas"
 (17 real changes made, 17 to missing)
 
-.         replace peak = 1 if state == "arkansas" & time == ym(2012, 10) // first media coverage in arkansas
+.         replace peak = 1 if state == "arkansas" & time == ym(2012, 10) // first me
+> dia coverage in arkansas
 (1 real change made)
 
 .         export delimited "$basedir/peak_mediacoverage.csv", replace
-file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/base/peak_mediacoverage.csv saved
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/bas
+> e/peak_mediacoverage.csv saved
 
 .         
 .         * get the upticks of google search trend
 .                 gen se = _se[_cons]
 
-.                 gen uptick_limit = 2*se // 2 times the standard errors from the fe regressions
+.                 gen uptick_limit = 2*se // 2 times the standard errors from the fe
+>  regressions
 
 .                 gen upticks = 1 if residuals >= uptick_limit
 (1,576 missing values generated)
 
 .                 * get first uptick
-.                 * manually get first uptick for arkansas, kentucky, mississippi, montana (first
+.                 * manually get first uptick for arkansas, kentucky, mississippi, m
+> ontana (first
 .                 * time that there is media coverage)
 .                 replace upticks = 1 if state == "arkansas" & time == ym(2012, 10)
 (1 real change made)
@@ -132,7 +137,8 @@ file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/da
 .                 replace upticks = 1 if state == "kentucky" & time == ym(2015, 1)
 (1 real change made)
 
-.                 replace upticks = 1 if state == "mississippi" & time == ym(2012, 3)
+.                 replace upticks = 1 if state == "mississippi" & time == ym(2012, 3
+> )
 (1 real change made)
 
 .                 replace upticks = 1 if state == "montana" & time == ym(2011, 7)
@@ -150,7 +156,8 @@ file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/da
 .                         rename upticks first_uptick
 
 .                         save "$interdir/first_uptick_media", replace
-file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/intermediate/first_uptick_media.dta saved
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/int
+> ermediate/first_uptick_media.dta saved
 
 .                 restore
 
@@ -174,13 +181,15 @@ file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/da
 
 .                         rename upticks first_biguptick
 
-.                         * manually fix uptick time for arkansas as arksansas only has two 
+.                         * manually fix uptick time for arkansas as arksansas only 
+> has two 
 .                         * media coverage counts in the entire period...
 .                         replace time = ym(2012, 11) if state == "arkansas"
 (1 real change made)
 
 .                         save "$interdir/first_biguptick_media", replace
-file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/intermediate/first_biguptick_media.dta saved
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/int
+> ermediate/first_biguptick_media.dta saved
 
 .                 restore
 
@@ -189,26 +198,26 @@ file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/da
 .         
 .                 merge 1:1 state time using "$interdir/first_uptick_media" 
 
-    Result                      Number of obs
+    Result                           # of obs.
     -----------------------------------------
-    Not matched                         1,984
+    not matched                         1,984
         from master                     1,984  (_merge==1)
         from using                          0  (_merge==2)
 
-    Matched                                16  (_merge==3)
+    matched                                16  (_merge==3)
     -----------------------------------------
 
 .                 drop _merge
 
 .                 merge 1:1 state time using "$interdir/first_biguptick_media"
 
-    Result                      Number of obs
+    Result                           # of obs.
     -----------------------------------------
-    Not matched                         1,984
+    not matched                         1,984
         from master                     1,984  (_merge==1)
         from using                          0  (_merge==2)
 
-    Matched                                16  (_merge==3)
+    matched                                16  (_merge==3)
     -----------------------------------------
 
 .                 drop _merge
@@ -218,10 +227,10 @@ file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/da
 
 .                 merge m:1 state using "$basedir/disclosurerule_dateUpdated.dta"
 
-    Result                      Number of obs
+    Result                           # of obs.
     -----------------------------------------
-    Not matched                             0
-    Matched                             2,000  (_merge==3)
+    not matched                             0
+    matched                             2,000  (_merge==3)
     -----------------------------------------
 
 .                 drop _merge
@@ -242,7 +251,8 @@ file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/da
 (1,984 missing values generated)
 
 .                 save "$basedir/mediacoverage_dates", replace
-file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/base/mediacoverage_dates.dta saved
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/bas
+> e/mediacoverage_dates.dta saved
 
 .                 
 . /**************
@@ -271,148 +281,48 @@ file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/da
 
 .         gen diff = peak_time - disc_time
 
-.         collapse (mean) mean_diff = diff (median) median_diff = diff (first) count, by(before_state)
+.         collapse (mean) mean_diff = diff (median) median_diff = diff (first) count
+> , by(before_state)
 
 .         save "$tabdir/Summary Statistics (Media)", replace
-file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/tables/Summary Statistics (Media).dta saved
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/t
+> ables/Summary Statistics (Media).dta saved
 
 .         
+.         * First Big Uptick and Legislative Start Date
 .         use "$basedir/mediacoverage_dates", clear 
 
-.         * summary statistics in table 
-.         * keep only peak, disclosure rule month, first tick date
-.         keep if peak == 1 | first_uptick == 1 | first_biguptick == 1 | disclosure == 1 | disclosure_start == 1
-(1,935 observations deleted)
+.         rename disclosure_start_month disc_time
 
-.         * replace arkansas first_biguptick (regression analysis not reasonable) 
-.         * generate peak/uptick times
-.         foreach x in peak first_uptick first_biguptick disclosure disclosure_start {
-  2.                 replace `x' = `x' * time
-  3.                 format `x' %tm
-  4.         }
-(16 real changes made)
-(16 real changes made)
-(16 real changes made)
-(16 real changes made)
-(16 real changes made)
+.         * generate first big uptick media coverage time to compare with disclosure
+>  time
+.         gen firstbiguptick_time = first_biguptick*time
+(1,984 missing values generated)
 
-.         collapse (max) peak first_uptick first_biguptick disclosure disclosure_start, by(state)
+.         format firstbiguptick_time %tm
 
-.         order state disclosure
+.         * collapse to state level 
+.         collapse (max) disc_time firstbiguptick_time, by(state)
 
-.         gen peak_minus_disclosure = peak - disclosure
+.         gen before_state = 1 if disc_time <= firstbiguptick_time 
+(9 missing values generated)
 
-.         gen first_uptick_minus_disclosure = first_uptick - disclosure
+.         replace before_state = 0 if before_state >=.
+(9 real changes made)
 
-.         gen first_biguptick_minus_disclosure = first_biguptick - disclosure
+.         bysort before_state: gen count = _N
 
-.         export delimited "$tabdir/mediacoverage_peakanduptick_table.csv", replace
-file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/tables/mediacoverage_peakanduptick_table.csv saved
+.         gen diff = firstbiguptick_time - disc_time
 
-. /**************
->         Plots
->         ***************/        
-.                 
-.         * get plots of peak and uptick for fracking states 
-.         use "$basedir/mediacoverage_dates", clear 
+.         egen diff_mean_total = mean(diff)
 
-.         
-.         lab var peak "Media Coverage Peak"
+.         collapse (mean) mean_diff = diff (median) median_diff = diff (first) count
+>  diff_mean_total, by(before_state)
 
-.         lab var disclosure "Disclosure Rule"
-
-.         lab var disclosure_start "Start of Disclosure Legislative Process"
-
-.         lab var first_uptick "Media Coverage First Uptick"
-
-.         lab var first_biguptick "Media Coverage First Big Uptick"
-
-.         lab var state "Newspaper HQ State"
+.         save "$tabdir/Summary Statistics (first big uptick (Media))", replace
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/t
+> ables/Summary Statistics (first big uptick (Media)).dta saved
 
 . 
-.         xtset st time
+end of do-file
 
-Panel variable: st (strongly balanced)
- Time variable: time, 2006m8 to 2016m12
-         Delta: 1 month
-
-.         
-.         *** OH
-.         twoway ///
->         (dropline peak time, msize(vtiny) lcolor(red) mcolor(red)) ///
->         (dropline disclosure time, msize(vtiny) lcolor(dkgreen) mcolor(dkgreen)) ///
->         (dropline disclosure_start time, msize(vtiny) lcolor(midgreen) mcolor(mgreen)) ///
->         (dropline first_uptick time, msize(vtiny) lcolor(ltblue) mcolor(ltblue)) ///
->         (dropline first_biguptick time, msize(vtiny) lcolor(blue) mcolor(blue)) ///
->         if state == "ohio" & time > 600 & time <= 660, ///
->         graphregion(color(white)) bgcolor(white) yscale(lstyle(none)) ///
->         xlabel(600(6)660, angle(60)) ylabel(0(1)1, noticks nolab) ///
->         legend(size(tiny) pos(4) ring(0) col(1)) xtitle("") 
-(note:  named style mgreen not found in class color, default attributes used)
-(note:  named style mgreen not found in class color, default attributes used)
-
-.         graph export "$figdir/mediacoverage_peakanduptick_ohio.pdf", replace
-file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/mediacoverage_peakanduptick_ohio.pdf saved as PDF format
-
-.         
-.         *** PA
-.         twoway ///
->         (dropline peak time, msize(vtiny) lcolor(red) mcolor(red)) ///
->         (dropline disclosure time, msize(vtiny) lcolor(dkgreen) mcolor(dkgreen)) ///
->         (dropline disclosure_start time, msize(vtiny) lcolor(midgreen) mcolor(mgreen)) ///
->         (dropline first_uptick time, msize(vtiny) lcolor(ltblue) mcolor(ltblue)) ///
->         (dropline first_biguptick time, msize(vtiny) lcolor(blue) mcolor(blue)) ///
->         if state == "pennsylvania" & time > 559 & time <= 683, ///
->         graphregion(color(white)) bgcolor(white) yscale(lstyle(none)) ///
->         xlabel(559(12)683, angle(60)) ylabel(0(1)1, noticks nolab) ///
->         legend(size(tiny) pos(4) ring(0) col(1)) xtitle("") 
-(note:  named style mgreen not found in class color, default attributes used)
-(note:  named style mgreen not found in class color, default attributes used)
-
-.         graph export "$figdir/mediacoverage_peakanduptick_pennsylvania.pdf", replace
-file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/mediacoverage_peakanduptick_pennsylvania.pdf saved as PDF format
-
-.         
-.         *** TX
-.         twoway ///
->         (dropline peak time, msize(vtiny) lcolor(red) mcolor(red)) ///
->         (dropline disclosure time, msize(vtiny) lcolor(dkgreen) mcolor(dkgreen)) ///
->         (dropline disclosure_start time, msize(vtiny) lcolor(midgreen) mcolor(mgreen)) ///
->         (dropline first_uptick time, msize(vtiny) lcolor(ltblue) mcolor(ltblue)) ///
->         (dropline first_biguptick time, msize(vtiny) lcolor(blue) mcolor(blue)) ///
->         if state == "texas" & time > 559 & time <= 683, ///
->         graphregion(color(white)) bgcolor(white) yscale(lstyle(none)) ///
->         xlabel(559(12)683, angle(60)) ylabel(0(1)1, noticks nolab) ///
->         legend(size(tiny) pos(4) ring(0) col(1)) xtitle("") 
-(note:  named style mgreen not found in class color, default attributes used)
-(note:  named style mgreen not found in class color, default attributes used)
-
-.         graph export "$figdir/mediacoverage_peakanduptick_texas.pdf", replace
-file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/mediacoverage_peakanduptick_texas.pdf saved as PDF format
-
-.         
-.         *** CO 
-.         * peak and first big uptick coincide, so keep only first big uptick 
-.         lab var first_biguptick "Media Coverage Peak and First Big Uptick"
-
-.         twoway ///
->         (dropline disclosure time, msize(vtiny) lcolor(dkgreen) mcolor(dkgreen)) ///
->         (dropline disclosure_start time, msize(vtiny) lcolor(midgreen) mcolor(mgreen)) ///
->         (dropline first_uptick time, msize(vtiny) lcolor(ltblue) mcolor(ltblue)) ///
->         (dropline first_biguptick time, msize(vtiny) lcolor(blue) mcolor(blue)) ///
->         if state == "colorado" & time > 559 & time <= 683, ///
->         graphregion(color(white)) bgcolor(white) yscale(lstyle(none)) ///
->         xlabel(559(12)683, angle(60)) ylabel(0(1)1, noticks nolab) ///
->         legend(size(tiny) pos(4) ring(0) col(1)) xtitle("") 
-(note:  named style mgreen not found in class color, default attributes used)
-(note:  named style mgreen not found in class color, default attributes used)
-
-.         graph export "$figdir/mediacoverage_peakanduptick_colorado.pdf", replace
-file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/mediacoverage_peakanduptick_colorado.pdf saved as PDF format
-
-.         lab var first_biguptick "Media Coverage First Big Uptick"
-
-.         
-. ********************************* END ******************************************
-. 
-. capture log close

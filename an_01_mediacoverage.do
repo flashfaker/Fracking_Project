@@ -7,7 +7,7 @@ local fname an_01_mediacoverage
 
 Author: Zirui Song
 Date Created: Feb 5th, 2022
-Date Modified: Feb 22nd, 2022
+Date Modified: Feb 24th, 2022
 
 ********************************************************************************/
 
@@ -20,7 +20,7 @@ Date Modified: Feb 22nd, 2022
 	
 	* Set local directory
 	* notice that repodir path for Mac/Windows might differ
-	global dropbox = "/Users/zsong98/Dropbox/Fracking Disclosure regulation project"
+	global dropbox = "/Users/zsong/Dropbox/Fracking Disclosure regulation project"
 	global repodir = "$dropbox/2. code/zs"
 	global logdir = "$repodir/code/LogFiles"
 	global rawdir = "$repodir/data/raw"
@@ -138,6 +138,22 @@ Date Modified: Feb 22nd, 2022
 	gen diff = peak_time - disc_time
 	collapse (mean) mean_diff = diff (median) median_diff = diff (first) count, by(before_state)
 	save "$tabdir/Summary Statistics (Media)", replace
+	
+	* First Big Uptick and Legislative Start Date
+	use "$basedir/mediacoverage_dates", clear 
+	rename disclosure_start_month disc_time
+	* generate first big uptick media coverage time to compare with disclosure time
+	gen firstbiguptick_time = first_biguptick*time
+	format firstbiguptick_time %tm
+	* collapse to state level 
+	collapse (max) disc_time firstbiguptick_time, by(state)
+	gen before_state = 1 if disc_time <= firstbiguptick_time 
+	replace before_state = 0 if before_state >=.
+	bysort before_state: gen count = _N
+	gen diff = firstbiguptick_time - disc_time
+	egen diff_mean_total = mean(diff)
+	collapse (mean) mean_diff = diff (median) median_diff = diff (first) count diff_mean_total, by(before_state)
+	save "$tabdir/Summary Statistics (first big uptick (Media))", replace
 	
 	use "$basedir/mediacoverage_dates", clear 
 	* summary statistics in table 

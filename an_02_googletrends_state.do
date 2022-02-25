@@ -7,7 +7,7 @@ local fname an_02_googletrends_state
 
 Author: Zirui Song
 Date Created: Feb 7th, 2022
-Date Modified: Feb 23rd, 2022
+Date Modified: Feb 24th, 2022
 
 ********************************************************************************/
 
@@ -110,8 +110,23 @@ Date Modified: Feb 23rd, 2022
 		save "$basedir/ggsearch_dates", replace
 		
 /**************
-	Output Tables/Figures
+	Summary Statistics 
 	***************/
+	use "$basedir/ggsearch_dates", clear
+	* First Big Uptick and Legislative Start Date
+	rename disclosure_start_month disc_time
+	* generate first big uptick media coverage time to compare with disclosure time
+	gen firstbiguptick_time = first_biguptick*time
+	format firstbiguptick_time %tm
+	* collapse to state level 
+	collapse (max) disc_time firstbiguptick_time, by(state)
+	gen before_state = 1 if disc_time <= firstbiguptick_time 
+	replace before_state = 0 if before_state >=.
+	bysort before_state: gen count = _N
+	gen diff = firstbiguptick_time - disc_time
+	egen diff_mean_total = mean(diff)
+	collapse (mean) mean_diff = diff (median) median_diff = diff (first) count diff_mean_total, by(before_state)
+	save "$tabdir/Summary Statistics (first big uptick (Google))", replace
 	
 	* generate summary statistics on the dates of the peaks/upticks/disclosure
 	
@@ -134,7 +149,11 @@ Date Modified: Feb 23rd, 2022
 	export delimited "$tabdir/ggsearch_peakanduptick_table.csv", replace
 	keep state disclosure peak peak_minus_disclosure
 	export delimited "$tabdir/ggsearch_peak_table.csv", replace
-		
+	
+/**************
+	Output Figures 
+	***************/	
+	
 	* get plots of peak and uptick for fracking states 
 	
 	use "$basedir/ggsearch_dates", clear
@@ -163,10 +182,6 @@ Date Modified: Feb 23rd, 2022
 	//(dropline firstbiguptick_fracking time, lcolor(blue) mcolor(blue))
 
 	xtset st time
-	
-/**************
-	Output Figures 
-	***************/	
 	
 	**************************** Single Plots **********************************
 	*** OH
