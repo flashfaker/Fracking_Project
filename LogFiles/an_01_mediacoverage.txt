@@ -326,3 +326,102 @@ file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/outp
 . 
 end of do-file
 
+. br
+
+. do "/var/folders/j0/m4ml1k5n497d6fwz1z9j80040000gn/T//SD20985.000000"
+
+.         use "$basedir/mediacoverage_dates", clear 
+
+.         rename disclosure_start_month disc_time
+
+.         * generate first big uptick media coverage time to compare with disclosure
+>  time
+.         gen firstbiguptick_time = first_biguptick*time
+(1,984 missing values generated)
+
+.         format firstbiguptick_time %tm
+
+.         * collapse to state level 
+.         collapse (max) disc_time firstbiguptick_time, by(state)
+
+.         gen before_state = 1 if disc_time <= firstbiguptick_time 
+(9 missing values generated)
+
+.         replace before_state = 0 if before_state >=.
+(9 real changes made)
+
+.         bysort before_state: gen count = _N
+
+.         gen diff = firstbiguptick_time - disc_time
+
+.         egen diff_mean_total = mean(diff)
+
+. 
+end of do-file
+
+. br
+
+. do "/var/folders/j0/m4ml1k5n497d6fwz1z9j80040000gn/T//SD20985.000000"
+
+.         use "$basedir/ggsearch_dates", clear
+
+.         * First Big Uptick and Legislative Start Date
+.         rename disclosure_start_month disc_time
+
+.         * generate first big uptick media coverage time to compare with disclosure
+>  time
+.         gen firstbiguptick_time = first_biguptick*time
+(1,920 missing values generated)
+
+.         format firstbiguptick_time %tm
+
+.         * collapse to state level 
+.         collapse (max) disc_time firstbiguptick_time, by(state)
+
+.         gen before_state = 1 if disc_time <= firstbiguptick_time 
+(7 missing values generated)
+
+.         replace before_state = 0 if before_state >=.
+(7 real changes made)
+
+.         bysort before_state: gen count = _N
+
+.         gen diff = firstbiguptick_time - disc_time
+
+. 
+end of do-file
+
+. do "/var/folders/j0/m4ml1k5n497d6fwz1z9j80040000gn/T//SD20985.000000"
+
+. * create Auto Loan Pricing by CECL Adoption Status
+. local fname cr_cecladoption_autoloan
+
+. 
+. ******************************* SYNOPSIS ***************************************
+. /* 
+> Objective: Merge the dataset you created containing indicators for CECL adoption 
+> with the RateWatch dataset. Create dataset with auto loan rates practiced by each 
+> bank on a monthly basis for each type of maturity that the bank offers. Plot the
+> average evolution of the loan rates at different maturities for CECL adopters 
+> versus non-CECL adopters.
+> Inputs: the dataset with the regulatory identifiers of the CECL adopters by 
+> quarter and the RateWatch Loans Data
+> Output: 1): Data set with the dummy variable of CECL adoption and auto loan rates
+>                 2): Average evolution of auto loan rates for CECL adopters v.s. no
+> n-adopters  
+> 
+> Author: Zirui Song
+> Date Created: Nov 30th, 2021
+> Date Modified: Feb 26th, 2022
+> 
+> */
+. 
+. /**************
+>         Basic Set-up
+>         ***************/
+.         clear all
+
+.         set more off, permanently
+(set more preference recorded)
+
+.         capture log close
