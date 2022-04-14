@@ -2,7 +2,7 @@
       name:  <unnamed>
        log:  C:/Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/code/LogFiles/an_02_googletrends_state.txt
   log type:  text
- opened on:  14 Apr 2022, 16:15:24
+ opened on:  14 Apr 2022, 16:42:22
 
 . 
 . /**************
@@ -401,59 +401,65 @@ Panel variable: st (strongly balanced)
 >         xlabel(600(6)`time', labsize(vsmall)) ///
 >         ylabel(0(100)100, noticks nolab) yscale(lstyle(none)) ///
 >         legend(size(tiny) pos(11) ring(0) col(1) region(lwidth(none))) xtitle("") 
-  3.         graph export "$figdir/ggsearch_peakanduptick_`st'_trend.pdf", replace
+  3.         graph export "$figdir/fracking_trend_series/ggsearch_peakanduptick_`st'_trend.pdf", replace
   4. end
 
 .                                                                                                                                         
 . plot_frackingtrend_disclosure "ohio" 648
-file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/ggsearch_peakanduptick_ohio_trend.pdf saved as PDF format
+file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/fracking_trend_series/ggsearch_peakanduptick_ohio_trend.pdf saved as PDF format
 
 . plot_frackingtrend_disclosure "pennsylvania" 648
-file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/ggsearch_peakanduptick_pennsylvania_trend.pdf saved as PDF format
+file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/fracking_trend_series/ggsearch_peakanduptick_pennsylvania_trend.pdf saved as PDF
+    format
 
 . plot_frackingtrend_disclosure "texas" 672
-file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/ggsearch_peakanduptick_texas_trend.pdf saved as PDF format
+file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/fracking_trend_series/ggsearch_peakanduptick_texas_trend.pdf saved as PDF format
 
 . plot_frackingtrend_disclosure "kansas" 672
-file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/ggsearch_peakanduptick_kansas_trend.pdf saved as PDF format
+file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/fracking_trend_series/ggsearch_peakanduptick_kansas_trend.pdf saved as PDF format
 
 . plot_frackingtrend_disclosure "kentucky" 672
-file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/ggsearch_peakanduptick_kentucky_trend.pdf saved as PDF format
+file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/fracking_trend_series/ggsearch_peakanduptick_kentucky_trend.pdf saved as PDF format
 
 . plot_frackingtrend_disclosure "louisiana" 672
-file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/ggsearch_peakanduptick_louisiana_trend.pdf saved as PDF format
+file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/fracking_trend_series/ggsearch_peakanduptick_louisiana_trend.pdf saved as PDF
+    format
 
 . plot_frackingtrend_disclosure "montana" 648
-file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/ggsearch_peakanduptick_montana_trend.pdf saved as PDF format
+file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/fracking_trend_series/ggsearch_peakanduptick_montana_trend.pdf saved as PDF format
 
 . plot_frackingtrend_disclosure "newmexico" 648
-file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/ggsearch_peakanduptick_newmexico_trend.pdf saved as PDF format
+file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/fracking_trend_series/ggsearch_peakanduptick_newmexico_trend.pdf saved as PDF
+    format
 
 . plot_frackingtrend_disclosure "northdakota" 648
-file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/ggsearch_peakanduptick_northdakota_trend.pdf saved as PDF format
+file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/fracking_trend_series/ggsearch_peakanduptick_northdakota_trend.pdf saved as PDF
+    format
 
 . plot_frackingtrend_disclosure "oklahoma" 686
-file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/ggsearch_peakanduptick_oklahoma_trend.pdf saved as PDF format
+file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/fracking_trend_series/ggsearch_peakanduptick_oklahoma_trend.pdf saved as PDF format
 
 . plot_frackingtrend_disclosure "utah" 660
-file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/ggsearch_peakanduptick_utah_trend.pdf saved as PDF format
+file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/fracking_trend_series/ggsearch_peakanduptick_utah_trend.pdf saved as PDF format
 
 . plot_frackingtrend_disclosure "wyoming" 686
-file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/ggsearch_peakanduptick_wyoming_trend.pdf saved as PDF format
+file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/fracking_trend_series/ggsearch_peakanduptick_wyoming_trend.pdf saved as PDF format
 
 .                                                                                                                                                                 
 . plot_frackingtrend_disclosure "colorado" 660
-file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/ggsearch_peakanduptick_colorado_trend.pdf saved as PDF format
+file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/fracking_trend_series/ggsearch_peakanduptick_colorado_trend.pdf saved as PDF format
 
 . plot_frackingtrend_disclosure "arkansas" 636
-file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/ggsearch_peakanduptick_arkansas_trend.pdf saved as PDF format
+file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/fracking_trend_series/ggsearch_peakanduptick_arkansas_trend.pdf saved as PDF format
 
 . plot_frackingtrend_disclosure "mississippi" 648
-file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/ggsearch_peakanduptick_mississippi_trend.pdf saved as PDF format
+file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/fracking_trend_series/ggsearch_peakanduptick_mississippi_trend.pdf saved as PDF
+    format
 
 . plot_frackingtrend_disclosure "westvirginia" 660                                                                                                                                
 >                                                                                                                                                         
-file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/ggsearch_peakanduptick_westvirginia_trend.pdf saved as PDF format
+file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/fracking_trend_series/ggsearch_peakanduptick_westvirginia_trend.pdf saved as PDF
+    format
 
 .         
 . ********************************************************************************

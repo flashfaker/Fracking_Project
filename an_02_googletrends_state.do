@@ -228,7 +228,7 @@ program plot_frackingtrend_disclosure
 	xlabel(600(6)`time', labsize(vsmall)) ///
 	ylabel(0(100)100, noticks nolab) yscale(lstyle(none)) ///
 	legend(size(tiny) pos(11) ring(0) col(1) region(lwidth(none))) xtitle("") 
-	graph export "$figdir/ggsearch_peakanduptick_`st'_trend.pdf", replace
+	graph export "$figdir/fracking_trend_series/ggsearch_peakanduptick_`st'_trend.pdf", replace
 end
 																	
 plot_frackingtrend_disclosure "ohio" 648
