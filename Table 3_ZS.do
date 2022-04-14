@@ -1,7 +1,7 @@
 ***********
 * Table 3 *
 ***********
-global dropbox = "/Users/zsong98/Dropbox/Fracking Disclosure regulation project"
+global dropbox = "G:\Dropbox (IESE)\/Fracking Disclosure regulation project"
 global datadir = "$dropbox/1. data"
 
 // set output directory
@@ -70,8 +70,9 @@ cd "$dropbox/6. results/zs/Table 3 Placebo Test"
 	collapse (mean) mean_diff = diff (median) median_diff = diff (first) count, by(before_state)
 	save "Summary Statistics", replace
 	
-********************************************************************************
-	use "$datadir/DISC_TEMP_2020 OCT 2021 DEF B.dta", clear
+******************************************************************************** 
+
+	use "$datadir/DISC_TEMP_2020 OCT 2021 DEF B_ALL_STATES.dta", clear // _ALL_STATES
 	rename StateCode fipstate
 	destring fipstate, replace
 	merge m:1 fipstate using "$dropbox/2. code/zs/data/base/discandggpeak_time_withfipstate", keepusing(disc_time disc_start_time peak_time)
@@ -84,8 +85,8 @@ cd "$dropbox/6. results/zs/Table 3 Placebo Test"
 	gen post_peak = 1 if peak_time <= monthly
 	replace post_peak = 0 if post_peak >=.
 	/* replace the post_disc dummy with the new set of disclosure */
-	replace post_disc = 1 if disc_time <= monthly
-	replace post_disc = 0 if disc_time >=.
+	*replace post_disc = 1 if disc_time <= monthly
+	*replace post_disc = 0 if disc_time >=.
 	
 	/* generate interactions 
 		// generate earlier date (gg search peak or disclosure rule)
@@ -117,7 +118,7 @@ cd "$dropbox/6. results/zs/Table 3 Placebo Test"
 	Regressions
 	**********/
 	
-********************************************************************************
+******************************************************************************** post_peak
 	use "$datadir/Table3_ZS", clear
 	// regressions with disc_before_ggpeak and disc_after_ggpeak 
 	
@@ -294,7 +295,7 @@ cd "$dropbox/6. results/zs/Table 3 Placebo Test"
 	}
 	}
 	}
-	
+
 	local errors ""cluster(huc10_state)""
 	local Ys ""log_t_t_Value_clean2""
 	local fe ""ID_geo_feNCha""
@@ -350,10 +351,41 @@ cd "$dropbox/6. results/zs/Table 3 Placebo Test"
 		two_variable_regression post_disc post_peak 3 after
 		two_variable_regression_all post_disc post_peak after
 
+		*******
+		* OLD *
+		*******
+
+	use "$datadir/Table3_ZS", clear
+		
+// Stacked regression
+// SUR
+local errors ""cluster(huc10_state)""
+local Ys ""log_t_t_Value_clean2""
+local fe ""ID_geo_feNCha""
+local k ALL
+local p 1
+foreach y of local Ys {
+foreach f of local fe {
+foreach e of local errors {
+
+reghdfe `y' c.post_disc#c.T_HUC10_balanced`p'_`k' c.post_peak#c.T_HUC10_balanced`p'_`k' c.log_cum_prec_3days#i.group_items i.T_mean_D_5_groups#i.group_items if  T_HUC10_only_post ==0 & Treated_state == 1 & m_cum_well_huc4_H_D == 1,  `e' absorb(`f' state_month_year_feCha huc8_month_feCha)
+		outreg2 using Tab1_A_1_`y'_`k'_`p'_`e'`f'_pre.xls, /// * location of the file
+		keep(c.post_disc#c.T_HUC10_balanced`p'_`k' c.post_peak#c.T_HUC10_balanced`p'_`k') /// * Variables you want to display 
+		title ("ATE - `k' - `y'") ctitle("HF at least in Pre Disclosure period") ///
+		bracket bdec (4) sdec(4) replace ///
+		addtext(Treated Sample, HUC10s with HF at least in pre, Control Sample, HUC10s with no HF in pre, Note, No HUC10 with HF only in post, Weather Controls, Yes, Monitoring FE, Yes, State*Month*Year FE, Yes, HUC8*Month FE, Yes)
+		
+reghdfe `y' c.post_disc_before#c.T_HUC10_balanced1_ALL c.post_disc_after#c.T_HUC10_balanced1_ALL  c.log_cum_prec_3days#i.group_items i.T_mean_D_5_groups#i.group_items if  T_HUC10_only_post ==0 & Treated_state == 1 & m_cum_well_huc4_H_D == 1,  `e' absorb(`f' state_month_year_feCha huc8_month_feCha)
+		outreg2 using Tab1_A_2_`y'_`k'_`p'_`e'`f'_pre.xls, /// * location of the file
+		keep(c.post_disc_before#c.T_HUC10_balanced1_ALL c.post_disc_after#c.T_HUC10_balanced1_ALL) /// * Variables you want to display 
+		title ("ATE - `k' - `y'") ctitle("HF at least in Pre Disclosure period") ///
+		bracket bdec (4) sdec(4) replace ///
+		addtext(Treated Sample, HUC10s with HF at least in pre, Control Sample, HUC10s with no HF in pre, Note, No HUC10 with HF only in post, Weather Controls, Yes, Monitoring FE, Yes, State*Month*Year FE, Yes, HUC8*Month FE, Yes)
 
 
-
-
+}
+}
+}
 
 ********************************************************************************
 	// regressions with post_peak only

@@ -189,11 +189,11 @@ Date Modified: Feb 24th, 2022
 	
 	*** OH
 	twoway ///
-	(dropline peak time, msize(vtiny) lcolor(red) mcolor(red)) ///
-	(dropline disclosure time, msize(vtiny) lcolor(dkgreen) mcolor(dkgreen)) ///
 	(dropline disclosure_start time, msize(vtiny) lcolor(midgreen) mcolor(mgreen)) ///
+	(dropline disclosure time, msize(vtiny) lcolor(dkgreen) mcolor(dkgreen)) ///
 	(dropline first_uptick time, msize(vtiny) lcolor(ltblue) mcolor(ltblue)) ///
 	(dropline first_biguptick time, msize(vtiny) lcolor(blue) mcolor(blue)) ///
+	(dropline peak time, msize(vtiny) lcolor(red) mcolor(red)) ///
 	if state == "ohio" & time > 600 & time <= 660, ///
 	graphregion(color(white)) bgcolor(white) yscale(lstyle(none)) ///
 	xlabel(600(6)660, angle(60)) ylabel(0(1)1, noticks nolab) ///
@@ -202,11 +202,11 @@ Date Modified: Feb 24th, 2022
 	
 	*** PA
 	twoway ///
-	(dropline peak time, msize(vtiny) lcolor(red) mcolor(red)) ///
-	(dropline disclosure time, msize(vtiny) lcolor(dkgreen) mcolor(dkgreen)) ///
 	(dropline disclosure_start time, msize(vtiny) lcolor(midgreen) mcolor(mgreen)) ///
+	(dropline disclosure time, msize(vtiny) lcolor(dkgreen) mcolor(dkgreen)) ///
 	(dropline first_uptick time, msize(vtiny) lcolor(ltblue) mcolor(ltblue)) ///
 	(dropline first_biguptick time, msize(vtiny) lcolor(blue) mcolor(blue)) ///
+	(dropline peak time, msize(vtiny) lcolor(red) mcolor(red)) ///
 	if state == "pennsylvania" & time > 559 & time <= 683, ///
 	graphregion(color(white)) bgcolor(white) yscale(lstyle(none)) ///
 	xlabel(559(12)683, angle(60)) ylabel(0(1)1, noticks nolab) ///
@@ -215,11 +215,11 @@ Date Modified: Feb 24th, 2022
 	
 	*** TX
 	twoway ///
-	(dropline peak time, msize(vtiny) lcolor(red) mcolor(red)) ///
-	(dropline disclosure time, msize(vtiny) lcolor(dkgreen) mcolor(dkgreen)) ///
 	(dropline disclosure_start time, msize(vtiny) lcolor(midgreen) mcolor(mgreen)) ///
+	(dropline disclosure time, msize(vtiny) lcolor(dkgreen) mcolor(dkgreen)) ///
 	(dropline first_uptick time, msize(vtiny) lcolor(ltblue) mcolor(ltblue)) ///
 	(dropline first_biguptick time, msize(vtiny) lcolor(blue) mcolor(blue)) ///
+	(dropline peak time, msize(vtiny) lcolor(red) mcolor(red)) ///
 	if state == "texas" & time > 559 & time <= 683, ///
 	graphregion(color(white)) bgcolor(white) yscale(lstyle(none)) ///
 	xlabel(559(12)683, angle(60)) ylabel(0(1)1, noticks nolab) ///
@@ -230,8 +230,8 @@ Date Modified: Feb 24th, 2022
 	* peak and first big uptick coincide, so keep only first big uptick 
 	lab var first_biguptick "Media Coverage Peak and First Big Uptick"
 	twoway ///
-	(dropline disclosure time, msize(vtiny) lcolor(dkgreen) mcolor(dkgreen)) ///
 	(dropline disclosure_start time, msize(vtiny) lcolor(midgreen) mcolor(mgreen)) ///
+	(dropline disclosure time, msize(vtiny) lcolor(dkgreen) mcolor(dkgreen)) ///
 	(dropline first_uptick time, msize(vtiny) lcolor(ltblue) mcolor(ltblue)) ///
 	(dropline first_biguptick time, msize(vtiny) lcolor(blue) mcolor(blue)) ///
 	if state == "colorado" & time > 559 & time <= 683, ///

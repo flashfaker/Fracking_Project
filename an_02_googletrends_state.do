@@ -7,7 +7,7 @@ local fname an_02_googletrends_state
 
 Author: Zirui Song
 Date Created: Feb 7th, 2022
-Date Modified: Feb 24th, 2022
+Date Modified: Apr 14th, 2022
 
 ********************************************************************************/
 
@@ -20,7 +20,7 @@ Date Modified: Feb 24th, 2022
 	
 	* Set local directory
 	* notice that repodir path for Mac/Windows might differ
-	global repodir = "/Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs"
+	global repodir = "/Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs"
 	global logdir = "$repodir/code/LogFiles"
 	global rawdir = "$repodir/data/raw"
 	global basedir = "$repodir/data/base"
@@ -143,12 +143,42 @@ Date Modified: Feb 24th, 2022
 	}
 	collapse (max) peak first_uptick first_biguptick disclosure disclosure_start, by(state)
 	order state disclosure
+
+*** manually inspect the states where two or more dates overlap 
+	* arkansas (move first uptick from 2010m8 to 2010m7)
+	* colorado (move first uptick 1 month prior and first big uptick 1 month later)
+	* mississippi (move first uptick back 2, first big uptick back 1)
+	* montana (move first big uptick 1 month back)
+	* oklahoma (move first uptick back 1)
+	* wv (move disclosure start date back 1, first big uptick forward 1)
+	
 	gen peak_minus_disclosure = peak - disclosure
 	gen first_uptick_minus_disclosure = first_uptick - disclosure
 	gen first_biguptick_minus_disclosure = first_biguptick - disclosure
 	export delimited "$tabdir/ggsearch_peakanduptick_table.csv", replace
 	keep state disclosure peak peak_minus_disclosure
 	export delimited "$tabdir/ggsearch_peak_table.csv", replace
+	
+/*** perform the changes specifies from the manual inspection above
+	Update: Actually not changing the date might be better
+	use "$basedir/ggsearch_dates", clear
+	replace first_uptick = first_uptick[_n+1] if state == "arkansas"
+	
+	replace first_uptick = first_uptick[_n+1] if state == "colorado"
+	replace first_biguptick = 1 if state == "colorado" & time == ym(2011, 12)
+	replace first_biguptick = . if state == "colorado" & time == ym(2011, 11)
+	
+	replace first_uptick = first_uptick[_n+2] if state == "mississippi"
+	replace first_biguptick = first_biguptick[_n+1] if state == "mississippi"
+	
+	replace first_biguptick = first_biguptick[_n+1] if state == "montana"
+	
+	replace first_uptick = first_uptick[_n+1] if state == "oklahoma"
+	
+	replace disclosure_start_month = disclosure_start_month - 1 if state == "westvirginia"
+	replace first_biguptick = 1 if state == "westvirginia" & time == ym(2011, 9)
+	replace first_biguptick = . if state == "westvirginia" & time == ym(2011, 8) 
+	save "$basedir/ggsearch_dates", replace */
 	
 /**************
 	Output Figures 
@@ -165,7 +195,7 @@ Date Modified: Feb 24th, 2022
 	gen disclosure_start_fracking = fracking if time == disclosure_start_month
 	gen disclosure_start = 1 if time == disclosure_start_month
 	
-	lab var fracking "Fracking Search Trend"
+	lab var fracking "Google Search Intensity (Fracking)"
 	
 	lab var peak_fracking "Google Search Peak"
 	lab var first_uptick_fracking "Google Search First Uptick"
@@ -178,83 +208,56 @@ Date Modified: Feb 24th, 2022
 	lab var disclosure_start "Beginning of Disclosure Legislative Process"
 	lab var first_uptick "Google Search First Uptick"
 	lab var first_biguptick "Google Search First Big Uptick"
-	
-	//(dropline firstbiguptick_fracking time, lcolor(blue) mcolor(blue))
 
 	xtset st time
 	
-	**************************** Single Plots **********************************
-	*** OH
+**************************** Single Plots **********************************
+* write function for plots
+capture program drop plot_frackingtrend_disclosure
+program plot_frackingtrend_disclosure
+	args st time
 	twoway ///
-	(line fracking time, lcolor(black)) ///
-	(dropline peak_fracking time, msize(tiny) lcolor(red) mcolor(red)) ///
-	(dropline disclosure_fracking time, msize(tiny) lcolor(dkgreen) mcolor(dkgreen)) ///
-	(dropline disclosure_start_fracking time, msize(tiny) lcolor(midgreen) mcolor(midgreen)) ///
-	(dropline first_uptick_fracking time, msize(tiny) lcolor(ltblue) mcolor(ltblue)) ///
-	(dropline first_biguptick_fracking time, msize(tiny) lcolor(blue) mcolor(blue)) ///
-	if state == "ohio" & time >= 600 & time <= 648, ///
+	(line fracking time, lcolor(black) lwidth(vthin)) ///
+	(dropline disclosure_start_fracking time, msize(tiny) lcolor(midgreen) mcolor(midgreen) lpattern(shortdash)) ///
+	(dropline disclosure_fracking time, msize(tiny) lcolor(dkgreen) mcolor(dkgreen) lpattern(shortdash_dot)) ///
+	(dropline first_uptick_fracking time, msize(tiny) lcolor(ltblue) mcolor(ltblue) lpattern(longdash)) ///
+	(dropline first_biguptick_fracking time, msize(tiny) lcolor(blue) mcolor(blue) lpattern(longdash_dot)) ///
+	(dropline peak_fracking time, msize(tiny) lcolor(red) mcolor(red) lpattern(dash)) ///
+	if state == "`st'" & time >= 600 & time <= `time', ///
 	graphregion(color(white)) bgcolor(white) ///
-	xlabel(600(6)648, angle(60)) ///
+	xlabel(600(6)`time', labsize(vsmall)) ///
 	ylabel(0(100)100, noticks nolab) yscale(lstyle(none)) ///
-	legend(size(tiny) pos(9) ring(0) col(1)) xtitle("") 
-	graph export "$figdir/ggsearch_peakanduptick_ohio_trend.pdf", replace
+	legend(size(tiny) pos(11) ring(0) col(1) region(lwidth(none))) xtitle("") 
+	graph export "$figdir/ggsearch_peakanduptick_`st'_trend.pdf", replace
+end
+																	
+plot_frackingtrend_disclosure "ohio" 648
+plot_frackingtrend_disclosure "pennsylvania" 648
+plot_frackingtrend_disclosure "texas" 672
+plot_frackingtrend_disclosure "kansas" 672
+plot_frackingtrend_disclosure "kentucky" 672
+plot_frackingtrend_disclosure "louisiana" 672
+plot_frackingtrend_disclosure "montana" 648
+plot_frackingtrend_disclosure "newmexico" 648
+plot_frackingtrend_disclosure "northdakota" 648
+plot_frackingtrend_disclosure "oklahoma" 686
+plot_frackingtrend_disclosure "utah" 660
+plot_frackingtrend_disclosure "wyoming" 686
+																				
+plot_frackingtrend_disclosure "colorado" 660
+plot_frackingtrend_disclosure "arkansas" 636
+plot_frackingtrend_disclosure "mississippi" 648
+plot_frackingtrend_disclosure "westvirginia" 660																																			
 	
-	*** PA
-	twoway ///
-	(line fracking time, lcolor(black)) ///
-	(dropline peak_fracking time, msize(tiny) lcolor(red) mcolor(red)) ///
-	(dropline disclosure_fracking time, msize(tiny) lcolor(dkgreen) mcolor(dkgreen)) ///
-	(dropline disclosure_start_fracking time, msize(tiny) lcolor(midgreen) mcolor(midgreen)) ///
-	(dropline first_uptick_fracking time, msize(tiny) lcolor(ltblue) mcolor(ltblue)) ///
-	(dropline first_biguptick_fracking time, msize(tiny) lcolor(blue) mcolor(blue)) ///
-	if state == "pennsylvania" & time >= 600 & time <= 648, ///
-	graphregion(color(white)) bgcolor(white) ///
-	xlabel(600(6)648, angle(60)) ///
-	ylabel(0(100)100, noticks nolab) yscale(lstyle(none)) ///
-	legend(size(tiny) pos(10) ring(0) col(1)) xtitle("") 
-	graph export "$figdir/ggsearch_peakanduptick_pennsylvania_trend.pdf", replace
-	
-	*** TX
-	twoway ///
-	(line fracking time, lcolor(black)) ///
-	(dropline peak_fracking time, msize(tiny) lcolor(red) mcolor(red)) ///
-	(dropline disclosure_fracking time, msize(tiny) lcolor(dkgreen) mcolor(dkgreen)) ///
-	(dropline disclosure_start_fracking time, msize(tiny) lcolor(midgreen) mcolor(midgreen)) ///
-	(dropline first_uptick_fracking time, msize(tiny) lcolor(ltblue) mcolor(ltblue)) ///
-	(dropline first_biguptick_fracking time, msize(tiny) lcolor(blue) mcolor(blue)) ///
-	if state == "texas" & time >= 600 & time <= 660, ///
-	graphregion(color(white)) bgcolor(white) ///
-	xlabel(600(6)660, angle(60)) ///
-	ylabel(0(100)100, noticks nolab) yscale(lstyle(none)) ///
-	legend(size(tiny) pos(10) ring(0) col(1)) xtitle("") 
-	graph export "$figdir/ggsearch_peakanduptick_texas_trend.pdf", replace
-	
-	*** CO 
-	// Issue: same date for disclosure start month and Google Search First Uptick and First Big Uptick!!!
-
-	lab var disclosure_start_fracking "Begining of Disclosure Legislativel Process + First (Big) Uptick"
-	twoway ///
-	(line fracking time, lcolor(black)) ///
-	(dropline peak_fracking time, msize(tiny) lcolor(red) mcolor(red)) ///
-	(dropline disclosure_fracking time, msize(tiny) lcolor(dkgreen) mcolor(dkgreen)) ///
-	(dropline disclosure_start_fracking time, msize(tiny) lcolor(midgreen) mcolor(midgreen)) ///
-	if state == "colorado" & time >= 600 & time <= 648, ///
-	graphregion(color(white)) bgcolor(white) ///
-	xlabel(600(6)648, angle(60)) ///
-	ylabel(0(100)100, noticks nolab) yscale(lstyle(none)) ///
-	legend(size(tiny) pos(10) ring(0) col(1)) xtitle("") 
-	graph export "$figdir/ggsearch_peakanduptick_colorado_trend.pdf", replace
-	
-	lab var disclosure_start_fracking "Begining of Disclosure Legislativel Process"
 ********************************************************************************
 	* without the fracking trend
 	*** OH
 	twoway ///
-	(dropline peak time, msize(vtiny) lcolor(red) mcolor(red)) ///
-	(dropline disclosure time, msize(vtiny) lcolor(dkgreen) mcolor(dkgreen)) ///
 	(dropline disclosure_start time, msize(vtiny) lcolor(midgreen) mcolor(midgreen)) ///
+	(dropline disclosure time, msize(vtiny) lcolor(dkgreen) mcolor(dkgreen)) ///
 	(dropline first_uptick time, msize(vtiny) lcolor(ltblue) mcolor(ltblue)) ///
 	(dropline first_biguptick time, msize(vtiny) lcolor(blue) mcolor(blue)) ///
+	(dropline peak time, msize(vtiny) lcolor(red) mcolor(red)) ///
 	if state == "ohio" & time >= 600 & time <= 648, ///
 	graphregion(color(white)) bgcolor(white) ///
 	xlabel(600(6)648, angle(60)) ///
@@ -264,11 +267,11 @@ Date Modified: Feb 24th, 2022
 	
 	*** PA
 	twoway ///
-	(dropline peak time, msize(vtiny) lcolor(red) mcolor(red)) ///
-	(dropline disclosure time, msize(vtiny) lcolor(dkgreen) mcolor(dkgreen)) ///
 	(dropline disclosure_start time, msize(vtiny) lcolor(midgreen) mcolor(midgreen)) ///
+	(dropline disclosure time, msize(vtiny) lcolor(dkgreen) mcolor(dkgreen)) ///
 	(dropline first_uptick time, msize(vtiny) lcolor(ltblue) mcolor(ltblue)) ///
 	(dropline first_biguptick time, msize(vtiny) lcolor(blue) mcolor(blue)) ///
+	(dropline peak time, msize(vtiny) lcolor(red) mcolor(red)) ///
 	if state == "pennsylvania" & time >= 600 & time <= 648, ///
 	graphregion(color(white)) bgcolor(white) ///
 	xlabel(600(6)648, angle(60)) ///
@@ -278,11 +281,11 @@ Date Modified: Feb 24th, 2022
 	
 	*** TX
 	twoway ///
-	(dropline peak time, msize(vtiny) lcolor(red) mcolor(red)) ///
-	(dropline disclosure time, msize(vtiny) lcolor(dkgreen) mcolor(dkgreen)) ///
 	(dropline disclosure_start time, msize(vtiny) lcolor(midgreen) mcolor(midgreen)) ///
+	(dropline disclosure time, msize(vtiny) lcolor(dkgreen) mcolor(dkgreen)) ///
 	(dropline first_uptick time, msize(vtiny) lcolor(ltblue) mcolor(ltblue)) ///
 	(dropline first_biguptick time, msize(vtiny) lcolor(blue) mcolor(blue)) ///
+	(dropline peak time, msize(vtiny) lcolor(red) mcolor(red)) ///
 	if state == "texas" & time >= 600 & time <= 660, ///
 	graphregion(color(white)) bgcolor(white) ///
 	xlabel(600(6)660, angle(60)) ///
@@ -295,9 +298,9 @@ Date Modified: Feb 24th, 2022
 
 	lab var disclosure_start "Begining of Disclosure Legislativel Process + First (Big) Uptick"
 	twoway ///
-	(dropline peak time, msize(vtiny) lcolor(red) mcolor(red)) ///
-	(dropline disclosure time, msize(vtiny) lcolor(dkgreen) mcolor(dkgreen)) ///
 	(dropline disclosure_start time, msize(vtiny) lcolor(midgreen) mcolor(midgreen)) ///
+	(dropline disclosure time, msize(vtiny) lcolor(dkgreen) mcolor(dkgreen)) ///
+	(dropline peak time, msize(vtiny) lcolor(red) mcolor(red)) ///
 	if state == "colorado" & time >= 600 & time <= 648, ///
 	graphregion(color(white)) bgcolor(white) ///
 	xlabel(600(6)648, angle(60)) ///
@@ -311,9 +314,9 @@ Date Modified: Feb 24th, 2022
 	*** OH 
 	foreach var in peak first_uptick first_biguptick {
 		twoway ///
-		(dropline `var' time, msize(vtiny) lcolor(red) mcolor(red)) ///
-		(dropline disclosure time, msize(vtiny) lcolor(dkgreen) mcolor(dkgreen)) ///
 		(dropline disclosure_start time, msize(vtiny) lcolor(midgreen) mcolor(midgreen)) ///
+		(dropline disclosure time, msize(vtiny) lcolor(dkgreen) mcolor(dkgreen)) ///
+		(dropline `var' time, msize(vtiny) lcolor(red) mcolor(red)) ///
 		if state == "ohio" & time >= 600 & time <= 648, ///
 		graphregion(color(white)) bgcolor(white) ///
 		xlabel(600(6)648, angle(60)) ///
@@ -325,9 +328,9 @@ Date Modified: Feb 24th, 2022
 	*** PA 
 	foreach var in peak first_uptick first_biguptick {
 		twoway ///
-		(dropline `var' time, msize(vtiny) lcolor(red) mcolor(red)) ///
-		(dropline disclosure time, msize(vtiny) lcolor(dkgreen) mcolor(dkgreen)) ///
 		(dropline disclosure_start time, msize(vtiny) lcolor(midgreen) mcolor(midgreen)) ///
+		(dropline disclosure time, msize(vtiny) lcolor(dkgreen) mcolor(dkgreen)) ///
+		(dropline `var' time, msize(vtiny) lcolor(red) mcolor(red)) ///
 		if state == "pennsylvania" & time >= 600 & time <= 648, ///
 		graphregion(color(white)) bgcolor(white) ///
 		xlabel(600(6)648, angle(60)) ///
@@ -339,9 +342,9 @@ Date Modified: Feb 24th, 2022
 	*** TX
 	foreach var in peak first_uptick first_biguptick {
 		twoway ///
-		(dropline `var' time, msize(vtiny) lcolor(red) mcolor(red)) ///
-		(dropline disclosure time, msize(vtiny) lcolor(dkgreen) mcolor(dkgreen)) ///
 		(dropline disclosure_start time, msize(vtiny) lcolor(midgreen) mcolor(midgreen)) ///
+		(dropline disclosure time, msize(vtiny) lcolor(dkgreen) mcolor(dkgreen)) ///
+		(dropline `var' time, msize(vtiny) lcolor(red) mcolor(red)) ///
 		if state == "texas" & time >= 600 & time <= 660, ///
 		graphregion(color(white)) bgcolor(white) ///
 		xlabel(600(6)660, angle(60)) ///
@@ -353,8 +356,8 @@ Date Modified: Feb 24th, 2022
 	*** CO
 	lab var disclosure_start "Begining of Disclosure Legislativel Process + First (Big) Uptick"
 	twoway ///
-	(dropline disclosure time, msize(vtiny) lcolor(dkgreen) mcolor(dkgreen)) ///
 	(dropline disclosure_start time, msize(vtiny) lcolor(midgreen) mcolor(midgreen)) ///
+	(dropline disclosure time, msize(vtiny) lcolor(dkgreen) mcolor(dkgreen)) ///
 	if state == "colorado" & time >= 600 & time <= 648, ///
 	graphregion(color(white)) bgcolor(white) ///
 	xlabel(600(6)648, angle(60)) ///
@@ -364,9 +367,9 @@ Date Modified: Feb 24th, 2022
 	graph export "$figdir/ggsearch_peakanduptick_colorado_first_biguptick.pdf", replace
 
 	twoway ///
-	(dropline peak time, msize(vtiny) lcolor(red) mcolor(red)) ///
-	(dropline disclosure time, msize(vtiny) lcolor(dkgreen) mcolor(dkgreen)) ///
 	(dropline disclosure_start time, msize(vtiny) lcolor(midgreen) mcolor(midgreen)) ///
+	(dropline disclosure time, msize(vtiny) lcolor(dkgreen) mcolor(dkgreen)) ///
+	(dropline peak time, msize(vtiny) lcolor(red) mcolor(red)) ///
 	if state == "colorado" & time >= 600 & time <= 648, ///
 	graphregion(color(white)) bgcolor(white) ///
 	xlabel(600(6)648, angle(60)) ///

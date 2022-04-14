@@ -1,9 +1,8 @@
-------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
       name:  <unnamed>
-       log:  /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/
-> code/LogFiles/an_02_googletrends_state.txt
+       log:  C:/Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/code/LogFiles/an_02_googletrends_state.txt
   log type:  text
- opened on:  24 Feb 2022, 23:09:22
+ opened on:  14 Apr 2022, 16:15:24
 
 . 
 . /**************
@@ -23,8 +22,7 @@
 .         local f "year_month_fe"
 
 .                         
-.         * regressions with state and year month fixed effects, outputting residual
-> s
+.         * regressions with state and year month fixed effects, outputting residuals
 .         reghdfe fracking, `e' absorb(`f') residuals(residuals)
 (dropped 26 singleton observations)
 (MWFE estimator converged in 1 iterations)
@@ -37,10 +35,10 @@ Statistics robust to heteroskedasticity           Prob > F        =          .
                                                   Within R-sq.    =     0.0000
 Number of clusters (state_fe) =         35        Root MSE        =    22.3356
 
-                              (Std. Err. adjusted for 35 clusters in state_fe)
+                              (Std. err. adjusted for 35 clusters in state_fe)
 ------------------------------------------------------------------------------
              |               Robust
-    fracking |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+    fracking | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
 -------------+----------------------------------------------------------------
        _cons |   24.68805   .9493292    26.01   0.000     22.75878    26.61732
 ------------------------------------------------------------------------------
@@ -62,8 +60,7 @@ Absorbed degrees of freedom:
 (4,200 missing values generated)
 
 .         export delimited "$basedir/peak_googletrends1.csv", replace
-file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/bas
-> e/peak_googletrends1.csv saved
+file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/base/peak_googletrends1.csv saved
 
 .         
 .         * output only state-month combination with peaks
@@ -75,8 +72,7 @@ file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data
 .                 drop peak
 
 .                 export delimited "$basedir/peak_googletrends2.csv", replace
-file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/bas
-> e/peak_googletrends2.csv saved
+file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/base/peak_googletrends2.csv saved
 
 .         restore
 
@@ -84,8 +80,7 @@ file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data
 .         * get the upticks of google search trend
 .                 gen se = _se[_cons]
 
-.                 gen uptick_limit = 2*se // 2 times the standard errors from the fe
->  regressions
+.                 gen uptick_limit = 2*se // 2 times the standard errors from the fe regressions
 
 .                 gen upticks = 1 if residuals >= uptick_limit
 (2,558 missing values generated)
@@ -103,8 +98,7 @@ file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data
 .                         rename upticks first_uptick
 
 .                         save "$interdir/first_uptick", replace
-file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/int
-> ermediate/first_uptick.dta saved
+file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/intermediate/first_uptick.dta saved
 
 .                 restore
 
@@ -129,8 +123,7 @@ file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data
 .                         rename upticks first_biguptick
 
 .                         save "$interdir/first_biguptick", replace
-file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/int
-> ermediate/first_biguptick.dta saved
+file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/intermediate/first_biguptick.dta saved
 
 .                 restore
 
@@ -139,26 +132,26 @@ file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data
 .                 
 .                 merge 1:1 state time using "$interdir/first_uptick" 
 
-    Result                           # of obs.
+    Result                      Number of obs
     -----------------------------------------
-    not matched                         4,200
+    Not matched                         4,200
         from master                     4,200  (_merge==1)
         from using                          0  (_merge==2)
 
-    matched                                35  (_merge==3)
+    Matched                                35  (_merge==3)
     -----------------------------------------
 
 .                 drop _merge
 
 .                 merge 1:1 state time using "$interdir/first_biguptick"
 
-    Result                           # of obs.
+    Result                      Number of obs
     -----------------------------------------
-    not matched                         4,200
+    Not matched                         4,200
         from master                     4,200  (_merge==1)
         from using                          0  (_merge==2)
 
-    matched                                35  (_merge==3)
+    Matched                                35  (_merge==3)
     -----------------------------------------
 
 .                 drop _merge
@@ -167,13 +160,13 @@ file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data
 
 .                 merge m:1 state using "$basedir/disclosurerule_datePB.dta"
 
-    Result                           # of obs.
+    Result                      Number of obs
     -----------------------------------------
-    not matched                         2,178
+    Not matched                         2,178
         from master                     2,178  (_merge==1)
         from using                          0  (_merge==2)
 
-    matched                             2,057  (_merge==3)
+    Matched                             2,057  (_merge==3)
     -----------------------------------------
 
 .                         keep if _merge == 3 // keep only disclosure states
@@ -190,17 +183,16 @@ file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data
 
 .                 merge m:1 state using "$basedir/disclosurerule_dateUpdated.dta"
 
-    Result                           # of obs.
+    Result                      Number of obs
     -----------------------------------------
-    not matched                           121
+    Not matched                           121
         from master                       121  (_merge==1)
         from using                          0  (_merge==2)
 
-    matched                             1,936  (_merge==3)
+    Matched                             1,936  (_merge==3)
     -----------------------------------------
 
-.                         keep if _merge == 3 // keep only disclosure states (get ri
-> d of Michigan)
+.                         keep if _merge == 3 // keep only disclosure states (get rid of Michigan)
 (121 observations deleted)
 
 .                         drop _merge
@@ -220,294 +212,18 @@ file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data
 (0 observations deleted)
 
 .                 save "$basedir/ggsearch_dates", replace
-file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/bas
-> e/ggsearch_dates.dta saved
+file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/base/ggsearch_dates.dta saved
 
 .                 
 . /**************
 >         Summary Statistics 
 >         ***************/
-.         
-. 
-end of do-file
-
-. do "/var/folders/j0/m4ml1k5n497d6fwz1z9j80040000gn/T//SD20985.000000"
-
-.         use "$basedir/ggsearch_dates", clear
-
-. 
-end of do-file
-
-. br
-
-. do "/var/folders/j0/m4ml1k5n497d6fwz1z9j80040000gn/T//SD20985.000000"
-
 .         use "$basedir/ggsearch_dates", clear
 
 .         * First Big Uptick and Legislative Start Date
 .         rename disclosure_start_month disc_time
 
-.         * generate first big uptick media coverage time to compare with disclosure
->  time
-.         gen firstbiguptick_time = first_biguptick*time
-(1,920 missing values generated)
-
-.         format firstbiguptick_time %tm
-
-.         * collapse to state level 
-.         collapse (max) disc_time firstbiguptick_time, by(state)
-
-.         gen before_state = 1 if disc_time <= firstbiguptick_time 
-(7 missing values generated)
-
-.         replace before_state = 0 if before_state >=.
-(7 real changes made)
-
-.         bysort before_state: gen count = _N
-
-.         gen diff = firstbiguptick_time - disc_time
-
-.         collapse (mean) mean_diff = diff (median) median_diff = diff (first) count
-> , by(before_state)
-
-.         save "$tabdir/Summary Statistics (first big uptick (Google))", replace
-(note: file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/o
-> utput/tables/Summary Statistics (first big uptick (Google)).dta not found)
-file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/t
-> ables/Summary Statistics (first big uptick (Google)).dta saved
-
-. 
-end of do-file
-
-. do "/var/folders/j0/m4ml1k5n497d6fwz1z9j80040000gn/T//SD20985.000000"
-
-.         ***************/
-.         use "$basedir/ggsearch_dates", clear
-
-.         * First Big Uptick and Legislative Start Date
-.         rename disclosure_start_month disc_time
-
-.         * generate first big uptick media coverage time to compare with disclosure
->  time
-.         gen firstbiguptick_time = first_biguptick*time
-(1,920 missing values generated)
-
-.         format firstbiguptick_time %tm
-
-.         * collapse to state level 
-.         collapse (max) disc_time firstbiguptick_time, by(state)
-
-. 
-end of do-file
-
-. do "/var/folders/j0/m4ml1k5n497d6fwz1z9j80040000gn/T//SD20985.000000"
-
-.         use "$basedir/ggsearch_dates", clear
-
-.         * First Big Uptick and Legislative Start Date
-.         rename disclosure_start_month disc_time
-
-.         * generate first big uptick media coverage time to compare with disclosure
->  time
-.         gen firstbiguptick_time = first_biguptick*time
-(1,920 missing values generated)
-
-.         format firstbiguptick_time %tm
-
-.         * collapse to state level 
-.         collapse (max) disc_time firstbiguptick_time, by(state)
-
-.         gen before_state = 1 if disc_time <= firstbiguptick_time 
-(7 missing values generated)
-
-.         replace before_state = 0 if before_state >=.
-(7 real changes made)
-
-.         bysort before_state: gen count = _N
-
-.         gen diff = firstbiguptick_time - disc_time
-
-.         collapse (mean) mean_diff = diff (median) median_diff = diff (first) count
-> , by(before_state)
-
-.         save "$tabdir/Summary Statistics (first big uptick (Google))", replace
-file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/t
-> ables/Summary Statistics (first big uptick (Google)).dta saved
-
-. 
-end of do-file
-
-. do "/var/folders/j0/m4ml1k5n497d6fwz1z9j80040000gn/T//SD20985.000000"
-
-.         use "$basedir/ggsearch_dates", clear
-
-.         * First Big Uptick and Legislative Start Date
-.         rename disclosure_start_month disc_time
-
-.         * generate first big uptick media coverage time to compare with disclosure
->  time
-.         gen firstbiguptick_time = first_biguptick*time
-(1,920 missing values generated)
-
-.         format firstbiguptick_time %tm
-
-.         * collapse to state level 
-.         collapse (max) disc_time firstbiguptick_time, by(state)
-
-.         gen before_state = 1 if disc_time <= firstbiguptick_time 
-(7 missing values generated)
-
-.         replace before_state = 0 if before_state >=.
-(7 real changes made)
-
-.         bysort before_state: gen count = _N
-
-.         gen diff = firstbiguptick_time - disc_time
-
-. 
-end of do-file
-
-. use "/Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output
-> /tables/Summary Statistics (first big uptick (Google)).dta", clear
-
-. br
-
-. br
-
-. use "/Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output
-> /tables/Summary Statistics (first big uptick (Media)).dta"
-
-. br
-
-. do "/var/folders/j0/m4ml1k5n497d6fwz1z9j80040000gn/T//SD20985.000000"
-
-.         use "$basedir/ggsearch_dates", clear
-
-.         * First Big Uptick and Legislative Start Date
-.         rename disclosure_start_month disc_time
-
-.         * generate first big uptick media coverage time to compare with disclosure
->  time
-.         gen firstbiguptick_time = first_biguptick*time
-(1,920 missing values generated)
-
-.         format firstbiguptick_time %tm
-
-.         * collapse to state level 
-.         collapse (max) disc_time firstbiguptick_time, by(state)
-
-.         gen before_state = 1 if disc_time <= firstbiguptick_time 
-(7 missing values generated)
-
-.         replace before_state = 0 if before_state >=.
-(7 real changes made)
-
-.         bysort before_state: gen count = _N
-
-.         gen diff = firstbiguptick_time - disc_time
-
-.         collapse (mean) mean_diff = diff (median) median_diff = diff (first) count
-> , by(before_state)
-
-. 
-end of do-file
-
-. br
-
-. do "/var/folders/j0/m4ml1k5n497d6fwz1z9j80040000gn/T//SD20985.000000"
-
-.         use "$basedir/ggsearch_dates", clear
-
-.         * First Big Uptick and Legislative Start Date
-.         rename disclosure_start_month disc_time
-
-.         * generate first big uptick media coverage time to compare with disclosure
->  time
-.         gen firstbiguptick_time = first_biguptick*time
-(1,920 missing values generated)
-
-.         format firstbiguptick_time %tm
-
-.         * collapse to state level 
-.         collapse (max) disc_time firstbiguptick_time, by(state)
-
-.         gen before_state = 1 if disc_time <= firstbiguptick_time 
-(7 missing values generated)
-
-.         replace before_state = 0 if before_state >=.
-(7 real changes made)
-
-.         bysort before_state: gen count = _N
-
-.         gen diff = firstbiguptick_time - disc_time
-
-. 
-end of do-file
-
-. br
-
-. collapse (total) diff
-(total) invalid statistic
-r(198);
-
-. egen diff_mean = mean(diff)
-
-. br
-
-. egen diff_median = median(diff)
-
-. br
-
-. do "/var/folders/j0/m4ml1k5n497d6fwz1z9j80040000gn/T//SD20985.000000"
-
-.         use "$basedir/ggsearch_dates", clear
-
-.         * First Big Uptick and Legislative Start Date
-.         rename disclosure_start_month disc_time
-
-.         * generate first big uptick media coverage time to compare with disclosure
->  time
-.         gen firstbiguptick_time = first_biguptick*time
-(1,920 missing values generated)
-
-.         format firstbiguptick_time %tm
-
-.         * collapse to state level 
-.         collapse (max) disc_time firstbiguptick_time, by(state)
-
-.         gen before_state = 1 if disc_time <= firstbiguptick_time 
-(7 missing values generated)
-
-.         replace before_state = 0 if before_state >=.
-(7 real changes made)
-
-.         bysort before_state: gen count = _N
-
-.         gen diff = firstbiguptick_time - disc_time
-
-.         egen diff_mean = mean(diff)
-
-.         collapse (mean) mean_diff = diff (median) median_diff = diff (first) count
-> , by(before_state)
-
-.         save "$tabdir/Summary Statistics (first big uptick (Google))", replace
-file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/t
-> ables/Summary Statistics (first big uptick (Google)).dta saved
-
-. 
-end of do-file
-
-. br
-
-. do "/var/folders/j0/m4ml1k5n497d6fwz1z9j80040000gn/T//SD20985.000000"
-
-.         use "$basedir/ggsearch_dates", clear
-
-.         * First Big Uptick and Legislative Start Date
-.         rename disclosure_start_month disc_time
-
-.         * generate first big uptick media coverage time to compare with disclosure
->  time
+.         * generate first big uptick media coverage time to compare with disclosure time
 .         gen firstbiguptick_time = first_biguptick*time
 (1,920 missing values generated)
 
@@ -528,40 +244,384 @@ end of do-file
 
 .         egen diff_mean_total = mean(diff)
 
-.         collapse (mean) mean_diff = diff (median) median_diff = diff (first) count
->  diff_mean_total, by(before_state)
+.         collapse (mean) mean_diff = diff (median) median_diff = diff (first) count diff_mean_total, by(before_state)
 
 .         save "$tabdir/Summary Statistics (first big uptick (Google))", replace
-file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/t
-> ables/Summary Statistics (first big uptick (Google)).dta saved
+file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/tables/Summary Statistics (first big uptick (Google)).dta saved
+
+.         
+.         * generate summary statistics on the dates of the peaks/upticks/disclosure
+.         
+.         use "$basedir/ggsearch_dates", clear
+
+.         * keep only peak, disclosure rule month, first tick date
+.         rename disclosure_month disclosure
+
+.         rename disclosure_start_month disclosure_start
+
+.         keep if peak == 1 | first_uptick == 1 | first_biguptick == 1 | ///
+>                         time == disclosure | time == disclosure_start
+(1,866 observations deleted)
+
+.         * generate peak/uptick times
+.         foreach x in peak first_uptick first_biguptick {
+  2.                 replace `x' = `x' * time
+  3.                 format `x' %tm
+  4.         }
+(16 real changes made)
+(16 real changes made)
+(16 real changes made)
+
+.         collapse (max) peak first_uptick first_biguptick disclosure disclosure_start, by(state)
+
+.         order state disclosure
 
 . 
-end of do-file
+. *** manually inspect the states where two or more dates overlap 
+.         * arkansas (move first uptick from 2010m8 to 2010m7)
+.         * colorado (move first uptick 1 month prior and first big uptick 1 month later)
+.         * mississippi (move first uptick back 2, first big uptick back 1)
+.         * montana (move first big uptick 1 month back)
+.         * oklahoma (move first uptick back 1)
+.         * wv (move disclosure start date back 1, first big uptick forward 1)
+.         
+.         gen peak_minus_disclosure = peak - disclosure
 
-. br
+.         gen first_uptick_minus_disclosure = first_uptick - disclosure
 
-. do "/var/folders/j0/m4ml1k5n497d6fwz1z9j80040000gn/T//SD20985.000000"
+.         gen first_biguptick_minus_disclosure = first_biguptick - disclosure
 
-. * Analyze Google Search Trends (find the peak)
-. local fname an_01_mediacoverage
+.         export delimited "$tabdir/ggsearch_peakanduptick_table.csv", replace
+file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/tables/ggsearch_peakanduptick_table.csv saved
 
-. 
-. /*******************************************************************************
-> 
-> * obtain the peaks and upticks of google search trend
-> 
-> Author: Zirui Song
-> Date Created: Feb 5th, 2022
-> Date Modified: Feb 24th, 2022
-> 
-> ********************************************************************************/
-. 
+.         keep state disclosure peak peak_minus_disclosure
+
+.         export delimited "$tabdir/ggsearch_peak_table.csv", replace
+file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/tables/ggsearch_peak_table.csv saved
+
+.         
+. /*** perform the changes specifies from the manual inspection above
+>         Update: Actually not changing the date might be better
+>         use "$basedir/ggsearch_dates", clear
+>         replace first_uptick = first_uptick[_n+1] if state == "arkansas"
+>         
+>         replace first_uptick = first_uptick[_n+1] if state == "colorado"
+>         replace first_biguptick = 1 if state == "colorado" & time == ym(2011, 12)
+>         replace first_biguptick = . if state == "colorado" & time == ym(2011, 11)
+>         
+>         replace first_uptick = first_uptick[_n+2] if state == "mississippi"
+>         replace first_biguptick = first_biguptick[_n+1] if state == "mississippi"
+>         
+>         replace first_biguptick = first_biguptick[_n+1] if state == "montana"
+>         
+>         replace first_uptick = first_uptick[_n+1] if state == "oklahoma"
+>         
+>         replace disclosure_start_month = disclosure_start_month - 1 if state == "westvirginia"
+>         replace first_biguptick = 1 if state == "westvirginia" & time == ym(2011, 9)
+>         replace first_biguptick = . if state == "westvirginia" & time == ym(2011, 8) 
+>         save "$basedir/ggsearch_dates", replace */
+.         
 . /**************
->         Basic Set-up
->         ***************/
-.         clear all
+>         Output Figures 
+>         ***************/        
+.         
+.         * get plots of peak and uptick for fracking states 
+.         
+.         use "$basedir/ggsearch_dates", clear
 
-.         set more off, permanently
-(set more preference recorded)
+.         gen peak_fracking = fracking*peak
+(1,920 missing values generated)
 
-.         capture log close
+.         gen first_uptick_fracking = fracking*first_uptick
+(1,920 missing values generated)
+
+.         gen first_biguptick_fracking = fracking*first_biguptick
+(1,920 missing values generated)
+
+.         gen disclosure_fracking = fracking if time == disclosure_month
+(1,920 missing values generated)
+
+.         gen disclosure = 1 if time == disclosure_month
+(1,920 missing values generated)
+
+.         gen disclosure_start_fracking = fracking if time == disclosure_start_month
+(1,920 missing values generated)
+
+.         gen disclosure_start = 1 if time == disclosure_start_month
+(1,920 missing values generated)
+
+.         
+.         lab var fracking "Google Search Intensity (Fracking)"
+
+.         
+.         lab var peak_fracking "Google Search Peak"
+
+.         lab var first_uptick_fracking "Google Search First Uptick"
+
+.         lab var first_biguptick_fracking "Google Search First Big Uptick"
+
+.         lab var disclosure_fracking "Disclosure Rule"
+
+.         lab var disclosure_start_fracking "Begining of Disclosure Legislativel Process"
+
+.         
+.         lab var peak "Google Search Peak"
+
+.         lab var disclosure "Disclosure Rule"
+
+.         lab var disclosure_start "Beginning of Disclosure Legislative Process"
+
+.         lab var first_uptick "Google Search First Uptick"
+
+.         lab var first_biguptick "Google Search First Big Uptick"
+
+. 
+.         xtset st time
+
+Panel variable: st (strongly balanced)
+ Time variable: time, 2010m1 to 2020m1
+         Delta: 1 month
+
+.         
+. **************************** Single Plots **********************************
+. * write function for plots
+. capture program drop plot_frackingtrend_disclosure
+
+. program plot_frackingtrend_disclosure
+  1.         args st time
+  2.         twoway ///
+>         (line fracking time, lcolor(black) lwidth(vthin)) ///
+>         (dropline disclosure_start_fracking time, msize(tiny) lcolor(midgreen) mcolor(midgreen) lpattern(shortdash)) ///
+>         (dropline disclosure_fracking time, msize(tiny) lcolor(dkgreen) mcolor(dkgreen) lpattern(shortdash_dot)) ///
+>         (dropline first_uptick_fracking time, msize(tiny) lcolor(ltblue) mcolor(ltblue) lpattern(longdash)) ///
+>         (dropline first_biguptick_fracking time, msize(tiny) lcolor(blue) mcolor(blue) lpattern(longdash_dot)) ///
+>         (dropline peak_fracking time, msize(tiny) lcolor(red) mcolor(red) lpattern(dash)) ///
+>         if state == "`st'" & time >= 600 & time <= `time', ///
+>         graphregion(color(white)) bgcolor(white) ///
+>         xlabel(600(6)`time', labsize(vsmall)) ///
+>         ylabel(0(100)100, noticks nolab) yscale(lstyle(none)) ///
+>         legend(size(tiny) pos(11) ring(0) col(1) region(lwidth(none))) xtitle("") 
+  3.         graph export "$figdir/ggsearch_peakanduptick_`st'_trend.pdf", replace
+  4. end
+
+.                                                                                                                                         
+. plot_frackingtrend_disclosure "ohio" 648
+file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/ggsearch_peakanduptick_ohio_trend.pdf saved as PDF format
+
+. plot_frackingtrend_disclosure "pennsylvania" 648
+file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/ggsearch_peakanduptick_pennsylvania_trend.pdf saved as PDF format
+
+. plot_frackingtrend_disclosure "texas" 672
+file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/ggsearch_peakanduptick_texas_trend.pdf saved as PDF format
+
+. plot_frackingtrend_disclosure "kansas" 672
+file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/ggsearch_peakanduptick_kansas_trend.pdf saved as PDF format
+
+. plot_frackingtrend_disclosure "kentucky" 672
+file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/ggsearch_peakanduptick_kentucky_trend.pdf saved as PDF format
+
+. plot_frackingtrend_disclosure "louisiana" 672
+file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/ggsearch_peakanduptick_louisiana_trend.pdf saved as PDF format
+
+. plot_frackingtrend_disclosure "montana" 648
+file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/ggsearch_peakanduptick_montana_trend.pdf saved as PDF format
+
+. plot_frackingtrend_disclosure "newmexico" 648
+file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/ggsearch_peakanduptick_newmexico_trend.pdf saved as PDF format
+
+. plot_frackingtrend_disclosure "northdakota" 648
+file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/ggsearch_peakanduptick_northdakota_trend.pdf saved as PDF format
+
+. plot_frackingtrend_disclosure "oklahoma" 686
+file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/ggsearch_peakanduptick_oklahoma_trend.pdf saved as PDF format
+
+. plot_frackingtrend_disclosure "utah" 660
+file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/ggsearch_peakanduptick_utah_trend.pdf saved as PDF format
+
+. plot_frackingtrend_disclosure "wyoming" 686
+file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/ggsearch_peakanduptick_wyoming_trend.pdf saved as PDF format
+
+.                                                                                                                                                                 
+. plot_frackingtrend_disclosure "colorado" 660
+file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/ggsearch_peakanduptick_colorado_trend.pdf saved as PDF format
+
+. plot_frackingtrend_disclosure "arkansas" 636
+file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/ggsearch_peakanduptick_arkansas_trend.pdf saved as PDF format
+
+. plot_frackingtrend_disclosure "mississippi" 648
+file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/ggsearch_peakanduptick_mississippi_trend.pdf saved as PDF format
+
+. plot_frackingtrend_disclosure "westvirginia" 660                                                                                                                                
+>                                                                                                                                                         
+file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/ggsearch_peakanduptick_westvirginia_trend.pdf saved as PDF format
+
+.         
+. ********************************************************************************
+.         * without the fracking trend
+.         *** OH
+.         twoway ///
+>         (dropline disclosure_start time, msize(vtiny) lcolor(midgreen) mcolor(midgreen)) ///
+>         (dropline disclosure time, msize(vtiny) lcolor(dkgreen) mcolor(dkgreen)) ///
+>         (dropline first_uptick time, msize(vtiny) lcolor(ltblue) mcolor(ltblue)) ///
+>         (dropline first_biguptick time, msize(vtiny) lcolor(blue) mcolor(blue)) ///
+>         (dropline peak time, msize(vtiny) lcolor(red) mcolor(red)) ///
+>         if state == "ohio" & time >= 600 & time <= 648, ///
+>         graphregion(color(white)) bgcolor(white) ///
+>         xlabel(600(6)648, angle(60)) ///
+>         ylabel(0(1)1, noticks nolab) yscale(lstyle(none)) ///
+>         legend(size(tiny) pos(9) ring(0) col(1)) xtitle("") 
+
+.         graph export "$figdir/ggsearch_peakanduptick_ohio.pdf", replace
+file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/ggsearch_peakanduptick_ohio.pdf saved as PDF format
+
+.         
+.         *** PA
+.         twoway ///
+>         (dropline disclosure_start time, msize(vtiny) lcolor(midgreen) mcolor(midgreen)) ///
+>         (dropline disclosure time, msize(vtiny) lcolor(dkgreen) mcolor(dkgreen)) ///
+>         (dropline first_uptick time, msize(vtiny) lcolor(ltblue) mcolor(ltblue)) ///
+>         (dropline first_biguptick time, msize(vtiny) lcolor(blue) mcolor(blue)) ///
+>         (dropline peak time, msize(vtiny) lcolor(red) mcolor(red)) ///
+>         if state == "pennsylvania" & time >= 600 & time <= 648, ///
+>         graphregion(color(white)) bgcolor(white) ///
+>         xlabel(600(6)648, angle(60)) ///
+>         ylabel(0(1)1, noticks nolab) yscale(lstyle(none)) ///
+>         legend(size(tiny) pos(3) ring(0) col(1)) xtitle("") 
+
+.         graph export "$figdir/ggsearch_peakanduptick_pennsylvania.pdf", replace
+file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/ggsearch_peakanduptick_pennsylvania.pdf saved as PDF format
+
+.         
+.         *** TX
+.         twoway ///
+>         (dropline disclosure_start time, msize(vtiny) lcolor(midgreen) mcolor(midgreen)) ///
+>         (dropline disclosure time, msize(vtiny) lcolor(dkgreen) mcolor(dkgreen)) ///
+>         (dropline first_uptick time, msize(vtiny) lcolor(ltblue) mcolor(ltblue)) ///
+>         (dropline first_biguptick time, msize(vtiny) lcolor(blue) mcolor(blue)) ///
+>         (dropline peak time, msize(vtiny) lcolor(red) mcolor(red)) ///
+>         if state == "texas" & time >= 600 & time <= 660, ///
+>         graphregion(color(white)) bgcolor(white) ///
+>         xlabel(600(6)660, angle(60)) ///
+>         ylabel(0(1)1, noticks nolab) yscale(lstyle(none)) ///
+>         legend(size(tiny) pos(3) ring(0) col(1)) xtitle("") 
+
+.         graph export "$figdir/ggsearch_peakanduptick_texas.pdf", replace
+file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/ggsearch_peakanduptick_texas.pdf saved as PDF format
+
+.         
+.         *** CO 
+.         // Issue: same date for disclosure start month and Google Search First Uptick and First Big Uptick!!!
+. 
+.         lab var disclosure_start "Begining of Disclosure Legislativel Process + First (Big) Uptick"
+
+.         twoway ///
+>         (dropline disclosure_start time, msize(vtiny) lcolor(midgreen) mcolor(midgreen)) ///
+>         (dropline disclosure time, msize(vtiny) lcolor(dkgreen) mcolor(dkgreen)) ///
+>         (dropline peak time, msize(vtiny) lcolor(red) mcolor(red)) ///
+>         if state == "colorado" & time >= 600 & time <= 648, ///
+>         graphregion(color(white)) bgcolor(white) ///
+>         xlabel(600(6)648, angle(60)) ///
+>         ylabel(0(1)1, noticks nolab) yscale(lstyle(none)) ///
+>         legend(size(tiny) pos(9) ring(0) col(1)) xtitle("") 
+
+.         graph export "$figdir/ggsearch_peakanduptick_colorado.pdf", replace
+file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/ggsearch_peakanduptick_colorado.pdf saved as PDF format
+
+.         
+.         lab var disclosure_start "Begining of Disclosure Legislativel Process"
+
+.         ****************************** 1x3 Plots ***********************************
+.         
+.         *** OH 
+.         foreach var in peak first_uptick first_biguptick {
+  2.                 twoway ///
+>                 (dropline disclosure_start time, msize(vtiny) lcolor(midgreen) mcolor(midgreen)) ///
+>                 (dropline disclosure time, msize(vtiny) lcolor(dkgreen) mcolor(dkgreen)) ///
+>                 (dropline `var' time, msize(vtiny) lcolor(red) mcolor(red)) ///
+>                 if state == "ohio" & time >= 600 & time <= 648, ///
+>                 graphregion(color(white)) bgcolor(white) ///
+>                 xlabel(600(6)648, angle(60)) ///
+>                 ylabel(0(1)1, noticks nolab) yscale(lstyle(none)) ///
+>                 legend(size(tiny) pos(9) ring(0) col(1)) xtitle("") 
+  3.                 graph export "$figdir/ggsearch_peakanduptick_ohio_`var'.pdf", replace
+  4.         }
+file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/ggsearch_peakanduptick_ohio_peak.pdf saved as PDF format
+file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/ggsearch_peakanduptick_ohio_first_uptick.pdf saved as PDF format
+file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/ggsearch_peakanduptick_ohio_first_biguptick.pdf saved as PDF format
+
+.         
+.         *** PA 
+.         foreach var in peak first_uptick first_biguptick {
+  2.                 twoway ///
+>                 (dropline disclosure_start time, msize(vtiny) lcolor(midgreen) mcolor(midgreen)) ///
+>                 (dropline disclosure time, msize(vtiny) lcolor(dkgreen) mcolor(dkgreen)) ///
+>                 (dropline `var' time, msize(vtiny) lcolor(red) mcolor(red)) ///
+>                 if state == "pennsylvania" & time >= 600 & time <= 648, ///
+>                 graphregion(color(white)) bgcolor(white) ///
+>                 xlabel(600(6)648, angle(60)) ///
+>                 ylabel(0(1)1, noticks nolab) yscale(lstyle(none)) ///
+>                 legend(size(tiny) pos(9) ring(0) col(1)) xtitle("") 
+  3.                 graph export "$figdir/ggsearch_peakanduptick_pennsylvania_`var'.pdf", replace
+  4.         }
+file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/ggsearch_peakanduptick_pennsylvania_peak.pdf saved as PDF format
+file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/ggsearch_peakanduptick_pennsylvania_first_uptick.pdf saved as PDF format
+file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/ggsearch_peakanduptick_pennsylvania_first_biguptick.pdf saved as PDF format
+
+.         
+.         *** TX
+.         foreach var in peak first_uptick first_biguptick {
+  2.                 twoway ///
+>                 (dropline disclosure_start time, msize(vtiny) lcolor(midgreen) mcolor(midgreen)) ///
+>                 (dropline disclosure time, msize(vtiny) lcolor(dkgreen) mcolor(dkgreen)) ///
+>                 (dropline `var' time, msize(vtiny) lcolor(red) mcolor(red)) ///
+>                 if state == "texas" & time >= 600 & time <= 660, ///
+>                 graphregion(color(white)) bgcolor(white) ///
+>                 xlabel(600(6)660, angle(60)) ///
+>                 ylabel(0(1)1, noticks nolab) yscale(lstyle(none)) ///
+>                 legend(size(tiny) pos(3) ring(0) col(1)) xtitle("") 
+  3.                 graph export "$figdir/ggsearch_peakanduptick_texas_`var'.pdf", replace
+  4.         }
+file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/ggsearch_peakanduptick_texas_peak.pdf saved as PDF format
+file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/ggsearch_peakanduptick_texas_first_uptick.pdf saved as PDF format
+file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/ggsearch_peakanduptick_texas_first_biguptick.pdf saved as PDF format
+
+.         
+.         *** CO
+.         lab var disclosure_start "Begining of Disclosure Legislativel Process + First (Big) Uptick"
+
+.         twoway ///
+>         (dropline disclosure_start time, msize(vtiny) lcolor(midgreen) mcolor(midgreen)) ///
+>         (dropline disclosure time, msize(vtiny) lcolor(dkgreen) mcolor(dkgreen)) ///
+>         if state == "colorado" & time >= 600 & time <= 648, ///
+>         graphregion(color(white)) bgcolor(white) ///
+>         xlabel(600(6)648, angle(60)) ///
+>         ylabel(0(1)1, noticks nolab) yscale(lstyle(none)) ///
+>         legend(size(tiny) pos(9) ring(0) col(1)) xtitle("") 
+
+.         graph export "$figdir/ggsearch_peakanduptick_colorado_first_uptick.pdf", replace
+file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/ggsearch_peakanduptick_colorado_first_uptick.pdf saved as PDF format
+
+.         graph export "$figdir/ggsearch_peakanduptick_colorado_first_biguptick.pdf", replace
+file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/ggsearch_peakanduptick_colorado_first_biguptick.pdf saved as PDF format
+
+. 
+.         twoway ///
+>         (dropline disclosure_start time, msize(vtiny) lcolor(midgreen) mcolor(midgreen)) ///
+>         (dropline disclosure time, msize(vtiny) lcolor(dkgreen) mcolor(dkgreen)) ///
+>         (dropline peak time, msize(vtiny) lcolor(red) mcolor(red)) ///
+>         if state == "colorado" & time >= 600 & time <= 648, ///
+>         graphregion(color(white)) bgcolor(white) ///
+>         xlabel(600(6)648, angle(60)) ///
+>         ylabel(0(1)1, noticks nolab) yscale(lstyle(none)) ///
+>         legend(size(tiny) pos(9) ring(0) col(1)) xtitle("") 
+
+.         graph export "$figdir/ggsearch_peakanduptick_colorado_peak.pdf", replace
+file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures/ggsearch_peakanduptick_colorado_peak.pdf saved as PDF format
+
+. 
+.         lab var disclosure_start "Begining of Disclosure Legislativel Process"
+
+.         
+. ********************************* END ******************************************
+. 
+. capture log close

@@ -3,7 +3,7 @@
        log:  /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/
 > code/LogFiles/an_01_mediacoverage.txt
   log type:  text
- opened on:  24 Feb 2022, 23:32:17
+ opened on:   1 Apr 2022, 16:52:17
 
 . 
 . /**************
@@ -323,105 +323,167 @@ file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/outp
 file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/t
 > ables/Summary Statistics (first big uptick (Media)).dta saved
 
-. 
-end of do-file
-
-. br
-
-. do "/var/folders/j0/m4ml1k5n497d6fwz1z9j80040000gn/T//SD20985.000000"
-
+.         
 .         use "$basedir/mediacoverage_dates", clear 
 
-.         rename disclosure_start_month disc_time
+.         * summary statistics in table 
+.         * keep only peak, disclosure rule month, first tick date
+.         keep if peak == 1 | first_uptick == 1 | first_biguptick == 1 | disclosure 
+> == 1 | disclosure_start == 1
+(1,935 observations deleted)
 
-.         * generate first big uptick media coverage time to compare with disclosure
->  time
-.         gen firstbiguptick_time = first_biguptick*time
-(1,984 missing values generated)
+.         * replace arkansas first_biguptick (regression analysis not reasonable) 
+.         * generate peak/uptick times
+.         foreach x in peak first_uptick first_biguptick disclosure disclosure_start
+>  {
+  2.                 replace `x' = `x' * time
+  3.                 format `x' %tm
+  4.         }
+(16 real changes made)
+(16 real changes made)
+(16 real changes made)
+(16 real changes made)
+(16 real changes made)
 
-.         format firstbiguptick_time %tm
+.         collapse (max) peak first_uptick first_biguptick disclosure disclosure_sta
+> rt, by(state)
 
-.         * collapse to state level 
-.         collapse (max) disc_time firstbiguptick_time, by(state)
+.         order state disclosure
 
-.         gen before_state = 1 if disc_time <= firstbiguptick_time 
-(9 missing values generated)
+.         gen peak_minus_disclosure = peak - disclosure
 
-.         replace before_state = 0 if before_state >=.
-(9 real changes made)
+.         gen first_uptick_minus_disclosure = first_uptick - disclosure
 
-.         bysort before_state: gen count = _N
+.         gen first_biguptick_minus_disclosure = first_biguptick - disclosure
 
-.         gen diff = firstbiguptick_time - disc_time
+.         export delimited "$tabdir/mediacoverage_peakanduptick_table.csv", replace
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/t
+> ables/mediacoverage_peakanduptick_table.csv saved
 
-.         egen diff_mean_total = mean(diff)
-
-. 
-end of do-file
-
-. br
-
-. do "/var/folders/j0/m4ml1k5n497d6fwz1z9j80040000gn/T//SD20985.000000"
-
-.         use "$basedir/ggsearch_dates", clear
-
-.         * First Big Uptick and Legislative Start Date
-.         rename disclosure_start_month disc_time
-
-.         * generate first big uptick media coverage time to compare with disclosure
->  time
-.         gen firstbiguptick_time = first_biguptick*time
-(1,920 missing values generated)
-
-.         format firstbiguptick_time %tm
-
-.         * collapse to state level 
-.         collapse (max) disc_time firstbiguptick_time, by(state)
-
-.         gen before_state = 1 if disc_time <= firstbiguptick_time 
-(7 missing values generated)
-
-.         replace before_state = 0 if before_state >=.
-(7 real changes made)
-
-.         bysort before_state: gen count = _N
-
-.         gen diff = firstbiguptick_time - disc_time
-
-. 
-end of do-file
-
-. do "/var/folders/j0/m4ml1k5n497d6fwz1z9j80040000gn/T//SD20985.000000"
-
-. * create Auto Loan Pricing by CECL Adoption Status
-. local fname cr_cecladoption_autoloan
-
-. 
-. ******************************* SYNOPSIS ***************************************
-. /* 
-> Objective: Merge the dataset you created containing indicators for CECL adoption 
-> with the RateWatch dataset. Create dataset with auto loan rates practiced by each 
-> bank on a monthly basis for each type of maturity that the bank offers. Plot the
-> average evolution of the loan rates at different maturities for CECL adopters 
-> versus non-CECL adopters.
-> Inputs: the dataset with the regulatory identifiers of the CECL adopters by 
-> quarter and the RateWatch Loans Data
-> Output: 1): Data set with the dummy variable of CECL adoption and auto loan rates
->                 2): Average evolution of auto loan rates for CECL adopters v.s. no
-> n-adopters  
-> 
-> Author: Zirui Song
-> Date Created: Nov 30th, 2021
-> Date Modified: Feb 26th, 2022
-> 
-> */
-. 
 . /**************
->         Basic Set-up
->         ***************/
-.         clear all
+>         Plots
+>         ***************/        
+.                 
+.         * get plots of peak and uptick for fracking states 
+.         use "$basedir/mediacoverage_dates", clear 
 
-.         set more off, permanently
-(set more preference recorded)
+.         
+.         lab var peak "Media Coverage Peak"
 
-.         capture log close
+.         lab var disclosure "Disclosure Rule"
+
+.         lab var disclosure_start "Start of Disclosure Legislative Process"
+
+.         lab var first_uptick "Media Coverage First Uptick"
+
+.         lab var first_biguptick "Media Coverage First Big Uptick"
+
+.         lab var state "Newspaper HQ State"
+
+. 
+.         xtset st time
+       panel variable:  st (strongly balanced)
+        time variable:  time, 2006m8 to 2016m12
+                delta:  1 month
+
+.         
+.         *** OH
+.         twoway ///
+>         (dropline peak time, msize(vtiny) lcolor(red) mcolor(red)) ///
+>         (dropline disclosure time, msize(vtiny) lcolor(dkgreen) mcolor(dkgreen)) /
+> //
+>         (dropline disclosure_start time, msize(vtiny) lcolor(midgreen) mcolor(mgre
+> en)) ///
+>         (dropline first_uptick time, msize(vtiny) lcolor(ltblue) mcolor(ltblue)) /
+> //
+>         (dropline first_biguptick time, msize(vtiny) lcolor(blue) mcolor(blue)) //
+> /
+>         if state == "ohio" & time > 600 & time <= 660, ///
+>         graphregion(color(white)) bgcolor(white) yscale(lstyle(none)) ///
+>         xlabel(600(6)660, angle(60)) ylabel(0(1)1, noticks nolab) ///
+>         legend(size(tiny) pos(4) ring(0) col(1)) xtitle("") 
+(note:  named style mgreen not found in class color, default attributes used)
+(note:  named style mgreen not found in class color, default attributes used)
+
+.         graph export "$figdir/mediacoverage_peakanduptick_ohio.pdf", replace
+(file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/
+> figures/mediacoverage_peakanduptick_ohio.pdf written in PDF format)
+
+.         
+.         *** PA
+.         twoway ///
+>         (dropline peak time, msize(vtiny) lcolor(red) mcolor(red)) ///
+>         (dropline disclosure time, msize(vtiny) lcolor(dkgreen) mcolor(dkgreen)) /
+> //
+>         (dropline disclosure_start time, msize(vtiny) lcolor(midgreen) mcolor(mgre
+> en)) ///
+>         (dropline first_uptick time, msize(vtiny) lcolor(ltblue) mcolor(ltblue)) /
+> //
+>         (dropline first_biguptick time, msize(vtiny) lcolor(blue) mcolor(blue)) //
+> /
+>         if state == "pennsylvania" & time > 559 & time <= 683, ///
+>         graphregion(color(white)) bgcolor(white) yscale(lstyle(none)) ///
+>         xlabel(559(12)683, angle(60)) ylabel(0(1)1, noticks nolab) ///
+>         legend(size(tiny) pos(4) ring(0) col(1)) xtitle("") 
+(note:  named style mgreen not found in class color, default attributes used)
+(note:  named style mgreen not found in class color, default attributes used)
+
+.         graph export "$figdir/mediacoverage_peakanduptick_pennsylvania.pdf", repla
+> ce
+(file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/
+> figures/mediacoverage_peakanduptick_pennsylvania.pdf written in PDF format)
+
+.         
+.         *** TX
+.         twoway ///
+>         (dropline peak time, msize(vtiny) lcolor(red) mcolor(red)) ///
+>         (dropline disclosure time, msize(vtiny) lcolor(dkgreen) mcolor(dkgreen)) /
+> //
+>         (dropline disclosure_start time, msize(vtiny) lcolor(midgreen) mcolor(mgre
+> en)) ///
+>         (dropline first_uptick time, msize(vtiny) lcolor(ltblue) mcolor(ltblue)) /
+> //
+>         (dropline first_biguptick time, msize(vtiny) lcolor(blue) mcolor(blue)) //
+> /
+>         if state == "texas" & time > 559 & time <= 683, ///
+>         graphregion(color(white)) bgcolor(white) yscale(lstyle(none)) ///
+>         xlabel(559(12)683, angle(60)) ylabel(0(1)1, noticks nolab) ///
+>         legend(size(tiny) pos(4) ring(0) col(1)) xtitle("") 
+(note:  named style mgreen not found in class color, default attributes used)
+(note:  named style mgreen not found in class color, default attributes used)
+
+.         graph export "$figdir/mediacoverage_peakanduptick_texas.pdf", replace
+(file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/
+> figures/mediacoverage_peakanduptick_texas.pdf written in PDF format)
+
+.         
+.         *** CO 
+.         * peak and first big uptick coincide, so keep only first big uptick 
+.         lab var first_biguptick "Media Coverage Peak and First Big Uptick"
+
+.         twoway ///
+>         (dropline disclosure time, msize(vtiny) lcolor(dkgreen) mcolor(dkgreen)) /
+> //
+>         (dropline disclosure_start time, msize(vtiny) lcolor(midgreen) mcolor(mgre
+> en)) ///
+>         (dropline first_uptick time, msize(vtiny) lcolor(ltblue) mcolor(ltblue)) /
+> //
+>         (dropline first_biguptick time, msize(vtiny) lcolor(blue) mcolor(blue)) //
+> /
+>         if state == "colorado" & time > 559 & time <= 683, ///
+>         graphregion(color(white)) bgcolor(white) yscale(lstyle(none)) ///
+>         xlabel(559(12)683, angle(60)) ylabel(0(1)1, noticks nolab) ///
+>         legend(size(tiny) pos(4) ring(0) col(1)) xtitle("") 
+(note:  named style mgreen not found in class color, default attributes used)
+(note:  named style mgreen not found in class color, default attributes used)
+
+.         graph export "$figdir/mediacoverage_peakanduptick_colorado.pdf", replace
+(file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/
+> figures/mediacoverage_peakanduptick_colorado.pdf written in PDF format)
+
+.         lab var first_biguptick "Media Coverage First Big Uptick"
+
+.         
+. ********************************* END ******************************************
+. 
+. capture log close
