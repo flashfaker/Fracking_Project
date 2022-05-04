@@ -5,7 +5,7 @@ local fname an_predict_wq_monitoring
 
 Author: Zirui Song
 Date Created: Apr 23th, 2022
-Date Modified: May 3rd, 2022
+Date Modified: May 4th, 2022
 
 ********************************************************************************/
 
@@ -18,7 +18,7 @@ Date Modified: May 3rd, 2022
 	
 	* Set local directory
 	* notice that repodir path for Mac/Windows might differ
-	global dropdir = "/Users/zsong/Dropbox/Fracking Disclosure regulation project"
+	global dropdir = "/Users/zsong98/Dropbox/Fracking Disclosure regulation project"
 	global repodir = "$dropdir/2. code/zs"
 	global logdir = "$repodir//code/LogFiles"
 	* data from 1. data folder in Dropbox share
@@ -54,7 +54,6 @@ Date Modified: May 3rd, 2022
 	drop if log_t_t_Value_clean2 ==.
 	// define estimation sample
 	keep if Treated_ ==1 & m_cum_well_huc4_H_D == 1
-	br
 	merge m:1 ID_geo using "$interdir/monitorstation_mindist.dta"
 
 *** tab-out frequencies by distance bins into latex tables 
@@ -143,12 +142,6 @@ Date Modified: May 3rd, 2022
 	egen huc8_year_month_fe = group(STATE huc8_s date_string_year date_string_month)
 	egen huc10_s_month = group(STATE huc10_s date_string_month)
 
-/**************
-	Measurement and Fracking Intensity
-	***************/	
-	*** tabout measurement intensity for treated and untreated HUC10s
-	reghdfe OBS c.T_HUC10_balanced1_3M, cluster(state_fe) absorb(state_year_month_fe)
-	
 	
 **************************** Robustness for Disclosure *************************
 
@@ -219,28 +212,74 @@ Date Modified: May 3rd, 2022
 	local county_covariates_interactions "high_school_2013_2017_int high_school_only_2013_2017_int college_2013_2017_int democratic_house_int"
 	
 	reghdfe OBS c.post_disc#c.T_HUC10_balanced1_3M `county_covariates_interactions' `county_covariates', cluster(state_fe) absorb(state_year_month_fe)
-	outreg2 using "$tabdir/water_measurement_voting_education.xls", keep(c.post_disc#c.T_HUC10_balanced1_3M `county_covariates_interactions') bracket bdec (5) sdec(5) replace addtext(Treated Sample, HUC10s with HF in pre, State*Month*Year FE, Yes)
+	outreg2 using "$tabdir/water_measurement_robustness_voting_education.xls", keep(c.post_disc#c.T_HUC10_balanced1_3M `county_covariates_interactions') bracket bdec (5) sdec(5) replace addtext(Treated Sample, HUC10s with HF in pre, State*Month*Year FE, Yes)
 	reghdfe OBS c.post_disc#c.T_HUC10_balanced1_3M `county_covariates_interactions' `county_covariates', cluster(huc8_fe) absorb(huc8_year_month_fe)
-	outreg2 using "$tabdir/water_measurement_voting_education.xls", keep(c.post_disc#c.T_HUC10_balanced1_3M `county_covariates_interactions') bracket bdec (5) sdec(5) append addtext(Treated Sample, HUC10s with HF in pre, HUC8*Month*Year FE, Yes)
+	outreg2 using "$tabdir/water_measurement_robustness_voting_education.xls", keep(c.post_disc#c.T_HUC10_balanced1_3M `county_covariates_interactions') bracket bdec (5) sdec(5) append addtext(Treated Sample, HUC10s with HF in pre, HUC8*Month*Year FE, Yes)
 
 	reghdfe number_reading c.post_disc#c.T_HUC10_balanced1_3M `county_covariates_interactions', cluster(state_fe) absorb(state_year_month_fe)
-	outreg2 using "$tabdir/water_measurement_voting_education.xls", keep(c.post_disc#c.T_HUC10_balanced1_3M `county_covariates_interactions') bracket bdec (5) sdec(5) append addtext(Treated Sample, HUC10s with HF in pre, State*Month*Year FE, Yes)
+	outreg2 using "$tabdir/water_measurement_robustness_voting_education.xls", keep(c.post_disc#c.T_HUC10_balanced1_3M `county_covariates_interactions') bracket bdec (5) sdec(5) append addtext(Treated Sample, HUC10s with HF in pre, State*Month*Year FE, Yes)
 	reghdfe number_reading c.post_disc#c.T_HUC10_balanced1_3M `county_covariates_interactions', cluster(huc8_fe) absorb(huc8_year_month_fe)
-	outreg2 using "$tabdir/water_measurement_voting_education.xls", keep(c.post_disc#c.T_HUC10_balanced1_3M `county_covariates_interactions') bracket bdec (5) sdec(5) append addtext(Treated Sample, HUC10s with HF in pre, HUC8*Month*Year FE, Yes)
+	outreg2 using "$tabdir/water_measurement_robustness_voting_education.xls", keep(c.post_disc#c.T_HUC10_balanced1_3M `county_covariates_interactions') bracket bdec (5) sdec(5) append addtext(Treated Sample, HUC10s with HF in pre, HUC8*Month*Year FE, Yes)
 
 	reghdfe OBS c.post_disc#c.T_HUC10_balanced1_3M Ttot_well_c_dH `county_covariates_interactions', cluster(state_fe) absorb(state_year_month_fe)
-	outreg2 using "$tabdir/water_measurement_voting_education.xls", keep(c.post_disc#c.T_HUC10_balanced1_3M `county_covariates_interactions' Ttot_well_c_dH) bracket bdec (5) sdec(5) append addtext(Treated Sample, HUC10s with HF in pre, State*Month*Year FE, Yes)
+	outreg2 using "$tabdir/water_measurement_robustness_voting_education.xls", keep(c.post_disc#c.T_HUC10_balanced1_3M `county_covariates_interactions' Ttot_well_c_dH) bracket bdec (5) sdec(5) append addtext(Treated Sample, HUC10s with HF in pre, State*Month*Year FE, Yes)
 	reghdfe OBS c.post_disc#c.T_HUC10_balanced1_3M Ttot_well_c_dH `county_covariates_interactions', cluster(huc8_fe) absorb(huc8_year_month_fe)
-	outreg2 using "$tabdir/water_measurement_voting_education.xls", keep(c.post_disc#c.T_HUC10_balanced1_3M `county_covariates_interactions' Ttot_well_c_dH) bracket bdec (5) sdec(5) append addtext(Treated Sample, HUC10s with HF in pre, HUC8*Month*Year FE, Yes)
+	outreg2 using "$tabdir/water_measurement_robustness_voting_education.xls", keep(c.post_disc#c.T_HUC10_balanced1_3M `county_covariates_interactions' Ttot_well_c_dH) bracket bdec (5) sdec(5) append addtext(Treated Sample, HUC10s with HF in pre, HUC8*Month*Year FE, Yes)
 
 	reghdfe number_reading c.post_disc#c.T_HUC10_balanced1_3M Ttot_well_c_dH `county_covariates_interactions', cluster(state_fe) absorb(state_year_month_fe)
-	outreg2 using "$tabdir/water_measurement_voting_education.xls", keep(c.post_disc#c.T_HUC10_balanced1_3M `county_covariates_interactions' Ttot_well_c_dH) bracket bdec (5) sdec(5) append addtext(Treated Sample, HUC10s with HF in pre, State*Month*Year FE, Yes)
+	outreg2 using "$tabdir/water_measurement_robustness_voting_education.xls", keep(c.post_disc#c.T_HUC10_balanced1_3M `county_covariates_interactions' Ttot_well_c_dH) bracket bdec (5) sdec(5) append addtext(Treated Sample, HUC10s with HF in pre, State*Month*Year FE, Yes)
 	reghdfe number_reading c.post_disc#c.T_HUC10_balanced1_3M Ttot_well_c_dH `county_covariates_interactions', cluster(huc8_fe) absorb(huc8_year_month_fe)
-	outreg2 using "$tabdir/water_measurement_voting_education.xls", keep(c.post_disc#c.T_HUC10_balanced1_3M `county_covariates_interactions' Ttot_well_c_dH) bracket bdec (5) sdec(5) append addtext(Treated Sample, HUC10s with HF in pre, HUC8*Month*Year FE, Yes)
+	outreg2 using "$tabdir/water_measurement_robustness_voting_education.xls", keep(c.post_disc#c.T_HUC10_balanced1_3M `county_covariates_interactions' Ttot_well_c_dH) bracket bdec (5) sdec(5) append addtext(Treated Sample, HUC10s with HF in pre, HUC8*Month*Year FE, Yes)
 
+************************ Measurement VS Fracking Activity **********************	
+	
 /**************
 	Measurement and Fracking Intensity
 	***************/
+	
+*** tabout measurement intensity for treated and untreated HUC10s
+	reghdfe OBS c.T_HUC10_balanced1_3M, cluster(state_fe) absorb(state_year_month_fe)
+	outreg2 using "$tabdir/water_measurement_treatedhuc10s.xls", keep(c.T_HUC10_balanced1_3M) bracket bdec (5) sdec(5) replace addtext(Treated Sample, HUC10s with HF in pre, State*Month*Year FE, Yes)
+	reghdfe OBS c.T_HUC10_balanced1_3M, cluster(huc8_fe) absorb(huc8_year_month_fe)
+	outreg2 using "$tabdir/water_measurement_treatedhuc10s.xls", keep(c.T_HUC10_balanced1_3M) bracket bdec (5) sdec(5) append addtext(Treated Sample, HUC10s with HF in pre, HUC8*Month*Year FE, Yes)
+
+	reghdfe number_reading c.T_HUC10_balanced1_3M, cluster(state_fe) absorb(state_year_month_fe)
+	outreg2 using "$tabdir/water_measurement_treatedhuc10s.xls", keep(c.T_HUC10_balanced1_3M) bracket bdec (5) sdec(5) append addtext(Treated Sample, HUC10s with HF in pre, State*Month*Year FE, Yes)
+	reghdfe number_reading c.T_HUC10_balanced1_3M, cluster(huc8_fe) absorb(huc8_year_month_fe)
+	outreg2 using "$tabdir/water_measurement_treatedhuc10s.xls", keep(c.T_HUC10_balanced1_3M) bracket bdec (5) sdec(5) append addtext(Treated Sample, HUC10s with HF in pre, HUC8*Month*Year FE, Yes)
+	
+	* account for well counts
+	reghdfe OBS c.T_HUC10_balanced1_3M Ttot_well_c_dH, cluster(state_fe) absorb(state_year_month_fe)
+	outreg2 using "$tabdir/water_measurement_treatedhuc10s.xls", keep(c.T_HUC10_balanced1_3M Ttot_well_c_dH) bracket bdec (5) sdec(5) append addtext(Treated Sample, HUC10s with HF in pre, State*Month*Year FE, Yes)
+	reghdfe OBS c.T_HUC10_balanced1_3M Ttot_well_c_dH, cluster(huc8_fe) absorb(huc8_year_month_fe)
+	outreg2 using "$tabdir/water_measurement_treatedhuc10s.xls", keep(c.T_HUC10_balanced1_3M Ttot_well_c_dH) bracket bdec (5) sdec(5) append addtext(Treated Sample, HUC10s with HF in pre, HUC8*Month*Year FE, Yes)
+
+	reghdfe number_reading c.T_HUC10_balanced1_3M Ttot_well_c_dH, cluster(state_fe) absorb(state_year_month_fe)
+	outreg2 using "$tabdir/water_measurement_treatedhuc10s.xls", keep(c.T_HUC10_balanced1_3M Ttot_well_c_dH) bracket bdec (5) sdec(5) append addtext(Treated Sample, HUC10s with HF in pre, State*Month*Year FE, Yes)
+	reghdfe number_reading c.T_HUC10_balanced1_3M Ttot_well_c_dH, cluster(huc8_fe) absorb(huc8_year_month_fe)
+	outreg2 using "$tabdir/water_measurement_treatedhuc10s.xls", keep(c.T_HUC10_balanced1_3M Ttot_well_c_dH) bracket bdec (5) sdec(5) append addtext(Treated Sample, HUC10s with HF in pre, HUC8*Month*Year FE, Yes)
+	
+*** tabout measurement intensity for treated and untreated HUC10s (controlling for county characteristics)
+	reghdfe OBS c.T_HUC10_balanced1_3M `county_covariates', cluster(state_fe) absorb(state_year_month_fe)
+	outreg2 using "$tabdir/water_measurement_treatedhuc10s_education_voting.xls", keep(c.T_HUC10_balanced1_3M `county_covariates') bracket bdec (5) sdec(5) replace addtext(Treated Sample, HUC10s with HF in pre, State*Month*Year FE, Yes)
+	reghdfe OBS c.T_HUC10_balanced1_3M `county_covariates', cluster(huc8_fe) absorb(huc8_year_month_fe)
+	outreg2 using "$tabdir/water_measurement_treatedhuc10s_education_voting.xls", keep(c.T_HUC10_balanced1_3M `county_covariates') bracket bdec (5) sdec(5) append addtext(Treated Sample, HUC10s with HF in pre, HUC8*Month*Year FE, Yes)
+
+	reghdfe number_reading c.T_HUC10_balanced1_3M `county_covariates', cluster(state_fe) absorb(state_year_month_fe)
+	outreg2 using "$tabdir/water_measurement_treatedhuc10s_education_voting.xls", keep(c.T_HUC10_balanced1_3M `county_covariates') bracket bdec (5) sdec(5) append addtext(Treated Sample, HUC10s with HF in pre, State*Month*Year FE, Yes)
+	reghdfe number_reading c.T_HUC10_balanced1_3M `county_covariates', cluster(huc8_fe) absorb(huc8_year_month_fe)
+	outreg2 using "$tabdir/water_measurement_treatedhuc10s_education_voting.xls", keep(c.T_HUC10_balanced1_3M `county_covariates') bracket bdec (5) sdec(5) append addtext(Treated Sample, HUC10s with HF in pre, HUC8*Month*Year FE, Yes)
+	
+	* account for well counts
+	reghdfe OBS c.T_HUC10_balanced1_3M Ttot_well_c_dH `county_covariates', cluster(state_fe) absorb(state_year_month_fe)
+	outreg2 using "$tabdir/water_measurement_treatedhuc10s_education_voting.xls", keep(c.T_HUC10_balanced1_3M Ttot_well_c_dH `county_covariates') bracket bdec (5) sdec(5) append addtext(Treated Sample, HUC10s with HF in pre, State*Month*Year FE, Yes)
+	reghdfe OBS c.T_HUC10_balanced1_3M Ttot_well_c_dH `county_covariates', cluster(huc8_fe) absorb(huc8_year_month_fe)
+	outreg2 using "$tabdir/water_measurement_treatedhuc10s_education_voting.xls", keep(c.T_HUC10_balanced1_3M Ttot_well_c_dH `county_covariates') bracket bdec (5) sdec(5) append addtext(Treated Sample, HUC10s with HF in pre, HUC8*Month*Year FE, Yes)
+
+	reghdfe number_reading c.T_HUC10_balanced1_3M Ttot_well_c_dH `county_covariates', cluster(state_fe) absorb(state_year_month_fe)
+	outreg2 using "$tabdir/water_measurement_treatedhuc10s_education_voting.xls", keep(c.T_HUC10_balanced1_3M Ttot_well_c_dH `county_covariates') bracket bdec (5) sdec(5) append addtext(Treated Sample, HUC10s with HF in pre, State*Month*Year FE, Yes)
+	reghdfe number_reading c.T_HUC10_balanced1_3M Ttot_well_c_dH `county_covariates', cluster(huc8_fe) absorb(huc8_year_month_fe)
+	outreg2 using "$tabdir/water_measurement_treatedhuc10s_education_voting.xls", keep(c.T_HUC10_balanced1_3M Ttot_well_c_dH `county_covariates') bracket bdec (5) sdec(5) append addtext(Treated Sample, HUC10s with HF in pre, HUC8*Month*Year FE, Yes)
 	
 ********************************* END ******************************************
 
