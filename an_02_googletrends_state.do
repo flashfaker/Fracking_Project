@@ -20,7 +20,7 @@ Date Modified: Apr 14th, 2022
 	
 	* Set local directory
 	* notice that repodir path for Mac/Windows might differ
-	global repodir = "/Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs"
+	global repodir = "/Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs"
 	global logdir = "$repodir/code/LogFiles"
 	global rawdir = "$repodir/data/raw"
 	global basedir = "$repodir/data/base"

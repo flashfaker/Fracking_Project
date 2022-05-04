@@ -1,0 +1,1102 @@
+------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/
+> /code/LogFiles/an_predict_wq_monitoring.txt
+  log type:  text
+ opened on:   4 May 2022, 11:09:31
+
+. 
+. /**************
+>         Get number of measurements per 5km distance bins for Figure S5 
+>         ***************/        
+. 
+. *** import and clean distance data
+.         use "$datadir/data for Zirui/distances_upstream_computed.dta", clear
+
+.         * generate smallest upstream well distance for each ID_geo (monitoring sta
+> tion)
+.         collapse (min) distance_geodesic, by(ID_geo)
+
+.         * generate 0-5km, 0-10km, 0-15km, ..., 0-30km bins
+.         forv d = 5(5)30 {
+  2.                 gen dist_bin_0to`d'km = 1 if distance_geodesic <= `d'
+  3.                 replace dist_bin_0to`d'km = 0 if dist_bin_0to`d'km == .
+  4.         }
+(5,359 missing values generated)
+(5,359 real changes made)
+(3,010 missing values generated)
+(3,010 real changes made)
+(1,682 missing values generated)
+(1,682 real changes made)
+(929 missing values generated)
+(929 real changes made)
+(531 missing values generated)
+(531 real changes made)
+(309 missing values generated)
+(309 real changes made)
+
+.         save "$interdir/monitorstation_mindist.dta", replace
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/int
+> ermediate/monitorstation_mindist.dta saved
+
+.         
+. *** merge with water quality measurement sample 
+.         use "$datadir/DISC_TEMP_2020 OCT 2021 DEF B.dta", clear // water quality s
+> ample
+
+. 
+.         // drop missing wq obs.
+.         drop if log_t_t_Value_clean2 ==.
+(40,808 observations deleted)
+
+.         // define estimation sample
+.         keep if Treated_ ==1 & m_cum_well_huc4_H_D == 1
+(788,904 observations deleted)
+
+.         br
+
+.         merge m:1 ID_geo using "$interdir/monitorstation_mindist.dta"
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                       192,014
+        from master                   189,580  (_merge==1)
+        from using                      2,434  (_merge==2)
+
+    matched                           136,695  (_merge==3)
+    -----------------------------------------
+
+. 
+. *** tab-out frequencies by distance bins into latex tables 
+.         * All Ions
+.         tabstat dist_bin_0to5km-dist_bin_0to30km, stats(sum)
+
+   stats |  dis~o5km  dis~10km  dis~15km  dis~20km  dis~25km  dis~30km
+---------+------------------------------------------------------------
+     sum |     69305    102180    120512    129736    133852    135320
+----------------------------------------------------------------------
+
+.         * Chloride
+.         keep if CharacteristicName == "Chloride"
+(145,810 observations deleted)
+
+.         tabstat dist_bin_0to5km-dist_bin_0to30km, stats(sum)
+
+   stats |  dis~o5km  dis~10km  dis~15km  dis~20km  dis~25km  dis~30km
+---------+------------------------------------------------------------
+     sum |     34809     50588     59670     64537     66430     67231
+----------------------------------------------------------------------
+
+.         
+. /**************
+>         Import Water Measurement Data
+>         ***************/
+.         use "$datadir/DISC_TEMP_2020 OCT 2021 DEF B_ALL_STATES.dta", clear // wate
+> r quality sample
+
+. 
+.         // drop missing wq obs.
+.         drop if log_t_t_Value_clean2 ==.
+(40,810 observations deleted)
+
+. 
+.         // define estimation sample
+.         keep if Treated_ ==1 & m_cum_well_huc4_H_D == 1
+(761,625 observations deleted)
+
+. 
+.         // number of reading by huc10-year-month
+.         bysort huc10_s date_string_year date_string_month: g number_reading = _N
+
+.         replace number_reading = 0 if number_reading==.
+(0 real changes made)
+
+. 
+.         bysort huc10_s date_string_year date_string_month: gen ok = 1 if date_stri
+> ng_month==date_string_month[_n+1]
+(88,351 missing values generated)
+
+.         keep if ok==.
+(264,783 observations deleted)
+
+. 
+.         keep StateCode CountyCode state_county_ID huc10_s date_string_year date_st
+> ring_month T_HUC10_balanced1_ALL number_reading
+
+. 
+.         fillin huc10_s date_string_year date_string_month
+
+. 
+.         g OBS = 1 if _fillin == 0
+(367,265 missing values generated)
+
+.         replace OBS = 0 if _fillin==1
+(367,265 real changes made)
+
+.         replace number_reading = 0 if number_reading==.
+(367,265 real changes made)
+
+. 
+.         egen state_fe = group(StateCode)
+(367265 missing values generated)
+
+.         bysort huc10_s: egen STATE =max(state_fe)
+
+.         * fill in missing state and county fips code
+.         destring StateCode CountyCode, replace
+StateCode: all characters numeric; replaced as byte
+(367265 missing values generated)
+CountyCode already numeric; no replace
+
+.         bysort huc10_s: egen fipstate = max(StateCode)
+
+.         bysort huc10_s: egen fipscounty = max(CountyCode)
+(3528 missing values generated)
+
+. 
+.         // disc dates 
+.         // Based on the location of the WQS: 
+.         // All the dates have been moved to the 1st day of the month [the dataset 
+> has been collapsed at the huc10-year-month level]
+.         g disc_date       = "01feb2013" if STATE==1 // arkansas
+(419,496 missing values generated)
+
+.         replace disc_date = "01apr2012" if STATE==2 // Colorado
+(46,032 real changes made)
+
+.         replace disc_date = "01dec2013" if STATE==3 // Kansas
+(9,576 real changes made)
+
+.         replace disc_date = "01mar2015" if STATE==4 // Kentucky
+(28,896 real changes made)
+
+.         replace disc_date = "01oct2011" if STATE==5 // Louisiana
+(19,824 real changes made)
+
+.         replace disc_date = "01mar2013" if STATE==6 // Mississippi
+(23,016 real changes made)
+
+.         replace disc_date = "01aug2011" if STATE==7 // Montana
+(34,608 real changes made)
+
+.         replace disc_date = "01feb2012" if STATE==8 // New Mexico
+(6,552 real changes made)
+
+.         replace disc_date = "01apr2012" if STATE==9 // North Dakota
+(25,872 real changes made)
+
+.         replace disc_date = "01sep2012" if STATE==10 // Ohio
+(44,688 real changes made)
+
+.         replace disc_date = "01jan2013" if STATE==11 // Oklahoma
+(32,256 real changes made)
+
+.         replace disc_date = "01apr2012" if STATE==12 // Pennsylvania
+(48,384 real changes made)
+
+.         replace disc_date = "01feb2012" if STATE==13 // Texas
+(56,280 real changes made)
+
+.         replace disc_date = "01nov2012" if STATE==14 // Utah
+(17,976 real changes made)
+
+.         replace disc_date = "01aug2011" if STATE==15 // West Virginia
+(10,752 real changes made)
+
+.         replace disc_date = "01aug2010" if STATE==16 // Wyoming
+(14,784 real changes made)
+
+.         tostring STATE, replace
+STATE was float now str2
+
+. 
+.         g disc_date_d = date(disc_date, "DMY")
+
+.         format disc_date_d %d
+
+. 
+.         // re-define treated HUC10s
+.         bysort huc10_s: egen T_HUC10_balanced1_3M = max(T_HUC10_balanced1_ALL)
+
+. 
+.         // re-define the date for the wq obs.
+.         gen date = "01" + date_string_month + date_string_year
+
+.         g date_d = date(date, "DMY")
+
+.         format date_d %d
+
+. 
+.         g post_disc = 1 if date_d>disc_date_d // it does not matter if we put > OR
+>  >=
+(215,360 missing values generated)
+
+.         replace post_disc = 0 if post_disc ==.
+(215,360 real changes made)
+
+. 
+.         drop state_fe
+
+.         egen state_fe = group(STATE)
+
+.         egen huc10_state = group(huc10_s STATE)
+
+. 
+.         g huc8_s = substr(huc10_s,1,8)
+
+.         egen huc10_fe = group(huc10_s)
+
+.         egen huc8_fe = group(huc8_s)
+
+.         egen state_year_month_fe = group(STATE date_string_year date_string_month)
+
+.         egen huc8_year_month_fe = group(STATE huc8_s date_string_year date_string_
+> month)
+
+.         egen huc10_s_month = group(STATE huc10_s date_string_month)
+
+.         
+. /**************
+>         Merge with Well Count Data
+>         ***************/
+.         rename date_string_month date_string_monthM
+
+.         merge 1:1 huc10_s date_string_year date_string_monthM using "$datadir/ENTR
+> Y_TEMP_2020 OCT 2021.dta", force gen(_merge_entry)
+(note: variable StateCode was str2 in the using data, but will be byte now)
+(note: variable date was float in the using data, but will be str9 now)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                       437,778
+        from master                   346,716  (_merge_entry==1)
+        from using                     91,062  (_merge_entry==2)
+
+    matched                           108,900  (_merge_entry==3)
+    -----------------------------------------
+
+.         drop if _merge_entry==2
+(91,062 observations deleted)
+
+.         
+.         replace Ttot_well_c_dH= 0  if Ttot_well_c_dH==.
+(346,716 real changes made)
+
+.         
+.         save "$basedir/water_measurement_main_data_20220426.xdta", replace
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/bas
+> e/water_measurement_main_data_20220426.xdta saved
+
+.         
+.         * original tables by Pietro
+.         reghdfe OBS c.post_disc#c.T_HUC10_balanced1_3M, cluster(huc10_state) absor
+> b(huc10_state state_year_month_fe huc10_s_month)
+(MWFE estimator converged in 2 iterations)
+
+HDFE Linear regression                            Number of obs   =    455,616
+Absorbing 3 HDFE groups                           F(   1,   2711) =       4.75
+Statistics robust to heteroskedasticity           Prob > F        =     0.0294
+                                                  R-squared       =     0.4834
+                                                  Adj R-squared   =     0.4365
+                                                  Within R-sq.    =     0.0002
+Number of clusters (huc10_state) =      2,712     Root MSE        =     0.2968
+
+                             (Std. Err. adjusted for 2,712 clusters in huc10_state)
+-----------------------------------------------------------------------------------
+                  |               Robust
+              OBS |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+------------------+----------------------------------------------------------------
+      c.post_disc#|
+               c. |
+T_HUC10_balanc~3M |   .0193094   .0088613     2.18   0.029     .0019339    .0366849
+                  |
+            _cons |   .1913902   .0011589   165.15   0.000     .1891179    .1936626
+-----------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+-------------------------------------------------------------+
+         Absorbed FE | Categories  - Redundant  = Num. Coefs |
+---------------------+---------------------------------------|
+         huc10_state |      2712        2712           0    *|
+ state_year_month_fe |      2688           0        2688     |
+       huc10_s_month |     32544       32544           0    *|
+-------------------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+
+.         outreg2 using "$tabdir/Table_B8.xls", keep(c.post_disc#c.T_HUC10_balanced1
+> _3M) bracket bdec (5) sdec(5) replace addtext(Treated Sample, HUC10s with HF in pr
+> e, HUC10 FE, Yes, State*Month*Year FE, Yes, HUC10*Month FE, Yes)
+/Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/tables
+> /Table_B8.xls
+dir : seeout
+
+.         reghdfe OBS c.post_disc#c.T_HUC10_balanced1_3M, cluster(huc10_state) absor
+> b(huc10_state huc8_year_month_fe huc10_s_month)
+(dropped 22848 singleton observations)
+(MWFE estimator converged in 2 iterations)
+
+HDFE Linear regression                            Number of obs   =    432,768
+Absorbing 3 HDFE groups                           F(   1,   2575) =       0.00
+Statistics robust to heteroskedasticity           Prob > F        =     0.9748
+                                                  R-squared       =     0.6645
+                                                  Adj R-squared   =     0.5378
+                                                  Within R-sq.    =     0.0000
+Number of clusters (huc10_state) =      2,576     Root MSE        =     0.2685
+
+                             (Std. Err. adjusted for 2,576 clusters in huc10_state)
+-----------------------------------------------------------------------------------
+                  |               Robust
+              OBS |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+------------------+----------------------------------------------------------------
+      c.post_disc#|
+               c. |
+T_HUC10_balanc~3M |  -.0003899   .0123368    -0.03   0.975     -.024581    .0238011
+                  |
+            _cons |   .1933899   .0016062   120.40   0.000     .1902403    .1965395
+-----------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+------------------------------------------------------------+
+        Absorbed FE | Categories  - Redundant  = Num. Coefs |
+--------------------+---------------------------------------|
+        huc10_state |      2576        2576           0    *|
+ huc8_year_month_fe |     85176           0       85176     |
+      huc10_s_month |     30912       30912           0    *|
+------------------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+
+.         outreg2 using "$tabdir/Table_B8.xls", keep(c.post_disc#c.T_HUC10_balanced1
+> _3M) bracket bdec (5) sdec(5) append addtext(Treated Sample, HUC10s with HF in pre
+> , HUC10 FE, Yes, HUC8*Month*Year FE, Yes, HUC10*Month FE, Yes)
+/Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/tables
+> /Table_B8.xls
+dir : seeout
+
+. 
+.         reghdfe number_reading c.post_disc#c.T_HUC10_balanced1_3M, cluster(huc10_s
+> tate) absorb(huc10_state state_year_month_fe huc10_s_month)
+(MWFE estimator converged in 2 iterations)
+
+HDFE Linear regression                            Number of obs   =    455,616
+Absorbing 3 HDFE groups                           F(   1,   2711) =       4.66
+Statistics robust to heteroskedasticity           Prob > F        =     0.0310
+                                                  R-squared       =     0.2235
+                                                  Adj R-squared   =     0.1529
+                                                  Within R-sq.    =     0.0001
+Number of clusters (huc10_state) =      2,712     Root MSE        =     3.5147
+
+                             (Std. Err. adjusted for 2,712 clusters in huc10_state)
+-----------------------------------------------------------------------------------
+                  |               Robust
+   number_reading |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+------------------+----------------------------------------------------------------
+      c.post_disc#|
+               c. |
+T_HUC10_balanc~3M |   .2009118   .0930935     2.16   0.031     .0183704    .3834532
+                  |
+            _cons |   .7487943   .0121747    61.50   0.000     .7249217    .7726669
+-----------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+-------------------------------------------------------------+
+         Absorbed FE | Categories  - Redundant  = Num. Coefs |
+---------------------+---------------------------------------|
+         huc10_state |      2712        2712           0    *|
+ state_year_month_fe |      2688           0        2688     |
+       huc10_s_month |     32544       32544           0    *|
+-------------------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+
+.         outreg2 using "$tabdir/Table_B8.xls", keep(c.post_disc#c.T_HUC10_balanced1
+> _3M) bracket bdec (5) sdec(5) append addtext(Treated Sample, HUC10s with HF in pre
+> , HUC10 FE, Yes, State*Month*Year FE, Yes, HUC10*Month FE, Yes)
+/Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/tables
+> /Table_B8.xls
+dir : seeout
+
+.         reghdfe number_reading c.post_disc#c.T_HUC10_balanced1_3M, cluster(huc10_s
+> tate) absorb(huc10_state huc8_year_month_fe huc10_s_month)
+(dropped 22848 singleton observations)
+(MWFE estimator converged in 2 iterations)
+
+HDFE Linear regression                            Number of obs   =    432,768
+Absorbing 3 HDFE groups                           F(   1,   2575) =       0.00
+Statistics robust to heteroskedasticity           Prob > F        =     0.9697
+                                                  R-squared       =     0.4665
+                                                  Adj R-squared   =     0.2649
+                                                  Within R-sq.    =     0.0000
+Number of clusters (huc10_state) =      2,576     Root MSE        =     3.2767
+
+                             (Std. Err. adjusted for 2,576 clusters in huc10_state)
+-----------------------------------------------------------------------------------
+                  |               Robust
+   number_reading |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+------------------+----------------------------------------------------------------
+      c.post_disc#|
+               c. |
+T_HUC10_balanc~3M |   .0042493   .1117254     0.04   0.970    -.2148315    .2233301
+                  |
+            _cons |   .7797632   .0145463    53.61   0.000     .7512396    .8082868
+-----------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+------------------------------------------------------------+
+        Absorbed FE | Categories  - Redundant  = Num. Coefs |
+--------------------+---------------------------------------|
+        huc10_state |      2576        2576           0    *|
+ huc8_year_month_fe |     85176           0       85176     |
+      huc10_s_month |     30912       30912           0    *|
+------------------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+
+.         outreg2 using "$tabdir/Table_B8.xls", keep(c.post_disc#c.T_HUC10_balanced1
+> _3M) bracket bdec (5) sdec(5) append addtext(Treated Sample, HUC10s with HF in pre
+> , HUC10 FE, Yes, HUC8*Month*Year FE, Yes, HUC10*Month FE, Yes)
+/Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/tables
+> /Table_B8.xls
+dir : seeout
+
+. 
+.         reghdfe OBS c.post_disc#c.T_HUC10_balanced1_3M Ttot_well_c_dH, cluster(huc
+> 10_state) absorb(huc10_state state_year_month_fe huc10_s_month)
+(MWFE estimator converged in 2 iterations)
+
+HDFE Linear regression                            Number of obs   =    455,616
+Absorbing 3 HDFE groups                           F(   2,   2711) =       2.49
+Statistics robust to heteroskedasticity           Prob > F        =     0.0830
+                                                  R-squared       =     0.4834
+                                                  Adj R-squared   =     0.4365
+                                                  Within R-sq.    =     0.0002
+Number of clusters (huc10_state) =      2,712     Root MSE        =     0.2968
+
+                             (Std. Err. adjusted for 2,712 clusters in huc10_state)
+-----------------------------------------------------------------------------------
+                  |               Robust
+              OBS |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+------------------+----------------------------------------------------------------
+      c.post_disc#|
+               c. |
+T_HUC10_balanc~3M |   .0191789   .0088771     2.16   0.031     .0017724    .0365855
+                  |
+   Ttot_well_c_dH |   .0006153   .0014536     0.42   0.672    -.0022351    .0034656
+            _cons |   .1912993   .0011727   163.13   0.000     .1889998    .1935988
+-----------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+-------------------------------------------------------------+
+         Absorbed FE | Categories  - Redundant  = Num. Coefs |
+---------------------+---------------------------------------|
+         huc10_state |      2712        2712           0    *|
+ state_year_month_fe |      2688           0        2688     |
+       huc10_s_month |     32544       32544           0    *|
+-------------------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+
+.         outreg2 using "$tabdir/Table_B8.xls", keep(c.post_disc#c.T_HUC10_balanced1
+> _3M Ttot_well_c_dH) bracket bdec (5) sdec(5) append addtext(Treated Sample, HUC10s
+>  with HF in pre, HUC10 FE, Yes, State*Month*Year FE, Yes, HUC10*Month FE, Yes)
+/Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/tables
+> /Table_B8.xls
+dir : seeout
+
+.         reghdfe OBS c.post_disc#c.T_HUC10_balanced1_3M Ttot_well_c_dH, cluster(huc
+> 10_state) absorb(huc10_state huc8_year_month_fe huc10_s_month)
+(dropped 22848 singleton observations)
+(MWFE estimator converged in 2 iterations)
+
+HDFE Linear regression                            Number of obs   =    432,768
+Absorbing 3 HDFE groups                           F(   2,   2575) =       0.51
+Statistics robust to heteroskedasticity           Prob > F        =     0.6009
+                                                  R-squared       =     0.6646
+                                                  Adj R-squared   =     0.5378
+                                                  Within R-sq.    =     0.0000
+Number of clusters (huc10_state) =      2,576     Root MSE        =     0.2685
+
+                             (Std. Err. adjusted for 2,576 clusters in huc10_state)
+-----------------------------------------------------------------------------------
+                  |               Robust
+              OBS |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+------------------+----------------------------------------------------------------
+      c.post_disc#|
+               c. |
+T_HUC10_balanc~3M |  -.0007325    .012343    -0.06   0.953    -.0249357    .0234707
+                  |
+   Ttot_well_c_dH |    .001561   .0015466     1.01   0.313    -.0014717    .0045937
+            _cons |   .1931616   .0016164   119.50   0.000     .1899919    .1963312
+-----------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+------------------------------------------------------------+
+        Absorbed FE | Categories  - Redundant  = Num. Coefs |
+--------------------+---------------------------------------|
+        huc10_state |      2576        2576           0    *|
+ huc8_year_month_fe |     85176           0       85176     |
+      huc10_s_month |     30912       30912           0    *|
+------------------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+
+.         outreg2 using "$tabdir/Table_B8.xls", keep(c.post_disc#c.T_HUC10_balanced1
+> _3M Ttot_well_c_dH) bracket bdec (5) sdec(5) append addtext(Treated Sample, HUC10s
+>  with HF in pre, HUC10 FE, Yes, HUC8*Month*Year FE, Yes, HUC10*Month FE, Yes)
+/Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/tables
+> /Table_B8.xls
+dir : seeout
+
+. 
+.         reghdfe number_reading c.post_disc#c.T_HUC10_balanced1_3M Ttot_well_c_dH, 
+> cluster(huc10_state) absorb(huc10_state state_year_month_fe huc10_s_month)
+(MWFE estimator converged in 2 iterations)
+
+HDFE Linear regression                            Number of obs   =    455,616
+Absorbing 3 HDFE groups                           F(   2,   2711) =       3.64
+Statistics robust to heteroskedasticity           Prob > F        =     0.0264
+                                                  R-squared       =     0.2235
+                                                  Adj R-squared   =     0.1530
+                                                  Within R-sq.    =     0.0002
+Number of clusters (huc10_state) =      2,712     Root MSE        =     3.5146
+
+                             (Std. Err. adjusted for 2,712 clusters in huc10_state)
+-----------------------------------------------------------------------------------
+                  |               Robust
+   number_reading |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+------------------+----------------------------------------------------------------
+      c.post_disc#|
+               c. |
+T_HUC10_balanc~3M |   .1951644   .0932002     2.09   0.036     .0124138     .377915
+                  |
+   Ttot_well_c_dH |   .0270924   .0169189     1.60   0.109     -.006083    .0602677
+            _cons |   .7447889   .0124094    60.02   0.000     .7204561    .7691217
+-----------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+-------------------------------------------------------------+
+         Absorbed FE | Categories  - Redundant  = Num. Coefs |
+---------------------+---------------------------------------|
+         huc10_state |      2712        2712           0    *|
+ state_year_month_fe |      2688           0        2688     |
+       huc10_s_month |     32544       32544           0    *|
+-------------------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+
+.         outreg2 using "$tabdir/Table_B8.xls", keep(c.post_disc#c.T_HUC10_balanced1
+> _3M Ttot_well_c_dH) bracket bdec (5) sdec(5) append addtext(Treated Sample, HUC10s
+>  with HF in pre, HUC10 FE, Yes, State*Month*Year FE, Yes, HUC10*Month FE, Yes)
+/Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/tables
+> /Table_B8.xls
+dir : seeout
+
+.         reghdfe number_reading c.post_disc#c.T_HUC10_balanced1_3M Ttot_well_c_dH, 
+> cluster(huc10_state) absorb(huc10_state huc8_year_month_fe huc10_s_month)
+(dropped 22848 singleton observations)
+(MWFE estimator converged in 2 iterations)
+
+HDFE Linear regression                            Number of obs   =    432,768
+Absorbing 3 HDFE groups                           F(   2,   2575) =       0.73
+Statistics robust to heteroskedasticity           Prob > F        =     0.4807
+                                                  R-squared       =     0.4665
+                                                  Adj R-squared   =     0.2649
+                                                  Within R-sq.    =     0.0000
+Number of clusters (huc10_state) =      2,576     Root MSE        =     3.2766
+
+                             (Std. Err. adjusted for 2,576 clusters in huc10_state)
+-----------------------------------------------------------------------------------
+                  |               Robust
+   number_reading |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+------------------+----------------------------------------------------------------
+      c.post_disc#|
+               c. |
+T_HUC10_balanc~3M |   .0002478   .1120519     0.00   0.998    -.2194732    .2199688
+                  |
+   Ttot_well_c_dH |   .0182331    .015159     1.20   0.229     -.011492    .0479582
+            _cons |   .7770957   .0145334    53.47   0.000     .7485974     .805594
+-----------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+------------------------------------------------------------+
+        Absorbed FE | Categories  - Redundant  = Num. Coefs |
+--------------------+---------------------------------------|
+        huc10_state |      2576        2576           0    *|
+ huc8_year_month_fe |     85176           0       85176     |
+      huc10_s_month |     30912       30912           0    *|
+------------------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+
+.         outreg2 using "$tabdir/Table_B8.xls", keep(c.post_disc#c.T_HUC10_balanced1
+> _3M Ttot_well_c_dH) bracket bdec (5) sdec(5) append addtext(Treated Sample, HUC10s
+>  with HF in pre, HUC10 FE, Yes, HUC8*Month*Year FE, Yes, HUC10*Month FE, Yes)
+/Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/tables
+> /Table_B8.xls
+dir : seeout
+
+.         
+. /**************
+>         Merge with County Characteristics Data
+>         ***************/
+.         
+. *** education and voting data
+.         import delimited "$rawdir/voting data/house/2010_4_0_2.csv", varnames(1) c
+> lear
+(25 vars, 3,114 obs)
+
+.         drop if fips == "fips"
+(1 observation deleted)
+
+.         destring fips, replace
+fips: all characters numeric; replaced as long
+
+.         gen str5 fipscode = string(fips,"%05.0f")
+
+.         merge 1:1 fipscode using "$basedir/education by county.dta"
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                           165
+        from master                         3  (_merge==1)
+        from using                        162  (_merge==2)
+
+    matched                             3,110  (_merge==3)
+    -----------------------------------------
+
+.                 drop if _merge != 3
+(165 observations deleted)
+
+.                 drop _merge
+
+.         destring democratic republican, replace
+democratic: all characters numeric; replaced as long
+republican: all characters numeric; replaced as long
+
+.         gen democratic_house = 1 if democratic > republican
+(2,398 missing values generated)
+
+.         replace democratic_house = 0 if democratic_house == .
+(2,398 real changes made)
+
+.         destring totalvote, replace
+totalvote: all characters numeric; replaced as long
+
+.         gen democratic_ratio = democratic / totalvote
+(21 missing values generated)
+
+.         keep democratic_house democratic_ratio *_2013_2017 fips
+
+.         save "$interdir/education_voting_county.dta", replace
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/int
+> ermediate/education_voting_county.dta saved
+
+.         
+.         use "$basedir/water_measurement_main_data_20220426.dta", clear
+
+.         gen fips = 1000*fipstate + fipscounty
+(3,528 missing values generated)
+
+.         merge m:1 fips using "$interdir/education_voting_county.dta"
+(note: variable fips was float, now double to accommodate using data's values)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                         8,333
+        from master                     6,048  (_merge==1)
+        from using                      2,285  (_merge==2)
+
+    matched                           449,568  (_merge==3)
+    -----------------------------------------
+
+.                 drop if _merge != 3
+(8,333 observations deleted)
+
+.                 drop _merge
+
+.                 
+.         local county_covariates "high_school_2013_2017 high_school_only_2013_2017 
+> college_2013_2017 democratic_house"
+
+.         foreach var of local county_covariates {
+  2.                 gen `var'_int = `var'*post_disc*T_HUC10_balanced1_3M
+  3.         }
+
+.         
+. *** Interactions with Education and House Data
+.         local county_covariates_interactions "high_school_2013_2017_int high_schoo
+> l_only_2013_2017_int college_2013_2017_int democratic_house_int"
+
+.         
+.         reghdfe OBS c.post_disc#c.T_HUC10_balanced1_3M `county_covariates_interact
+> ions' `county_covariates', cluster(state_fe) absorb(state_year_month_fe)
+(MWFE estimator converged in 1 iterations)
+
+HDFE Linear regression                            Number of obs   =    449,568
+Absorbing 1 HDFE group                            F(   9,     15) =       6.11
+Statistics robust to heteroskedasticity           Prob > F        =     0.0011
+                                                  R-squared       =     0.1794
+                                                  Adj R-squared   =     0.1744
+                                                  Within R-sq.    =     0.0048
+Number of clusters (state_fe) =         16        Root MSE        =     0.3600
+
+                                   (Std. Err. adjusted for 16 clusters in state_fe)
+-----------------------------------------------------------------------------------
+                  |               Robust
+              OBS |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+------------------+----------------------------------------------------------------
+      c.post_disc#|
+               c. |
+T_HUC10_balanc~3M |  -.0168993   .1071021    -0.16   0.877     -.245182    .2113834
+                  |
+high_school_201~t |  -.0021782   .0015023    -1.45   0.168    -.0053802    .0010239
+high_school_onl~t |   .0010788   .0016185     0.67   0.515    -.0023709    .0045286
+college_2013_20~t |   .0004811   .0021519     0.22   0.826    -.0041056    .0050678
+democratic_hous~t |   .0016024   .0288486     0.06   0.956    -.0598868    .0630917
+high_school_201~7 |  -.0019132   .0011771    -1.63   0.125    -.0044221    .0005957
+high_school_onl~7 |   -.003766   .0012455    -3.02   0.009    -.0064206   -.0011113
+college_2013_2017 |  -.0010876   .0016125    -0.67   0.510    -.0045245    .0023493
+ democratic_house |  -.0072271    .016273    -0.44   0.663    -.0419121     .027458
+            _cons |   .3887005   .0745269     5.22   0.000       .22985    .5475509
+-----------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+-------------------------------------------------------------+
+         Absorbed FE | Categories  - Redundant  = Num. Coefs |
+---------------------+---------------------------------------|
+ state_year_month_fe |      2688        2688           0    *|
+-------------------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+
+.         outreg2 using "$tabdir/water_measurement_voting_education.xls", keep(c.pos
+> t_disc#c.T_HUC10_balanced1_3M `county_covariates_interactions') bracket bdec (5) s
+> dec(5) replace addtext(Treated Sample, HUC10s with HF in pre, State*Month*Year FE,
+>  Yes)
+/Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/tables
+> /water_measurement_voting_education.xls
+dir : seeout
+
+.         reghdfe OBS c.post_disc#c.T_HUC10_balanced1_3M `county_covariates_interact
+> ions' `county_covariates', cluster(huc8_fe) absorb(huc8_year_month_fe)
+(dropped 22008 singleton observations)
+(MWFE estimator converged in 1 iterations)
+
+HDFE Linear regression                            Number of obs   =    427,560
+Absorbing 1 HDFE group                            F(   9,    478) =       0.77
+Statistics robust to heteroskedasticity           Prob > F        =     0.6410
+                                                  R-squared       =     0.4527
+                                                  Adj R-squared   =     0.3178
+                                                  Within R-sq.    =     0.0006
+Number of clusters (huc8_fe) =        479         Root MSE        =     0.3268
+
+                                   (Std. Err. adjusted for 479 clusters in huc8_fe)
+-----------------------------------------------------------------------------------
+                  |               Robust
+              OBS |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+------------------+----------------------------------------------------------------
+      c.post_disc#|
+               c. |
+T_HUC10_balanc~3M |  -.0751004   .1379808    -0.54   0.587    -.3462243    .1960235
+                  |
+high_school_201~t |  -.0020347   .0019493    -1.04   0.297     -.005865    .0017955
+high_school_onl~t |   .0018863   .0020391     0.93   0.355    -.0021205     .005893
+college_2013_20~t |   .0010738   .0026605     0.40   0.687    -.0041539    .0063014
+democratic_hous~t |  -.0244849   .0285327    -0.86   0.391    -.0805498    .0315801
+high_school_201~7 |   .0006163   .0011482     0.54   0.592      -.00164    .0028725
+high_school_onl~7 |  -.0014806   .0010004    -1.48   0.140    -.0034463     .000485
+college_2013_2017 |   .0004251   .0016401     0.26   0.796    -.0027977    .0036478
+ democratic_house |   .0013232   .0194858     0.07   0.946    -.0369652    .0396116
+            _cons |   .2263333   .0699209     3.24   0.001     .0889431    .3637236
+-----------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+------------------------------------------------------------+
+        Absorbed FE | Categories  - Redundant  = Num. Coefs |
+--------------------+---------------------------------------|
+ huc8_year_month_fe |     84504       84504           0    *|
+------------------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+
+.         outreg2 using "$tabdir/water_measurement_voting_education.xls", keep(c.pos
+> t_disc#c.T_HUC10_balanced1_3M `county_covariates_interactions') bracket bdec (5) s
+> dec(5) append addtext(Treated Sample, HUC10s with HF in pre, HUC8*Month*Year FE, Y
+> es)
+/Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/tables
+> /water_measurement_voting_education.xls
+dir : seeout
+
+. 
+.         reghdfe number_reading c.post_disc#c.T_HUC10_balanced1_3M `county_covariat
+> es_interactions', cluster(state_fe) absorb(state_year_month_fe)
+(MWFE estimator converged in 1 iterations)
+
+HDFE Linear regression                            Number of obs   =    449,568
+Absorbing 1 HDFE group                            F(   5,     15) =       9.34
+Statistics robust to heteroskedasticity           Prob > F        =     0.0003
+                                                  R-squared       =     0.0733
+                                                  Adj R-squared   =     0.0677
+                                                  Within R-sq.    =     0.0012
+Number of clusters (state_fe) =         16        Root MSE        =     3.7016
+
+                                   (Std. Err. adjusted for 16 clusters in state_fe)
+-----------------------------------------------------------------------------------
+                  |               Robust
+   number_reading |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+------------------+----------------------------------------------------------------
+      c.post_disc#|
+               c. |
+T_HUC10_balanc~3M |   2.596866   1.235052     2.10   0.053    -.0355855    5.229318
+                  |
+high_school_201~t |  -.0465265   .0177858    -2.62   0.019     -.084436    -.008617
+high_school_onl~t |  -.0035555   .0118009    -0.30   0.767    -.0287084    .0215975
+college_2013_20~t |  -.0545153   .0227149    -2.40   0.030     -.102931   -.0060996
+democratic_hous~t |   .3388736   .3957289     0.86   0.405    -.5046027     1.18235
+            _cons |   .7431162   .0118548    62.68   0.000     .7178484    .7683841
+-----------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+-------------------------------------------------------------+
+         Absorbed FE | Categories  - Redundant  = Num. Coefs |
+---------------------+---------------------------------------|
+ state_year_month_fe |      2688        2688           0    *|
+-------------------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+
+.         outreg2 using "$tabdir/water_measurement_voting_education.xls", keep(c.pos
+> t_disc#c.T_HUC10_balanced1_3M `county_covariates_interactions') bracket bdec (5) s
+> dec(5) append addtext(Treated Sample, HUC10s with HF in pre, State*Month*Year FE, 
+> Yes)
+/Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/tables
+> /water_measurement_voting_education.xls
+dir : seeout
+
+.         reghdfe number_reading c.post_disc#c.T_HUC10_balanced1_3M `county_covariat
+> es_interactions', cluster(huc8_fe) absorb(huc8_year_month_fe)
+(dropped 22008 singleton observations)
+(MWFE estimator converged in 1 iterations)
+
+HDFE Linear regression                            Number of obs   =    427,560
+Absorbing 1 HDFE group                            F(   5,    478) =       0.68
+Statistics robust to heteroskedasticity           Prob > F        =     0.6408
+                                                  R-squared       =     0.3587
+                                                  Adj R-squared   =     0.2007
+                                                  Within R-sq.    =     0.0001
+Number of clusters (huc8_fe) =        479         Root MSE        =     3.4288
+
+                                   (Std. Err. adjusted for 479 clusters in huc8_fe)
+-----------------------------------------------------------------------------------
+                  |               Robust
+   number_reading |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+------------------+----------------------------------------------------------------
+      c.post_disc#|
+               c. |
+T_HUC10_balanc~3M |  -.5879231   .9367947    -0.63   0.531    -2.428668    1.252822
+                  |
+high_school_201~t |  -.0070705   .0149025    -0.47   0.635    -.0363529    .0222119
+high_school_onl~t |   .0149211   .0197557     0.76   0.450    -.0238976    .0537397
+college_2013_20~t |   .0063911   .0152522     0.42   0.675    -.0235785    .0363608
+democratic_hous~t |  -.1917702   .2913633    -0.66   0.511    -.7642815     .380741
+            _cons |   .7791103   .0154246    50.51   0.000      .748802    .8094186
+-----------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+------------------------------------------------------------+
+        Absorbed FE | Categories  - Redundant  = Num. Coefs |
+--------------------+---------------------------------------|
+ huc8_year_month_fe |     84504       84504           0    *|
+------------------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+
+.         outreg2 using "$tabdir/water_measurement_voting_education.xls", keep(c.pos
+> t_disc#c.T_HUC10_balanced1_3M `county_covariates_interactions') bracket bdec (5) s
+> dec(5) append addtext(Treated Sample, HUC10s with HF in pre, HUC8*Month*Year FE, Y
+> es)
+/Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/tables
+> /water_measurement_voting_education.xls
+dir : seeout
+
+. 
+.         reghdfe OBS c.post_disc#c.T_HUC10_balanced1_3M Ttot_well_c_dH `county_cova
+> riates_interactions', cluster(state_fe) absorb(state_year_month_fe)
+(MWFE estimator converged in 1 iterations)
+
+HDFE Linear regression                            Number of obs   =    449,568
+Absorbing 1 HDFE group                            F(   6,     15) =       3.69
+Statistics robust to heteroskedasticity           Prob > F        =     0.0187
+                                                  R-squared       =     0.1759
+                                                  Adj R-squared   =     0.1709
+                                                  Within R-sq.    =     0.0006
+Number of clusters (state_fe) =         16        Root MSE        =     0.3608
+
+                                   (Std. Err. adjusted for 16 clusters in state_fe)
+-----------------------------------------------------------------------------------
+                  |               Robust
+              OBS |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+------------------+----------------------------------------------------------------
+      c.post_disc#|
+               c. |
+T_HUC10_balanc~3M |   .1675522   .1010797     1.66   0.118    -.0478941    .3829985
+                  |
+   Ttot_well_c_dH |   .0008711    .003587     0.24   0.811    -.0067744    .0085166
+high_school_201~t |  -.0041541   .0013163    -3.16   0.007    -.0069597   -.0013485
+high_school_onl~t |  -.0017703   .0011704    -1.51   0.151    -.0042651    .0007244
+college_2013_20~t |  -.0014097   .0020185    -0.70   0.496    -.0057119    .0028926
+democratic_hous~t |  -.0041663   .0241293    -0.17   0.865    -.0555966    .0472641
+            _cons |   .1944278    .001317   147.63   0.000     .1916208    .1972349
+-----------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+-------------------------------------------------------------+
+         Absorbed FE | Categories  - Redundant  = Num. Coefs |
+---------------------+---------------------------------------|
+ state_year_month_fe |      2688        2688           0    *|
+-------------------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+
+.         outreg2 using "$tabdir/water_measurement_voting_education.xls", keep(c.pos
+> t_disc#c.T_HUC10_balanced1_3M `county_covariates_interactions' Ttot_well_c_dH) bra
+> cket bdec (5) sdec(5) append addtext(Treated Sample, HUC10s with HF in pre, State*
+> Month*Year FE, Yes)
+/Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/tables
+> /water_measurement_voting_education.xls
+dir : seeout
+
+.         reghdfe OBS c.post_disc#c.T_HUC10_balanced1_3M Ttot_well_c_dH `county_cova
+> riates_interactions', cluster(huc8_fe) absorb(huc8_year_month_fe)
+(dropped 22008 singleton observations)
+(MWFE estimator converged in 1 iterations)
+
+HDFE Linear regression                            Number of obs   =    427,560
+Absorbing 1 HDFE group                            F(   6,    478) =       0.81
+Statistics robust to heteroskedasticity           Prob > F        =     0.5642
+                                                  R-squared       =     0.4525
+                                                  Adj R-squared   =     0.3176
+                                                  Within R-sq.    =     0.0003
+Number of clusters (huc8_fe) =        479         Root MSE        =     0.3269
+
+                                   (Std. Err. adjusted for 479 clusters in huc8_fe)
+-----------------------------------------------------------------------------------
+                  |               Robust
+              OBS |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+------------------+----------------------------------------------------------------
+      c.post_disc#|
+               c. |
+T_HUC10_balanc~3M |  -.0489384   .1415643    -0.35   0.730    -.3271035    .2292268
+                  |
+   Ttot_well_c_dH |   .0029197   .0025984     1.12   0.262     -.002186    .0080255
+high_school_201~t |  -.0019279   .0018903    -1.02   0.308    -.0056422    .0017864
+high_school_onl~t |   .0011802   .0020486     0.58   0.565    -.0028452    .0052056
+college_2013_20~t |   .0009199   .0027127     0.34   0.735    -.0044103    .0062501
+democratic_hous~t |  -.0238257   .0280331    -0.85   0.396     -.078909    .0312576
+            _cons |   .1948044   .0018393   105.91   0.000     .1911903    .1984184
+-----------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+------------------------------------------------------------+
+        Absorbed FE | Categories  - Redundant  = Num. Coefs |
+--------------------+---------------------------------------|
+ huc8_year_month_fe |     84504       84504           0    *|
+------------------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+
+.         outreg2 using "$tabdir/water_measurement_voting_education.xls", keep(c.pos
+> t_disc#c.T_HUC10_balanced1_3M `county_covariates_interactions' Ttot_well_c_dH) bra
+> cket bdec (5) sdec(5) append addtext(Treated Sample, HUC10s with HF in pre, HUC8*M
+> onth*Year FE, Yes)
+/Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/tables
+> /water_measurement_voting_education.xls
+dir : seeout
+
+. 
+.         reghdfe number_reading c.post_disc#c.T_HUC10_balanced1_3M Ttot_well_c_dH `
+> county_covariates_interactions', cluster(state_fe) absorb(state_year_month_fe)
+(MWFE estimator converged in 1 iterations)
+
+HDFE Linear regression                            Number of obs   =    449,568
+Absorbing 1 HDFE group                            F(   6,     15) =      11.38
+Statistics robust to heteroskedasticity           Prob > F        =     0.0001
+                                                  R-squared       =     0.0736
+                                                  Adj R-squared   =     0.0680
+                                                  Within R-sq.    =     0.0015
+Number of clusters (state_fe) =         16        Root MSE        =     3.7012
+
+                                   (Std. Err. adjusted for 16 clusters in state_fe)
+-----------------------------------------------------------------------------------
+                  |               Robust
+   number_reading |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+------------------+----------------------------------------------------------------
+      c.post_disc#|
+               c. |
+T_HUC10_balanc~3M |   2.504415   1.246514     2.01   0.063    -.1524664    5.161296
+                  |
+   Ttot_well_c_dH |   .0477929    .043018     1.11   0.284    -.0438979    .1394836
+high_school_201~t |  -.0477083   .0180591    -2.64   0.018    -.0862004   -.0092162
+high_school_onl~t |   -.001962   .0116778    -0.17   0.869    -.0268526    .0229286
+college_2013_20~t |  -.0541774    .023227    -2.33   0.034    -.1036846   -.0046703
+democratic_hous~t |   .3386872   .3939738     0.86   0.404     -.501048    1.178422
+            _cons |   .7397502   .0134714    54.91   0.000     .7110366    .7684639
+-----------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+-------------------------------------------------------------+
+         Absorbed FE | Categories  - Redundant  = Num. Coefs |
+---------------------+---------------------------------------|
+ state_year_month_fe |      2688        2688           0    *|
+-------------------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+
+.         outreg2 using "$tabdir/water_measurement_voting_education.xls", keep(c.pos
+> t_disc#c.T_HUC10_balanced1_3M `county_covariates_interactions' Ttot_well_c_dH) bra
+> cket bdec (5) sdec(5) append addtext(Treated Sample, HUC10s with HF in pre, State*
+> Month*Year FE, Yes)
+/Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/tables
+> /water_measurement_voting_education.xls
+dir : seeout
+
+.         reghdfe number_reading c.post_disc#c.T_HUC10_balanced1_3M Ttot_well_c_dH `
+> county_covariates_interactions', cluster(huc8_fe) absorb(huc8_year_month_fe)
+(dropped 22008 singleton observations)
+(MWFE estimator converged in 1 iterations)
+
+HDFE Linear regression                            Number of obs   =    427,560
+Absorbing 1 HDFE group                            F(   6,    478) =       1.16
+Statistics robust to heteroskedasticity           Prob > F        =     0.3260
+                                                  R-squared       =     0.3588
+                                                  Adj R-squared   =     0.2008
+                                                  Within R-sq.    =     0.0003
+Number of clusters (huc8_fe) =        479         Root MSE        =     3.4285
+
+                                   (Std. Err. adjusted for 479 clusters in huc8_fe)
+-----------------------------------------------------------------------------------
+                  |               Robust
+   number_reading |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+------------------+----------------------------------------------------------------
+      c.post_disc#|
+               c. |
+T_HUC10_balanc~3M |  -.6248088   .9281519    -0.67   0.501    -2.448571    1.198953
+                  |
+   Ttot_well_c_dH |   .0391545   .0226801     1.73   0.085    -.0054105    .0837195
+high_school_201~t |  -.0071626   .0148949    -0.48   0.631    -.0364303     .022105
+high_school_onl~t |   .0155286   .0195737     0.79   0.428    -.0229326    .0539898
+college_2013_20~t |   .0060547    .015162     0.40   0.690    -.0237378    .0358472
+democratic_hous~t |   -.181352    .289006    -0.63   0.531    -.7492312    .3865272
+            _cons |   .7753233   .0151949    51.03   0.000     .7454663    .8051804
+-----------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+------------------------------------------------------------+
+        Absorbed FE | Categories  - Redundant  = Num. Coefs |
+--------------------+---------------------------------------|
+ huc8_year_month_fe |     84504       84504           0    *|
+------------------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+
+.         outreg2 using "$tabdir/water_measurement_voting_education.xls", keep(c.pos
+> t_disc#c.T_HUC10_balanced1_3M `county_covariates_interactions' Ttot_well_c_dH) bra
+> cket bdec (5) sdec(5) append addtext(Treated Sample, HUC10s with HF in pre, HUC8*M
+> onth*Year FE, Yes)
+/Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/tables
+> /water_measurement_voting_education.xls
+dir : seeout
+
+. 
+. /**************
+>         Measurement and Fracking Intensity
+>         ***************/
+.         
+. ********************************* END ******************************************
+. 
+. capture log close

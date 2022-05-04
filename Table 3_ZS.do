@@ -80,10 +80,32 @@ cd "$dropbox/6. results/zs/Table 3 Placebo Test"
 		drop if _merge != 3
 		drop _merge
 		
+		tostring peak_time, gen(peak_time_s) force usedisplayformat
+		g year_peak = substr(peak_time_s, 1,4)
+		g month_peak = substr(peak_time_s, 5,3)
+		
+		replace month_peak = "jan" if month_peak =="m1"
+		replace month_peak = "feb" if month_peak =="m2"
+		replace month_peak = "mar" if month_peak =="m3"
+		replace month_peak = "apr" if month_peak =="m4"
+		replace month_peak = "may" if month_peak =="m5"
+		replace month_peak = "jun" if month_peak =="m6"
+		replace month_peak = "jul" if month_peak =="m7"
+		replace month_peak = "aug" if month_peak =="m8"
+		replace month_peak = "sep" if month_peak =="m9"
+		replace month_peak = "oct" if month_peak =="m10"
+		replace month_peak = "nov" if month_peak =="m11"
+		replace month_peak = "dec" if month_peak =="m12"
+		
+		g peak_date = "28" + month_peak + year_peak
+		
+		g peak_date_d = date(peak_date, "DMY")
+		format peak_date_d %d
+
 	gen monthly = monthly(M_Y, "MY")
 	format monthly %tm
-	gen post_peak = 1 if peak_time <= monthly
-	replace post_peak = 0 if post_peak >=.
+	gen post_peak = 1 if date >= peak_date_d
+	replace post_peak = 0 if post_peak ==.
 	/* replace the post_disc dummy with the new set of disclosure */
 	*replace post_disc = 1 if disc_time <= monthly
 	*replace post_disc = 0 if disc_time >=.
@@ -111,8 +133,17 @@ cd "$dropbox/6. results/zs/Table 3 Placebo Test"
 		gen post_peak_before = disc_before_ggpeak * post_peak
 		gen post_peak_after = disc_after_ggpeak * post_peak
 		
+		bysort huc10_s: egen m_disc_before_ggpeak = max(disc_before_ggpeak)
+		bysort huc10_s: egen m_disc_after_ggpeak = max(disc_after_ggpeak)
+		
+		bysort fipstate: egen M_disc_before_ggpeak = max(disc_before_ggpeak)
+		bysort fipstate: egen M_disc_after_ggpeak = max(disc_after_ggpeak)
+		gen post_disc_beforeM = M_disc_before_ggpeak * post_disc
+		gen post_disc_afterM = M_disc_after_ggpeak * post_disc
+
+		
 	save "$datadir/Table3_ZS", replace	
-	
+/*
 	
 /**********
 	Regressions
