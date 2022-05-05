@@ -281,6 +281,16 @@ Date Modified: May 4th, 2022
 	reghdfe number_reading c.T_HUC10_balanced1_3M Ttot_well_c_dH `county_covariates', cluster(huc8_fe) absorb(huc8_year_month_fe)
 	outreg2 using "$tabdir/water_measurement_treatedhuc10s_education_voting.xls", keep(c.T_HUC10_balanced1_3M Ttot_well_c_dH `county_covariates') bracket bdec (5) sdec(5) append addtext(Treated Sample, HUC10s with HF in pre, HUC8*Month*Year FE, Yes)
 	
+*** measurement intensity w.r.t well counts 	
+	reghdfe OBS Ttot_well_c_dH, cluster(huc10_state) absorb(huc10_state state_year_month_fe huc10_s_month)
+	outreg2 using "$tabdir/water_measurement_well_counts.xls", keep(Ttot_well_c_dH) bracket bdec (5) sdec(5) replace addtext(Treated Sample, HUC10s with HF in pre, HUC10 FE, Yes, State*Month*Year FE, Yes, HUC10*Month FE, Yes)
+	reghdfe OBS Ttot_well_c_dH, cluster(huc10_state) absorb(huc10_state huc8_year_month_fe huc10_s_month)
+	outreg2 using "$tabdir/water_measurement_well_counts.xls", keep(Ttot_well_c_dH) bracket bdec (5) sdec(5) append addtext(Treated Sample, HUC10s with HF in pre, HUC10 FE, Yes, HUC8*Month*Year FE, Yes, HUC10*Month FE, Yes)
+
+	reghdfe number_reading Ttot_well_c_dH, cluster(huc10_state) absorb(huc10_state state_year_month_fe huc10_s_month)
+	outreg2 using "$tabdir/water_measurement_well_counts.xls", keep(Ttot_well_c_dH) bracket bdec (5) sdec(5) append addtext(Treated Sample, HUC10s with HF in pre, HUC10 FE, Yes, State*Month*Year FE, Yes, HUC10*Month FE, Yes)
+	reghdfe number_reading Ttot_well_c_dH, cluster(huc10_state) absorb(huc10_state huc8_year_month_fe huc10_s_month)
+	outreg2 using "$tabdir/water_measurement_well_counts.xls", keep(Ttot_well_c_dH) bracket bdec (5) sdec(5) append addtext(Treated Sample, HUC10s with HF in pre, HUC10 FE, Yes, HUC8*Month*Year FE, Yes, HUC10*Month FE, Yes)
 ********************************* END ******************************************
 
 capture log close
