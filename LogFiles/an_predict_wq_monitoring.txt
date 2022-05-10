@@ -79,3 +79,47 @@ file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/da
 
 .         
 .         // joinby with distance data to get api10 (well) distance for each IG_geo
+.         joinby ID_geo using "$interdir/monitorstation_downstream_dist.dta"
+
+. 
+.         // keep only dates close (spud date within 1 year of monitoring date)
+.         drop if abs(date-spud_date_augmented) > 360
+(9,734,389 observations deleted)
+
+.         * now sample only includes those within 360 days of spudding well and downstream monitoring locations
+.         // collapse by api10 (well) to get the average number of monitoring station within some distance bins
+.         collapse (sum) dist_bin_0to5km-dist_bin_0to30km, by(api10 CharacteristicName)
+
+.         save "$interdir/at_risk_monitor_dist_to_well", replace
+file /Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/intermediate/at_risk_monitor_dist_to_well.dta saved
+
+.         
+. *** tab-out frequencies by distance bins into latex tables 
+. 
+.         * Chloride
+.         keep if CharacteristicName == "Chloride"
+(52,094 observations deleted)
+
+.         tabstat dist_bin_0to5km-dist_bin_0to30km, stats(mean)   
+
+   Stats |  dis~o5km  dis~10km  dis~15km  dis~20km  dis~25km  dis~30km
+---------+------------------------------------------------------------
+    Mean |  2.197986  6.349652   10.4065  14.04666  16.92527  19.03129
+----------------------------------------------------------------------
+
+.         * All 
+.         use "$interdir/at_risk_monitor_dist_to_well", clear
+
+.         collapse (sum) dist_bin_0to5km-dist_bin_0to30km, by(api10)
+
+.         tabstat dist_bin_0to5km-dist_bin_0to30km, stats(mean)   
+
+   Stats |  dis~o5km  dis~10km  dis~15km  dis~20km  dis~25km  dis~30km
+---------+------------------------------------------------------------
+    Mean |  3.728682  11.32916  19.10068  26.30991   32.0257  36.31579
+----------------------------------------------------------------------
+
+. 
+end of do-file
+
+. exit, clear
