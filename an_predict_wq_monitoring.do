@@ -5,7 +5,7 @@ local fname an_predict_wq_monitoring
 
 Author: Zirui Song
 Date Created: Apr 23th, 2022
-Date Modified: May 4th, 2022
+Date Modified: May 10th, 2022
 
 ********************************************************************************/
 
@@ -36,7 +36,7 @@ Date Modified: May 4th, 2022
 	Get number of measurements per 5km distance bins for Figure S5 
 	***************/	
 
-*** import and clean distance data
+*** import and clean distance data （collapsing by monitoring station)
 	use "$datadir/data for Zirui/distances_upstream_computed.dta", clear
 	* generate smallest upstream well distance for each ID_geo (monitoring station)
 	collapse (min) distance_geodesic, by(ID_geo)
@@ -47,6 +47,16 @@ Date Modified: May 4th, 2022
 	}
 	save "$interdir/monitorstation_mindist.dta", replace
 	
+*** import and clean distance data （collapsing by api10 (well))
+	use "$datadir/data for Zirui/distances_upstream_computed.dta", clear
+	* keep only good upstream wells (downstream monitoring station)
+	keep if upstream_len == 1
+	* generate 0-5km, 0-10km, 0-15km, ..., 0-30km bins
+	forv d = 5(5)30 {
+		gen dist_bin_0to`d'km = 1 if distance_geodesic <= `d'
+		replace dist_bin_0to`d'km = 0 if dist_bin_0to`d'km == .
+	}
+	save "$interdir/monitorstation_downstream_dist.dta", replace
 *** merge with water quality measurement sample	
 	use "$datadir/DISC_TEMP_2020 OCT 2021 DEF B.dta", clear // water quality sample
 
@@ -54,15 +64,27 @@ Date Modified: May 4th, 2022
 	drop if log_t_t_Value_clean2 ==.
 	// define estimation sample
 	keep if Treated_ ==1 & m_cum_well_huc4_H_D == 1
-	merge m:1 ID_geo using "$interdir/monitorstation_mindist.dta"
+	
+	// joinby with distance data to get api10 (well) distance for each IG_geo
+	joinby ID_geo using "$interdir/monitorstation_downstream_dist.dta"
 
+	// keep only dates close (spud date within 1 year of monitoring date)
+	drop if abs(date-spud_date_augmented) > 360
+	* now sample only includes those within 360 days of spudding well and downstream monitoring locations
+	// collapse by api10 (well) to get the average number of monitoring station within some distance bins
+	collapse (sum) dist_bin_0to5km-dist_bin_0to30km, by(api10 CharacteristicName)
+	save "$interdir/at_risk_monitor_dist_to_well", replace
+	
 *** tab-out frequencies by distance bins into latex tables 
-	* All Ions
-	tabstat dist_bin_0to5km-dist_bin_0to30km, stats(sum)
+
 	* Chloride
 	keep if CharacteristicName == "Chloride"
-	tabstat dist_bin_0to5km-dist_bin_0to30km, stats(sum)	
-
+	tabstat dist_bin_0to5km-dist_bin_0to30km, stats(mean)	
+	* All 
+	use "$interdir/at_risk_monitor_dist_to_well", clear
+	collapse (sum) dist_bin_0to5km-dist_bin_0to30km, by(api10)
+	tabstat dist_bin_0to5km-dist_bin_0to30km, stats(mean)	
+	
 /**************
 	Import Water Measurement Data
 	***************/
