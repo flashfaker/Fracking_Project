@@ -1,0 +1,115 @@
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:/Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs//code/LogFiles/an_wq_monitor_discontinuity.txt
+  log type:  text
+ opened on:  18 May 2022, 18:00:48
+
+.         
+. /**************
+>         Import Water Measurement Data
+>         ***************/
+.         use "$datadir/DISC_TEMP_2020 OCT 2021 DEF B_ALL_STATES.dta", clear // water quality sample
+
+. 
+.         * poke at the problem with only PA
+.         keep if StateCode == "42"
+(1,050,684 observations deleted)
+
+.         
+.         // drop missing wq obs.
+.         drop if log_t_t_Value_clean2 ==.
+(5,762 observations deleted)
+
+. 
+.         keep StateCode CountyCode state_county_ID huc10_s date_string ID_geo
+
+.         gen date = date(date_string, "DMY")
+
+.         gen month = mofd(date)
+
+.         format month %tm
+
+.         * collapse data to be monitorid-year-month with dummy variable indicating whether 
+.         * there is reading or not in the given month
+.         duplicates drop ID_geo month, force
+
+Duplicates in terms of ID_geo month
+
+(55,357 observations deleted)
+
+.         egen monitor_id = group(ID_geo)
+
+.         keep ID_geo monitor_id month 
+
+.         
+.         tempfile wq_pa
+
+.         save `wq_pa'
+file C:\Users\zsong98\AppData\Local\Temp\ST_3a6c_000001.tmp saved as .dta format
+
+. /**************
+>         Import Monitoring Station Spudding Well Distance Data
+>         ***************/
+.         use "$datadir/data for Zirui/distances_upstream_computed.dta", clear
+
+. 
+. *** by ID_geo, obtain the spud dates of the wells that are at risk 
+.         * keep only upstream spudding wells with distances smaller than 15km
+.         keep if upstream_len == 1
+(600,482 observations deleted)
+
+.         keep if distance_geodesic <= 15 
+(350,288 observations deleted)
+
+.         * generate the year and month of spud date
+.         gen month_frack = mofd(spud_date_augmented)
+
+.         keep ID_geo month_frack 
+
+.         format month_frack %tm
+
+.         * collapse by ID_geo year month 
+.         gduplicates drop
+
+Duplicates in terms of all variables
+
+(262,049 observations deleted)
+
+.         * reshape data to wide such that one ID_geo has multiple at-risk fracking dates
+.         * generate counter variable for number of fracks in the given ID_geo
+.         bysort ID_geo (month_frack): gen count = _n
+
+.         reshape wide month_frack, i(ID_geo) j(count)
+(j = 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61
+>  62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 1
+> 15 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144)
+
+Data                               Long   ->   Wide
+-----------------------------------------------------------------------------
+Number of observations          142,605   ->   8,475       
+Number of variables                   3   ->   145         
+j variable (144 values)           count   ->   (dropped)
+xij variables:
+                            month_frack   ->   month_frack1 month_frack2 ... month_frack144
+-----------------------------------------------------------------------------
+
+.         
+.         * now merge ID_geo onto the water quality measurements data
+.         merge 1:m ID_geo using "`wq_pa'"
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                        32,947
+        from master                     4,964  (_merge==1)
+        from using                     27,983  (_merge==2)
+
+    Matched                            15,783  (_merge==3)
+    -----------------------------------------
+
+.         
+. /**************
+>         Run Regressions 
+>         ***************/
+. ********************************* END ******************************************
+. 
+. capture log close
