@@ -3,7 +3,7 @@
        log:  /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/
 > code/LogFiles/an_01_mediacoverage.txt
   log type:  text
- opened on:   1 Apr 2022, 16:52:17
+ opened on:  20 May 2022, 13:43:29
 
 . 
 . /**************
@@ -389,15 +389,15 @@ file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/outp
 .         
 .         *** OH
 .         twoway ///
->         (dropline peak time, msize(vtiny) lcolor(red) mcolor(red)) ///
->         (dropline disclosure time, msize(vtiny) lcolor(dkgreen) mcolor(dkgreen)) /
-> //
 >         (dropline disclosure_start time, msize(vtiny) lcolor(midgreen) mcolor(mgre
 > en)) ///
+>         (dropline disclosure time, msize(vtiny) lcolor(dkgreen) mcolor(dkgreen)) /
+> //
 >         (dropline first_uptick time, msize(vtiny) lcolor(ltblue) mcolor(ltblue)) /
 > //
 >         (dropline first_biguptick time, msize(vtiny) lcolor(blue) mcolor(blue)) //
 > /
+>         (dropline peak time, msize(vtiny) lcolor(red) mcolor(red)) ///
 >         if state == "ohio" & time > 600 & time <= 660, ///
 >         graphregion(color(white)) bgcolor(white) yscale(lstyle(none)) ///
 >         xlabel(600(6)660, angle(60)) ylabel(0(1)1, noticks nolab) ///
@@ -412,15 +412,15 @@ file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/outp
 .         
 .         *** PA
 .         twoway ///
->         (dropline peak time, msize(vtiny) lcolor(red) mcolor(red)) ///
->         (dropline disclosure time, msize(vtiny) lcolor(dkgreen) mcolor(dkgreen)) /
-> //
 >         (dropline disclosure_start time, msize(vtiny) lcolor(midgreen) mcolor(mgre
 > en)) ///
+>         (dropline disclosure time, msize(vtiny) lcolor(dkgreen) mcolor(dkgreen)) /
+> //
 >         (dropline first_uptick time, msize(vtiny) lcolor(ltblue) mcolor(ltblue)) /
 > //
 >         (dropline first_biguptick time, msize(vtiny) lcolor(blue) mcolor(blue)) //
 > /
+>         (dropline peak time, msize(vtiny) lcolor(red) mcolor(red)) ///
 >         if state == "pennsylvania" & time > 559 & time <= 683, ///
 >         graphregion(color(white)) bgcolor(white) yscale(lstyle(none)) ///
 >         xlabel(559(12)683, angle(60)) ylabel(0(1)1, noticks nolab) ///
@@ -436,15 +436,15 @@ file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/outp
 .         
 .         *** TX
 .         twoway ///
->         (dropline peak time, msize(vtiny) lcolor(red) mcolor(red)) ///
->         (dropline disclosure time, msize(vtiny) lcolor(dkgreen) mcolor(dkgreen)) /
-> //
 >         (dropline disclosure_start time, msize(vtiny) lcolor(midgreen) mcolor(mgre
 > en)) ///
+>         (dropline disclosure time, msize(vtiny) lcolor(dkgreen) mcolor(dkgreen)) /
+> //
 >         (dropline first_uptick time, msize(vtiny) lcolor(ltblue) mcolor(ltblue)) /
 > //
 >         (dropline first_biguptick time, msize(vtiny) lcolor(blue) mcolor(blue)) //
 > /
+>         (dropline peak time, msize(vtiny) lcolor(red) mcolor(red)) ///
 >         if state == "texas" & time > 559 & time <= 683, ///
 >         graphregion(color(white)) bgcolor(white) yscale(lstyle(none)) ///
 >         xlabel(559(12)683, angle(60)) ylabel(0(1)1, noticks nolab) ///
@@ -462,10 +462,10 @@ file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/outp
 .         lab var first_biguptick "Media Coverage Peak and First Big Uptick"
 
 .         twoway ///
->         (dropline disclosure time, msize(vtiny) lcolor(dkgreen) mcolor(dkgreen)) /
-> //
 >         (dropline disclosure_start time, msize(vtiny) lcolor(midgreen) mcolor(mgre
 > en)) ///
+>         (dropline disclosure time, msize(vtiny) lcolor(dkgreen) mcolor(dkgreen)) /
+> //
 >         (dropline first_uptick time, msize(vtiny) lcolor(ltblue) mcolor(ltblue)) /
 > //
 >         (dropline first_biguptick time, msize(vtiny) lcolor(blue) mcolor(blue)) //
@@ -478,12 +478,10 @@ file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/outp
 (note:  named style mgreen not found in class color, default attributes used)
 
 .         graph export "$figdir/mediacoverage_peakanduptick_colorado.pdf", replace
-(file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/
-> figures/mediacoverage_peakanduptick_colorado.pdf written in PDF format)
+no Graph window open
+r(601);
 
-.         lab var first_biguptick "Media Coverage First Big Uptick"
+end of do-file
 
-.         
-. ********************************* END ******************************************
-. 
-. capture log close
+r(601);
+
