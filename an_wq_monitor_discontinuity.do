@@ -140,7 +140,7 @@ program define wq_measurment_eventplot
 	replace eventtime_pos = . if eventtime_pos == 10000 //this is because missing value is treated as infinity
 	replace eventtime_neg = . if eventtime_neg == -10000
 	* 2. now we have the closest positive and negative (prior+after) date for each monitor-month obs
-	* 3. generate eventtimes to be the closest eventtime within 12 months
+	* 3. generate eventtimes to be the closest positive eventtime within 12 months (if not, get negative)
 	gen eventtime = eventtime_pos
 	replace eventtime = eventtime_neg if eventtime_pos > 12
 	

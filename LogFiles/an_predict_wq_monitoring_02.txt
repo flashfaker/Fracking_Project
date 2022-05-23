@@ -1,0 +1,105 @@
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:/Users/zsong98/Dropbox/Fracking Disclosure regulation project/2. code/zs//code/LogFiles/an_predict_wq_monitoring_02.txt
+  log type:  text
+ opened on:  23 May 2022, 17:46:21
+
+.         
+. /**************
+>         Import Water Measurement Data
+>         ***************/
+.         use "$datadir/DISC_TEMP_2020 OCT 2021 DEF B_ALL_STATES.dta", clear // water quality sample
+
+. 
+.         // drop missing wq obs.
+.         drop if log_t_t_Value_clean2 ==.
+(40,810 observations deleted)
+
+.         
+.         // number of reading by huc10-year-month
+.         bysort huc10_s date_string_year date_string_month: g number_reading = _N
+
+.         replace number_reading = 0 if number_reading==.
+(0 real changes made)
+
+. 
+.         bysort huc10_s date_string_year date_string_month: gen ok = 1 if date_string_month==date_string_month[_n+1]
+(281,463 missing values generated)
+
+.         keep if ok==.
+(833,296 observations deleted)
+
+. 
+.         keep StateCode CountyCode state_county_ID huc10_s date_string_year date_string_month T_HUC10_balanced1_ALL number_reading
+
+. 
+.         fillin huc10_s date_string_year date_string_month
+
+. 
+.         g OBS = 1 if _fillin == 0
+(1,296,561 missing values generated)
+
+.         replace OBS = 0 if _fillin==1
+(1,296,561 real changes made)
+
+.         replace number_reading = 0 if number_reading==.
+(1,296,561 real changes made)
+
+. 
+.         replace date_string_month = "1" if date_string_month == "jan"
+(131,502 real changes made)
+
+.         replace date_string_month = "2" if date_string_month == "feb"
+(131,502 real changes made)
+
+.         replace date_string_month = "3" if date_string_month == "mar"
+(131,502 real changes made)
+
+.         replace date_string_month = "4" if date_string_month == "apr"
+(131,502 real changes made)
+
+.         replace date_string_month = "5" if date_string_month == "may"
+(131,502 real changes made)
+
+.         replace date_string_month = "6" if date_string_month == "jun"                           
+(131,502 real changes made)
+
+.         replace date_string_month = "7" if date_string_month == "jul"
+(131,502 real changes made)
+
+.         replace date_string_month = "8" if date_string_month == "aug"
+(131,502 real changes made)
+
+.         replace date_string_month = "9" if date_string_month == "sep"
+(131,502 real changes made)
+
+.         replace date_string_month = "10" if date_string_month == "oct"                          
+(131,502 real changes made)
+
+.         replace date_string_month = "11" if date_string_month == "nov"
+(131,502 real changes made)
+
+.         replace date_string_month = "12" if date_string_month == "dec"                                                  
+(131,502 real changes made)
+
+.         destring date_string_year date_string_month, replace
+date_string_year: all characters numeric; replaced as int
+date_string_month: all characters numeric; replaced as byte
+
+.         gen month = ym(date_string_year, date_string_month)
+
+.         format month %tm
+
+.         
+.         /*
+>         egen state_fe = group(StateCode)
+>         bysort huc10_s: egen STATE =max(state_fe)
+>         * fill in missing state and county fips code
+>         destring StateCode CountyCode, replace
+>         bysort huc10_s: egen fipstate = max(StateCode)
+>         bysort huc10_s: egen fipscounty = max(CountyCode)
+>         */
+.         
+. ********************************* END ******************************************
+. 
+. capture log close
