@@ -176,7 +176,7 @@ Date Modified: May 23th, 2022
 	
 	replace Ttot_well_c_dH= 0 if Ttot_well_c_dH==.
 	
-	save "$basedir/water_measurement_main_data_20220426.xdta", replace
+	save "$basedir/water_measurement_main_data_20220426.dta", replace
 	
 	* original tables by Pietro
 	reghdfe OBS c.post_disc#c.T_HUC10_balanced1_3M, cluster(huc10_state) absorb(huc10_state state_year_month_fe huc10_s_month)
