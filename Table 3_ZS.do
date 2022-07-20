@@ -121,11 +121,12 @@ cd "$dropbox/6. results/zs/Table 3 Placebo Test"
 		format disc_start_time_month %tm
 		
 		sort fipstate date
-		gen disc_before_ggpeak = 1 if disc_start_time_month <= peak_time
+		gen disc_before_ggpeak = 1 if disc_start_time_month <= peak_time & peak_time!=. & disc_start_time_month!=. // peak after disclosure legislative process starts
 		replace disc_before_ggpeak = 0 if disc_before_ggpeak >=.
 		
-		gen disc_after_ggpeak = 1 if disc_start_time_month > peak_time & disc_start_time !=.
+		gen disc_after_ggpeak = 1 if disc_start_time_month > peak_time & disc_start_time_month !=. & peak_time!=. // peak before disclosure legislative process starts
 		replace disc_after_ggpeak = 0 if disc_after_ggpeak >=.
+
 		
 		* generate interaction between post_disc and before/after 
 		gen post_disc_before = disc_before_ggpeak * post_disc
@@ -141,6 +142,38 @@ cd "$dropbox/6. results/zs/Table 3 Placebo Test"
 		gen post_disc_beforeM = M_disc_before_ggpeak * post_disc
 		gen post_disc_afterM = M_disc_after_ggpeak * post_disc
 
+ codebook fipstate if M_disc_before_ggpeak == 1 // 13
+ codebook fipstate if M_disc_after_ggpeak == 1 // 3
+
+ /*
+		sort fipstate date
+		gen discD_before_ggpeak = 1 if disc_date_d <= peak_time & peak_time!=. & disc_date_d!=.
+		replace discD_before_ggpeak = 0 if discD_before_ggpeak >=.
+		
+		gen discD_after_ggpeak = 1 if disc_date_d > peak_time & disc_start_time_month !=. & disc_date_d!=.
+		replace discD_after_ggpeak = 0 if discD_after_ggpeak >=.
+
+
+		* generate interaction between post_disc and before/after 
+		gen postD_disc_before = discD_before_ggpeak * post_disc
+		gen postD_disc_after = discD_after_ggpeak * post_disc
+		gen postD_peak_before = discD_before_ggpeak * post_peak
+		gen postD_peak_after = discD_after_ggpeak * post_peak
+		
+		bysort huc10_s: egen m_discD_before_ggpeak = max(discD_before_ggpeak)
+		bysort huc10_s: egen m_discD_after_ggpeak = max(discD_after_ggpeak)
+		
+		bysort fipstate: egen M_discD_before_ggpeak = max(discD_before_ggpeak)
+		bysort fipstate: egen M_discD_after_ggpeak = max(discD_after_ggpeak)
+		gen post_discD_beforeM = M_discD_before_ggpeak * post_disc // always zero
+		gen post_discD_afterM = M_discD_after_ggpeak * post_disc
+*/
+		
+		
+		
+		
+		
+		
 		
 	save "$datadir/Table3_ZS", replace	
 /*
