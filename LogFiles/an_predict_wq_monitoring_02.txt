@@ -1,9 +1,9 @@
-------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------
       name:  <unnamed>
-       log:  /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/
-> /code/LogFiles/an_predict_wq_monitoring_02.txt
+       log:  /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs//code/L
+> ogFiles/an_predict_wq_monitoring_02.txt
   log type:  text
- opened on:  24 May 2022, 16:29:22
+ opened on:   3 Jan 2023, 11:09:52
 
 .         
 . /**************
@@ -29,14 +29,14 @@ Duplicates in terms of ID_geo
 .         keep ID_geo
 
 .         save "$interdir/at_risk_monitors.dta", replace
-file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/int
-> ermediate/at_risk_monitors.dta saved
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/intermedia
+> te/at_risk_monitors.dta saved
 
 . /**************
 >         Import Water Measurement Data
 >         ***************/
-.         use "$datadir/DISC_TEMP_2020 OCT 2021 DEF B_ALL_STATES.dta", clear // wate
-> r quality sample
+.         use "$datadir/DISC_TEMP_2020 OCT 2021 DEF B_ALL_STATES.dta", clear // water quali
+> ty sample
 
 . 
 .         // drop missing wq obs.
@@ -80,8 +80,8 @@ file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data
 (0 real changes made)
 
 . 
-.         bysort huc10_s date_string_year date_string_month: gen ok = 1 if date_stri
-> ng_month==date_string_month[_n+1]
+.         bysort huc10_s date_string_year date_string_month: gen ok = 1 if date_string_mont
+> h==date_string_month[_n+1]
 (88,351 missing values generated)
 
 .         keep if ok==.
@@ -91,59 +91,44 @@ file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data
 .         // merge with well count data
 .         rename date_string_month date_string_monthM
 
-.         merge 1:1 huc10_s date_string_year date_string_monthM using "$datadir/ENTR
-> Y_TEMP_2020 OCT 2021.dta", force gen(_merge_entry)
+.         merge 1:1 huc10_s date_string_year date_string_monthM using "$datadir/ENTRY_TEMP_
+> 2020 OCT 2021.dta", force gen(_merge_entry)
 (note: variable huc10 was long, now double to accommodate using data's values)
-(note: variable operatoraliaslegacy was str37, now str45 to accommodate using
-       data's values)
-(note: variable operatorcompanyname was str30, now str43 to accommodate using
-       data's values)
-(note: variable operatorreported was str41, now str45 to accommodate using data's
+(note: variable operatoraliaslegacy was str37, now str45 to accommodate using data's
        values)
+(note: variable operatorcompanyname was str30, now str43 to accommodate using data's
+       values)
+(note: variable operatorreported was str41, now str45 to accommodate using data's values)
 (note: variable post_disc was byte, now float to accommodate using data's values)
 (note: variable min_spud was int, now float to accommodate using data's values)
 (note: variable cum_well_H was int, now float to accommodate using data's values)
-(note: variable Treated_state was byte, now float to accommodate using data's
-       values)
+(note: variable Treated_state was byte, now float to accommodate using data's values)
 (note: variable disc_date_d was int, now float to accommodate using data's values)
 (note: variable date was int, now float to accommodate using data's values)
 (note: variable year_fe was byte, now float to accommodate using data's values)
-(note: variable month_year_fe was int, now float to accommodate using data's
-       values)
+(note: variable month_year_fe was int, now float to accommodate using data's values)
 (note: variable state_fe was byte, now float to accommodate using data's values)
-(note: variable state_year_fe was int, now float to accommodate using data's
-       values)
-(note: variable state_month_fe was int, now float to accommodate using data's
-       values)
+(note: variable state_year_fe was int, now float to accommodate using data's values)
+(note: variable state_month_fe was int, now float to accommodate using data's values)
 (note: variable state_month_year_fe was int, now float to accommodate using data's
        values)
 (note: variable huc4_fe was int, now float to accommodate using data's values)
-(note: variable huc4_year_fe was int, now float to accommodate using data's
-       values)
-(note: variable huc4_month_fe was int, now float to accommodate using data's
-       values)
-(note: variable huc4_year_month_fe was int, now float to accommodate using data's
-       values)
+(note: variable huc4_year_fe was int, now float to accommodate using data's values)
+(note: variable huc4_month_fe was int, now float to accommodate using data's values)
+(note: variable huc4_year_month_fe was int, now float to accommodate using data's values)
 (note: variable huc8_fe was int, now float to accommodate using data's values)
-(note: variable huc8_year_fe was int, now float to accommodate using data's
-       values)
-(note: variable huc8_month_fe was int, now float to accommodate using data's
-       values)
+(note: variable huc8_year_fe was int, now float to accommodate using data's values)
+(note: variable huc8_month_fe was int, now float to accommodate using data's values)
 (note: variable huc10_fe was int, now float to accommodate using data's values)
-(note: variable state_huc4_fe was int, now float to accommodate using data's
-       values)
-(note: variable state_huc4_year_fe was int, now float to accommodate using data's
-       values)
+(note: variable state_huc4_fe was int, now float to accommodate using data's values)
+(note: variable state_huc4_year_fe was int, now float to accommodate using data's values)
 (note: variable state_huc4_month_fe was int, now float to accommodate using data's
        values)
-(note: variable state_huc8_fe was int, now float to accommodate using data's
-       values)
-(note: variable state_huc8_year_fe was int, now float to accommodate using data's
-       values)
+(note: variable state_huc8_fe was int, now float to accommodate using data's values)
+(note: variable state_huc8_year_fe was int, now float to accommodate using data's values)
 (note: variable state_huc8_month_fe was int, now float to accommodate using data's
        values)
-(note: variable state_huc10_fe was int, now float to accommodate using data's
-       values)
+(note: variable state_huc10_fe was int, now float to accommodate using data's values)
 (note: variable shale was byte, now float to accommodate using data's values)
 (note: variable m_shale was byte, now float to accommodate using data's values)
 (label _merge already defined)
@@ -166,9 +151,8 @@ file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data
 
 .         rename date_string_monthM date_string_month
 
-.         keep StateCode CountyCode state_county_ID huc8_s huc10_s ID_geo date_strin
-> g_year date_string_month T_HUC10_balanced1_ALL number_reading Ttot_well_c_dH at_ri
-> sk
+.         keep StateCode CountyCode state_county_ID huc8_s huc10_s ID_geo date_string_year 
+> date_string_month T_HUC10_balanced1_ALL number_reading Ttot_well_c_dH at_risk
 
 . 
 .         fillin huc10_s date_string_year date_string_month
@@ -199,8 +183,8 @@ file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data
 .         replace date_string_month = "5" if date_string_month == "may"
 (37,968 real changes made)
 
-.         replace date_string_month = "6" if date_string_month == "jun"             
->               
+.         replace date_string_month = "6" if date_string_month == "jun"                    
+>        
 (37,968 real changes made)
 
 .         replace date_string_month = "7" if date_string_month == "jul"
@@ -212,15 +196,15 @@ file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data
 .         replace date_string_month = "9" if date_string_month == "sep"
 (37,968 real changes made)
 
-.         replace date_string_month = "10" if date_string_month == "oct"            
->               
+.         replace date_string_month = "10" if date_string_month == "oct"                   
+>        
 (37,968 real changes made)
 
 .         replace date_string_month = "11" if date_string_month == "nov"
 (37,968 real changes made)
 
-.         replace date_string_month = "12" if date_string_month == "dec"            
->                                       
+.         replace date_string_month = "12" if date_string_month == "dec"                   
+>                                
 (37,968 real changes made)
 
 .         destring date_string_year date_string_month, replace
@@ -259,14 +243,14 @@ StateCode: all characters numeric; replaced as byte
 
 .         lab var treated "Treated HUC10"
 
-.         lab var at_risk "At-risk Monitoring Stations (downstream, within 15km of s
-> pudding)"
+.         lab var at_risk "At-risk Monitoring Stations (downstream, within 15km of spudding
+> )"
 
 .         gsort state huc8 huc10 month
 
 .         save "$interdir/monthly_wq_measurement_with_wlct", replace
-file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/int
-> ermediate/monthly_wq_measurement_with_wlct.dta saved
+file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/data/intermedia
+> te/monthly_wq_measurement_with_wlct.dta saved
 
 .         
 .                 
@@ -310,32 +294,30 @@ xij variables:
 (3 observations deleted)
 
 .         twoway (tsline OBS0) || (tsline OBS1), yscale(r(0(.05).3)) ///
->                         ytitle("Share of HUC10 with Water Measurement", size(small
-> ) height(5))  ///
+>                         ytitle("Share of HUC10 with Water Measurement", size(small) heigh
+> t(5))  ///
 >                         xtitle("Time (Months)", size(small)) ///
->                         tlabel(2006m1 2008m1 2010m1 2012m1 2014m1 2016m1 2018m1)  
-> ///
->                         legend(rows(1)) ysize(2.8) xsize(4.2) graphregion(c(white)
->  fcolor(white))
+>                         tlabel(2006m1 2008m1 2010m1 2012m1 2014m1 2016m1 2018m1)  ///
+>                         legend(rows(1)) ysize(2.8) xsize(4.2) graphregion(c(white) fcolor
+> (white))
 
 .         graph export "$figdir/OBS_trends_bytreatedHUC10s.pdf", replace
-(file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/
-> figures/OBS_trends_bytreatedHUC10s.pdf written in PDF format)
+(file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures
+> /OBS_trends_bytreatedHUC10s.pdf written in PDF format)
 
 .         
-.         twoway (tsline number_reading0) || (tsline number_reading1), yscale(r(0(.0
-> 5).3)) ///
->                         ytitle("Average Number of Readings Per HUC10", size(small)
->  height(5))  ///
->                         xtitle("Time (Months)", size(small)) ///
->                         tlabel(2006m1 2008m1 2010m1 2012m1 2014m1 2016m1 2018m1)  
+.         twoway (tsline number_reading0) || (tsline number_reading1), yscale(r(0(.05).3)) 
 > ///
->                         legend(rows(1)) ysize(2.8) xsize(4.2) graphregion(c(white)
->  fcolor(white))
+>                         ytitle("Average Number of Readings Per HUC10", size(small) height
+> (5))  ///
+>                         xtitle("Time (Months)", size(small)) ///
+>                         tlabel(2006m1 2008m1 2010m1 2012m1 2014m1 2016m1 2018m1)  ///
+>                         legend(rows(1)) ysize(2.8) xsize(4.2) graphregion(c(white) fcolor
+> (white))
 
 .         graph export "$figdir/number_reading_trends_bytreatedHUC10s.pdf", replace
-(file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/
-> figures/number_reading_trends_bytreatedHUC10s.pdf written in PDF format)
+(file /Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/figures
+> /number_reading_trends_bytreatedHUC10s.pdf written in PDF format)
 
 . restore
 
@@ -364,24 +346,23 @@ xij variables:
 . program define regressions
   1.         args var
   2.         reghdfe OBS `var', cluster(state_fe) absorb(state_fe year_fe)
-  3.         outreg2 using "$tabdir/wq_measurement_`var'.xls", bracket bdec (5) sdec
-> (5) wide replace
-  4.         reghdfe number_reading `var', cluster(state_fe) absorb(state_fe year_fe
-> )
-  5.         outreg2 using "$tabdir/wq_measurement_`var'.xls", bracket bdec (5) sdec
-> (5) wide append
+  3.         outreg2 using "$tabdir/wq_measurement_`var'.xls", bracket bdec (5) sdec(5) wid
+> e replace
+  4.         reghdfe number_reading `var', cluster(state_fe) absorb(state_fe year_fe)
+  5.         outreg2 using "$tabdir/wq_measurement_`var'.xls", bracket bdec (5) sdec(5) wid
+> e append
   6.         reghdfe OBS `var', cluster(huc8_fe) absorb(huc8_fe year_fe)
-  7.         outreg2 using "$tabdir/wq_measurement_`var'.xls", bracket bdec (5) sdec
-> (5) wide append
+  7.         outreg2 using "$tabdir/wq_measurement_`var'.xls", bracket bdec (5) sdec(5) wid
+> e append
   8.         reghdfe number_reading `var', cluster(huc8) absorb(huc8_fe year_fe)
-  9.         outreg2 using "$tabdir/wq_measurement_`var'.xls", bracket bdec (5) sdec
-> (5) wide append
+  9.         outreg2 using "$tabdir/wq_measurement_`var'.xls", bracket bdec (5) sdec(5) wid
+> e append
  10.         reghdfe OBS `var', cluster(state_fe) absorb(state_year_fe)
- 11.         outreg2 using "$tabdir/wq_measurement_`var'.xls", bracket bdec (5) sdec
-> (5) wide append
+ 11.         outreg2 using "$tabdir/wq_measurement_`var'.xls", bracket bdec (5) sdec(5) wid
+> e append
  12.         reghdfe number_reading `var', cluster(state_fe) absorb(state_year_fe)
- 13.         outreg2 using "$tabdir/wq_measurement_`var'.xls", bracket bdec (5) sdec
-> (5) wide append
+ 13.         outreg2 using "$tabdir/wq_measurement_`var'.xls", bracket bdec (5) sdec(5) wid
+> e append
  14. end
 
 .         regressions "treated"
@@ -412,8 +393,8 @@ Absorbed degrees of freedom:
      year_fe |        14           0          14     |
 -----------------------------------------------------+
 * = FE nested within cluster; treated as redundant for DoF computation
-/Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/tables
-> /wq_measurement_treated.xls
+/Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/tables/wq_mea
+> surement_treated.xls
 dir : seeout
 (MWFE estimator converged in 2 iterations)
 
@@ -442,8 +423,8 @@ Absorbed degrees of freedom:
      year_fe |        14           0          14     |
 -----------------------------------------------------+
 * = FE nested within cluster; treated as redundant for DoF computation
-/Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/tables
-> /wq_measurement_treated.xls
+/Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/tables/wq_mea
+> surement_treated.xls
 dir : seeout
 (MWFE estimator converged in 2 iterations)
 
@@ -472,8 +453,8 @@ Absorbed degrees of freedom:
      year_fe |        14           0          14     |
 -----------------------------------------------------+
 * = FE nested within cluster; treated as redundant for DoF computation
-/Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/tables
-> /wq_measurement_treated.xls
+/Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/tables/wq_mea
+> surement_treated.xls
 dir : seeout
 (MWFE estimator converged in 2 iterations)
 
@@ -502,8 +483,8 @@ Absorbed degrees of freedom:
      year_fe |        14           0          14     |
 -----------------------------------------------------+
 * = FE nested within cluster; treated as redundant for DoF computation
-/Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/tables
-> /wq_measurement_treated.xls
+/Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/tables/wq_mea
+> surement_treated.xls
 dir : seeout
 (MWFE estimator converged in 1 iterations)
 
@@ -531,8 +512,8 @@ Absorbed degrees of freedom:
  state_year_fe |       224         224           0    *|
 -------------------------------------------------------+
 * = FE nested within cluster; treated as redundant for DoF computation
-/Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/tables
-> /wq_measurement_treated.xls
+/Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/tables/wq_mea
+> surement_treated.xls
 dir : seeout
 (MWFE estimator converged in 1 iterations)
 
@@ -560,8 +541,8 @@ Absorbed degrees of freedom:
  state_year_fe |       224         224           0    *|
 -------------------------------------------------------+
 * = FE nested within cluster; treated as redundant for DoF computation
-/Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/tables
-> /wq_measurement_treated.xls
+/Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/tables/wq_mea
+> surement_treated.xls
 dir : seeout
 
 .         
@@ -594,8 +575,8 @@ Absorbed degrees of freedom:
      year_fe |        14           0          14     |
 -----------------------------------------------------+
 * = FE nested within cluster; treated as redundant for DoF computation
-/Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/tables
-> /wq_measurement_well_count.xls
+/Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/tables/wq_mea
+> surement_well_count.xls
 dir : seeout
 (MWFE estimator converged in 2 iterations)
 
@@ -624,8 +605,8 @@ Absorbed degrees of freedom:
      year_fe |        14           0          14     |
 -----------------------------------------------------+
 * = FE nested within cluster; treated as redundant for DoF computation
-/Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/tables
-> /wq_measurement_well_count.xls
+/Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/tables/wq_mea
+> surement_well_count.xls
 dir : seeout
 (MWFE estimator converged in 2 iterations)
 
@@ -654,8 +635,8 @@ Absorbed degrees of freedom:
      year_fe |        14           0          14     |
 -----------------------------------------------------+
 * = FE nested within cluster; treated as redundant for DoF computation
-/Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/tables
-> /wq_measurement_well_count.xls
+/Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/tables/wq_mea
+> surement_well_count.xls
 dir : seeout
 (MWFE estimator converged in 2 iterations)
 
@@ -684,8 +665,8 @@ Absorbed degrees of freedom:
      year_fe |        14           0          14     |
 -----------------------------------------------------+
 * = FE nested within cluster; treated as redundant for DoF computation
-/Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/tables
-> /wq_measurement_well_count.xls
+/Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/tables/wq_mea
+> surement_well_count.xls
 dir : seeout
 (MWFE estimator converged in 1 iterations)
 
@@ -713,8 +694,8 @@ Absorbed degrees of freedom:
  state_year_fe |       224         224           0    *|
 -------------------------------------------------------+
 * = FE nested within cluster; treated as redundant for DoF computation
-/Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/tables
-> /wq_measurement_well_count.xls
+/Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/tables/wq_mea
+> surement_well_count.xls
 dir : seeout
 (MWFE estimator converged in 1 iterations)
 
@@ -742,8 +723,8 @@ Absorbed degrees of freedom:
  state_year_fe |       224         224           0    *|
 -------------------------------------------------------+
 * = FE nested within cluster; treated as redundant for DoF computation
-/Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/tables
-> /wq_measurement_well_count.xls
+/Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/tables/wq_mea
+> surement_well_count.xls
 dir : seeout
 
 .         * hyperbolic sine transform
@@ -777,8 +758,8 @@ Absorbed degrees of freedom:
      year_fe |        14           0          14     |
 -----------------------------------------------------+
 * = FE nested within cluster; treated as redundant for DoF computation
-/Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/tables
-> /wq_measurement_well_count_ihs.xls
+/Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/tables/wq_mea
+> surement_well_count_ihs.xls
 dir : seeout
 (MWFE estimator converged in 2 iterations)
 
@@ -807,8 +788,8 @@ Absorbed degrees of freedom:
      year_fe |        14           0          14     |
 -----------------------------------------------------+
 * = FE nested within cluster; treated as redundant for DoF computation
-/Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/tables
-> /wq_measurement_well_count_ihs.xls
+/Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/tables/wq_mea
+> surement_well_count_ihs.xls
 dir : seeout
 (MWFE estimator converged in 2 iterations)
 
@@ -837,8 +818,8 @@ Absorbed degrees of freedom:
      year_fe |        14           0          14     |
 -----------------------------------------------------+
 * = FE nested within cluster; treated as redundant for DoF computation
-/Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/tables
-> /wq_measurement_well_count_ihs.xls
+/Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/tables/wq_mea
+> surement_well_count_ihs.xls
 dir : seeout
 (MWFE estimator converged in 2 iterations)
 
@@ -867,8 +848,8 @@ Absorbed degrees of freedom:
      year_fe |        14           0          14     |
 -----------------------------------------------------+
 * = FE nested within cluster; treated as redundant for DoF computation
-/Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/tables
-> /wq_measurement_well_count_ihs.xls
+/Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/tables/wq_mea
+> surement_well_count_ihs.xls
 dir : seeout
 (MWFE estimator converged in 1 iterations)
 
@@ -896,8 +877,8 @@ Absorbed degrees of freedom:
  state_year_fe |       224         224           0    *|
 -------------------------------------------------------+
 * = FE nested within cluster; treated as redundant for DoF computation
-/Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/tables
-> /wq_measurement_well_count_ihs.xls
+/Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/tables/wq_mea
+> surement_well_count_ihs.xls
 dir : seeout
 (MWFE estimator converged in 1 iterations)
 
@@ -925,8 +906,8 @@ Absorbed degrees of freedom:
  state_year_fe |       224         224           0    *|
 -------------------------------------------------------+
 * = FE nested within cluster; treated as redundant for DoF computation
-/Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/tables
-> /wq_measurement_well_count_ihs.xls
+/Users/zsong/Dropbox/Fracking Disclosure regulation project/2. code/zs/output/tables/wq_mea
+> surement_well_count_ihs.xls
 dir : seeout
 
 .         
